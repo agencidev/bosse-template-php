@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Blockera känsliga mappar
+Disallow: /cms/
+Disallow: /data/
+Disallow: /security/
+Disallow: /includes/
+
+# Sitemap
+Sitemap: https://example.com/seo/sitemap.xml
