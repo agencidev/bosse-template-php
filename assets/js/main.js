@@ -1,9 +1,13 @@
 /**
  * Main JavaScript
- * CMS inline-redigering och interaktivitet
+ * CMS inline-redigering och interaktivitet - WordPress-liknande
  */
 
 'use strict';
+
+// CMS State
+let currentlyEditing = null;
+let originalValue = null;
 
 // CMS Inline Editing
 document.addEventListener('DOMContentLoaded', function() {
@@ -15,29 +19,135 @@ document.addEventListener('DOMContentLoaded', function() {
  * Initiera inline-redigering
  */
 function initInlineEditing() {
-  const editableElements = document.querySelectorAll('[contenteditable="true"]');
+  const editableElements = document.querySelectorAll('.cms-editable');
   
   editableElements.forEach(element => {
-    const originalValue = element.textContent;
-    
-    // Spara vid blur
-    element.addEventListener('blur', function() {
-      const key = this.dataset.key;
-      const value = this.textContent.trim();
-      
-      if (value !== originalValue) {
-        saveContent(key, value);
-      }
-    });
-    
-    // Prevent line breaks i inline elements
-    element.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && this.tagName !== 'DIV' && this.tagName !== 'P') {
-        e.preventDefault();
-        this.blur();
-      }
+    element.addEventListener('click', function(e) {
+      e.stopPropagation();
+      startEditing(this);
     });
   });
+  
+  // Stäng redigering vid klick utanför
+  document.addEventListener('click', function(e) {
+    if (currentlyEditing && !e.target.closest('.cms-edit-wrapper')) {
+      cancelEditing();
+    }
+  });
+}
+
+/**
+ * Starta redigering av element
+ */
+function startEditing(element) {
+  if (currentlyEditing) {
+    cancelEditing();
+  }
+  
+  currentlyEditing = element;
+  originalValue = element.textContent;
+  
+  const key = element.dataset.key;
+  const tag = element.dataset.tag;
+  const isMultiline = tag === 'p' || tag === 'div' || tag === 'textarea';
+  
+  // Skapa redigeringsformulär
+  const wrapper = document.createElement('div');
+  wrapper.className = 'cms-edit-wrapper';
+  
+  const inputElement = isMultiline 
+    ? document.createElement('textarea')
+    : document.createElement('input');
+  
+  if (!isMultiline) {
+    inputElement.type = 'text';
+  }
+  
+  inputElement.value = element.textContent;
+  inputElement.className = 'cms-edit-input';
+  
+  if (isMultiline) {
+    inputElement.rows = 4;
+  }
+  
+  // Skapa knappar
+  const buttons = document.createElement('div');
+  buttons.className = 'cms-edit-buttons';
+  
+  const saveBtn = document.createElement('button');
+  saveBtn.textContent = '✓ Spara';
+  saveBtn.className = 'cms-btn cms-btn-save';
+  saveBtn.onclick = () => saveEditing(element, inputElement.value);
+  
+  const cancelBtn = document.createElement('button');
+  cancelBtn.textContent = '✕ Avbryt';
+  cancelBtn.className = 'cms-btn cms-btn-cancel';
+  cancelBtn.onclick = () => cancelEditing();
+  
+  buttons.appendChild(saveBtn);
+  buttons.appendChild(cancelBtn);
+  
+  wrapper.appendChild(inputElement);
+  wrapper.appendChild(buttons);
+  
+  // Ersätt element med redigeringsformulär
+  element.style.display = 'none';
+  element.parentNode.insertBefore(wrapper, element.nextSibling);
+  
+  inputElement.focus();
+  if (!isMultiline) {
+    inputElement.select();
+  }
+  
+  // Keyboard shortcuts
+  inputElement.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !isMultiline) {
+      e.preventDefault();
+      saveEditing(element, inputElement.value);
+    }
+    if (e.key === 'Escape') {
+      cancelEditing();
+    }
+  });
+}
+
+/**
+ * Spara redigering
+ */
+function saveEditing(element, newValue) {
+  const key = element.dataset.key;
+  
+  if (newValue.trim() !== originalValue.trim()) {
+    saveContent(key, newValue);
+    element.textContent = newValue;
+  }
+  
+  cleanupEditing();
+}
+
+/**
+ * Avbryt redigering
+ */
+function cancelEditing() {
+  if (currentlyEditing) {
+    currentlyEditing.textContent = originalValue;
+  }
+  cleanupEditing();
+}
+
+/**
+ * Rensa redigeringsformulär
+ */
+function cleanupEditing() {
+  if (currentlyEditing) {
+    const wrapper = currentlyEditing.parentNode.querySelector('.cms-edit-wrapper');
+    if (wrapper) {
+      wrapper.remove();
+    }
+    currentlyEditing.style.display = '';
+    currentlyEditing = null;
+    originalValue = null;
+  }
 }
 
 /**

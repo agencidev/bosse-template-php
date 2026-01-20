@@ -79,15 +79,39 @@ project-root/
 └── index.php             # Huvudsida
 ```
 
-## CMS
+## CMS - WordPress-liknande Inline-redigering
 
 ### Logga in
 - URL: `/cms/admin.php`
 - Username: Se `.env` (ADMIN_USERNAME)
 - Password: Se `.env` (ADMIN_PASSWORD)
 
-### Inline-redigering
-CMS:et stödjer inline-redigering av text och bilder direkt på sidan.
+### Funktioner
+- ✅ **Admin Bar** - Toolbar högst upp när du är inloggad
+- ✅ **Inline-redigering** - Klicka på text/bilder för att redigera direkt på sidan
+- ✅ **Hover-effekter** - Gul highlight när du hovrar över redigerbara element
+- ✅ **Spara/Avbryt** - Knappar för att spara eller avbryta ändringar
+- ✅ **Keyboard shortcuts** - Enter för att spara, Escape för att avbryta
+- ✅ **Visuell feedback** - Tooltips och notifikationer
+
+### Användning
+
+**Redigera text:**
+```php
+<?php editable_text('hero.title', 'Standard rubrik', 'h1'); ?>
+<?php editable_text('hero.description', 'Standard beskrivning', 'p', 'text-lg'); ?>
+```
+
+**Redigera bilder:**
+```php
+<?php editable_image('hero.image', '/assets/images/default.jpg', 'Hero bild', 'w-full'); ?>
+```
+
+När du är inloggad:
+1. Hovra över text/bilder → Ser gul highlight
+2. Klicka för att redigera → Input-fält visas
+3. Gör ändringar → Klicka "Spara" eller tryck Enter
+4. Ändringar sparas automatiskt till `data/content.json`
 
 ## SEO
 

@@ -73,31 +73,51 @@ function get_all_content() {
 }
 
 /**
- * Redigerbar text (inline CMS)
+ * Redigerbar text (inline CMS) - WordPress-liknande
  */
-function editable_text($key, $default = '', $tag = 'span', $class = '') {
+function editable_text($key, $default = '', $tag = 'span', $class = '', $placeholder = 'Klicka för att redigera...') {
     $value = get_content($key, $default);
     $is_admin = isset($_SESSION['logged_in']) && $_SESSION['logged_in'];
     
-    $editable_attr = $is_admin ? 'contenteditable="true" data-key="' . htmlspecialchars($key, ENT_QUOTES, 'UTF-8') . '"' : '';
-    $admin_class = $is_admin ? ' editable' : '';
+    if (!$is_admin) {
+        echo "<{$tag} class=\"{$class}\">{$value}</{$tag}>";
+        return;
+    }
     
-    echo "<{$tag} class=\"{$class}{$admin_class}\" {$editable_attr}>{$value}</{$tag}>";
+    $display_value = !empty($value) ? $value : $placeholder;
+    $data_key = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
+    $data_default = htmlspecialchars($default, ENT_QUOTES, 'UTF-8');
+    $data_tag = htmlspecialchars($tag, ENT_QUOTES, 'UTF-8');
+    
+    echo "<{$tag} 
+        class=\"{$class} cms-editable\" 
+        data-key=\"{$data_key}\" 
+        data-default=\"{$data_default}\"
+        data-tag=\"{$data_tag}\"
+        title=\"✏️ Klicka för att redigera\"
+    >{$display_value}</{$tag}>";
 }
 
 /**
- * Redigerbar bild (inline CMS)
+ * Redigerbar bild (inline CMS) - WordPress-liknande
  */
 function editable_image($key, $default = '/assets/images/placeholder.jpg', $alt = '', $class = '') {
     $src = get_content($key, $default);
     $is_admin = isset($_SESSION['logged_in']) && $_SESSION['logged_in'];
     
-    if ($is_admin) {
-        echo '<div class="editable-image-wrapper" data-key="' . htmlspecialchars($key, ENT_QUOTES, 'UTF-8') . '">';
-        echo '<img src="' . htmlspecialchars($src, ENT_QUOTES, 'UTF-8') . '" alt="' . htmlspecialchars($alt, ENT_QUOTES, 'UTF-8') . '" class="' . $class . ' editable-image">';
-        echo '<button class="image-upload-btn" onclick="uploadImage(\'' . htmlspecialchars($key, ENT_QUOTES, 'UTF-8') . '\')">Ändra bild</button>';
-        echo '</div>';
-    } else {
+    if (!$is_admin) {
         echo '<img src="' . htmlspecialchars($src, ENT_QUOTES, 'UTF-8') . '" alt="' . htmlspecialchars($alt, ENT_QUOTES, 'UTF-8') . '" class="' . $class . '">';
+        return;
     }
+    
+    $data_key = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
+    $data_src = htmlspecialchars($src, ENT_QUOTES, 'UTF-8');
+    $data_alt = htmlspecialchars($alt, ENT_QUOTES, 'UTF-8');
+    
+    echo '<div class="cms-image-wrapper" data-key="' . $data_key . '" title="🖼️ Klicka för att ändra bild">';
+    echo '<img src="' . $data_src . '" alt="' . $data_alt . '" class="' . $class . ' cms-image">';
+    echo '<div class="cms-image-overlay">';
+    echo '<button class="cms-image-btn" onclick="uploadImage(\'' . $data_key . '\')">🖼️ Ändra bild</button>';
+    echo '</div>';
+    echo '</div>';
 }

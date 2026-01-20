@@ -34,6 +34,7 @@ init_secure_session();
     ?>
 </head>
 <body>
+    <?php include __DIR__ . '/includes/admin-bar.php'; ?>
     <?php include __DIR__ . '/includes/header.php'; ?>
     
     <main>
