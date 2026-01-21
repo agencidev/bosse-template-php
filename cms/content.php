@@ -73,51 +73,76 @@ function get_all_content() {
 }
 
 /**
- * Redigerbar text (inline CMS) - WordPress-liknande
+ * Redigerbar text - EXAKT som EditableText.jsx i Next.js
+ * 
+ * @param string $contentKey - Content key (e.g., 'hero')
+ * @param string $field - Field name (e.g., 'title')
+ * @param string $defaultValue - Default value
+ * @param string $as - HTML tag (h1, h2, p, span, etc.)
+ * @param string $className - CSS classes
+ * @param string $placeholder - Placeholder text
  */
-function editable_text($key, $default = '', $tag = 'span', $class = '', $placeholder = 'Klicka för att redigera...') {
-    $value = get_content($key, $default);
+function editable_text($contentKey, $field, $defaultValue = '', $as = 'p', $className = '', $placeholder = 'Klicka för att redigera...') {
     $is_admin = isset($_SESSION['logged_in']) && $_SESSION['logged_in'];
     
+    // Get value from content
+    $content = get_all_content();
+    $value = isset($content[$contentKey][$field]) ? $content[$contentKey][$field] : $defaultValue;
+    $displayValue = !empty($value) ? $value : $placeholder;
+    
     if (!$is_admin) {
-        echo "<{$tag} class=\"{$class}\">{$value}</{$tag}>";
+        echo "<{$as} class=\"{$className}\">{$displayValue}</{$as}>";
         return;
     }
     
-    $display_value = !empty($value) ? $value : $placeholder;
-    $data_key = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
-    $data_default = htmlspecialchars($default, ENT_QUOTES, 'UTF-8');
-    $data_tag = htmlspecialchars($tag, ENT_QUOTES, 'UTF-8');
+    // Escape attributes
+    $safeContentKey = htmlspecialchars($contentKey, ENT_QUOTES, 'UTF-8');
+    $safeField = htmlspecialchars($field, ENT_QUOTES, 'UTF-8');
+    $safeDefault = htmlspecialchars($defaultValue, ENT_QUOTES, 'UTF-8');
     
-    echo "<{$tag} 
-        class=\"{$class} cms-editable\" 
-        data-key=\"{$data_key}\" 
-        data-default=\"{$data_default}\"
-        data-tag=\"{$data_tag}\"
+    // Output with data attributes for JavaScript
+    echo "<{$as} 
+        class=\"{$className} cms-editable-active\" 
+        data-editable-text=\"true\"
+        data-content-key=\"{$safeContentKey}\" 
+        data-field=\"{$safeField}\"
+        data-default-value=\"{$safeDefault}\"
         title=\"✏️ Klicka för att redigera\"
-    >{$display_value}</{$tag}>";
+    >{$displayValue}</{$as}>";
 }
 
 /**
- * Redigerbar bild (inline CMS) - WordPress-liknande
+ * Redigerbar bild - EXAKT som EditableImage.jsx i Next.js
+ * 
+ * @param string $contentKey - Content key (e.g., 'hero')
+ * @param string $field - Field name (e.g., 'image')
+ * @param string $defaultValue - Default image path
+ * @param string $alt - Alt text
+ * @param string $className - CSS classes
  */
-function editable_image($key, $default = '/assets/images/placeholder.jpg', $alt = '', $class = '') {
-    $src = get_content($key, $default);
+function editable_image($contentKey, $field, $defaultValue = '/assets/images/placeholder.jpg', $alt = '', $className = '') {
     $is_admin = isset($_SESSION['logged_in']) && $_SESSION['logged_in'];
     
+    // Get value from content
+    $content = get_all_content();
+    $src = isset($content[$contentKey][$field]) ? $content[$contentKey][$field] : $defaultValue;
+    
     if (!$is_admin) {
-        echo '<img src="' . htmlspecialchars($src, ENT_QUOTES, 'UTF-8') . '" alt="' . htmlspecialchars($alt, ENT_QUOTES, 'UTF-8') . '" class="' . $class . '">';
+        echo '<img src="' . htmlspecialchars($src, ENT_QUOTES, 'UTF-8') . '" alt="' . htmlspecialchars($alt, ENT_QUOTES, 'UTF-8') . '" class="' . $className . '">';
         return;
     }
     
-    $data_key = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
-    $data_src = htmlspecialchars($src, ENT_QUOTES, 'UTF-8');
-    $data_alt = htmlspecialchars($alt, ENT_QUOTES, 'UTF-8');
+    $safeContentKey = htmlspecialchars($contentKey, ENT_QUOTES, 'UTF-8');
+    $safeField = htmlspecialchars($field, ENT_QUOTES, 'UTF-8');
+    $safeSrc = htmlspecialchars($src, ENT_QUOTES, 'UTF-8');
+    $safeAlt = htmlspecialchars($alt, ENT_QUOTES, 'UTF-8');
     
-    echo '<div class="cms-image-wrapper" data-key="' . $data_key . '" title="🖼️ Klicka för att ändra bild">';
-    echo '<img src="' . $data_src . '" alt="' . $data_alt . '" class="' . $class . ' cms-image">';
-    echo '<div class="cms-image-overlay">';
-    echo '<button class="cms-image-btn" onclick="uploadImage(\'' . $data_key . '\')">🖼️ Ändra bild</button>';
-    echo '</div>';
-    echo '</div>';
+    echo '<img 
+        src="' . $safeSrc . '" 
+        alt="' . $safeAlt . '" 
+        class="' . $className . '" 
+        data-editable-image="true"
+        data-content-key="' . $safeContentKey . '"
+        data-field="' . $safeField . '"
+    >';
 }

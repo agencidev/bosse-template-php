@@ -1,77 +1,37 @@
 <?php
 /**
- * CMS Admin Panel
- * Enkel admin-panel för inloggning och översikt
+ * CMS Admin Panel - EXAKT som Next.js-versionen
+ * Dashboard med CTA-knappar
  */
 
 require_once __DIR__ . '/../config.example.php';
 require_once __DIR__ . '/../security/csrf.php';
 require_once __DIR__ . '/../security/session.php';
-
-init_secure_session();
-
-// Hantera login
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'login') {
-    csrf_require();
-    
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
-    
-    if ($username === ADMIN_USERNAME && $password === ADMIN_PASSWORD) {
-        login_user($username);
-        header('Location: /');
-        exit;
-    } else {
-        $error = 'Felaktigt användarnamn eller lösenord';
-    }
-}
+require_once __DIR__ . '/../security/validation.php';
 
 // Hantera logout
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
-    logout_user();
+    logout();
     header('Location: /cms/admin.php');
     exit;
 }
 
-// Om redan inloggad, visa admin-panel
-if (is_logged_in()) {
-    ?>
-    <!DOCTYPE html>
-    <html lang="sv">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>CMS Admin - <?php echo SITE_NAME; ?></title>
-        <link rel="stylesheet" href="/assets/css/main.css">
-        <style>
-            .admin-panel {
-                max-width: 800px;
-                margin: 4rem auto;
-                padding: 2rem;
-            }
-            .admin-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 2rem;
-                padding-bottom: 1rem;
-                border-bottom: 2px solid var(--color-gray-200);
-            }
-        </style>
-    </head>
-    <body>
-        <div class="admin-panel">
-            <div class="admin-header">
-                <h1>CMS Admin</h1>
-                <a href="?action=logout" class="button button--outline">Logga ut</a>
-            </div>
-            
-            <div class="card">
-                <h2 class="card__title">Välkommen, <?php echo htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'UTF-8'); ?>!</h2>
-                <p class="card__text">Du är nu inloggad i CMS:et. Gå till hemsidan för att redigera innehåll direkt på sidorna.</p>
-                
-                <div style="margin-top: 2rem;">
-                    <a href="/" class="button button--primary">Gå till hemsidan</a>
+// Hantera login
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
+    if (!csrf_verify()) {
+        $error = 'CSRF-validering misslyckades';
+    } else {
+        $username = $_POST['username'] ?? '';
+        $password = $_POST['password'] ?? '';
+        
+        if ($username === ADMIN_USERNAME && $password === ADMIN_PASSWORD) {
+            login($username);
+            header('Location: /cms/admin-dashboard.php');
+            exit;
+        } else {
+            $error = 'Felaktigt användarnamn eller lösenord';
+        }
+    }
                 </div>
             </div>
             

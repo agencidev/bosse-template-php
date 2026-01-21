@@ -40,33 +40,20 @@ switch ($action) {
 }
 
 /**
- * Hämta innehåll
+ * Hämta innehåll - EXAKT som Next.js /api/content
  */
 function handleGet() {
-    $key = $_GET['key'] ?? '';
-    
-    if (empty($key)) {
-        echo json_encode(['success' => true, 'data' => get_all_content()]);
-    } else {
-        $value = get_content($key, null);
-        echo json_encode(['success' => true, 'data' => $value]);
-    }
+    // Returnera hela content-objektet direkt (som Next.js)
+    echo json_encode(get_all_content());
 }
 
 /**
- * Uppdatera innehåll
+ * Uppdatera innehåll - EXAKT som Next.js /api/admin/content
  */
 function handleUpdate() {
-    // Validera CSRF
-    if (!csrf_verify()) {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'error' => 'CSRF validation failed']);
-        exit;
-    }
-    
     $data = json_decode(file_get_contents('php://input'), true);
     $key = $data['key'] ?? '';
-    $value = $data['value'] ?? '';
+    $value = $data['value'] ?? null;
     
     if (empty($key)) {
         http_response_code(400);
@@ -74,12 +61,15 @@ function handleUpdate() {
         exit;
     }
     
-    // Sanitera värde
-    $value = sanitize_text($value);
+    // Läs nuvarande content
+    $content = get_all_content();
     
-    // Spara
-    if (save_content($key, $value)) {
-        echo json_encode(['success' => true, 'message' => 'Content updated']);
+    // Uppdatera section (value är ett objekt med fields)
+    $content[$key] = $value;
+    
+    // Spara hela content-filen
+    if (file_put_contents(CONTENT_FILE, json_encode($content, JSON_PRETTY_PRINT))) {
+        echo json_encode(['success' => true, '_version' => time()]);
     } else {
         http_response_code(500);
         echo json_encode(['success' => false, 'error' => 'Failed to save content']);

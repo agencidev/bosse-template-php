@@ -41,8 +41,8 @@ init_secure_session();
         <!-- Hero Section -->
         <section class="section section--white">
             <div class="container text-center">
-                <?php editable_text('hero.title', 'Välkommen till vår hemsida', 'h1'); ?>
-                <?php editable_text('hero.description', 'Vi hjälper dig att nå dina mål med moderna lösningar', 'p', 'text-lg'); ?>
+                <?php editable_text('hero', 'title', 'Välkommen till vår hemsida', 'h1'); ?>
+                <?php editable_text('hero', 'description', 'Vi hjälper dig att nå dina mål med moderna lösningar', 'p', 'text-lg'); ?>
                 
                 <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
                     <a href="/kontakt" class="button button--primary">
@@ -95,7 +95,7 @@ init_secure_session();
     
     <?php include __DIR__ . '/includes/footer.php'; ?>
     
-    <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/cms.js"></script>
     
     <?php if (is_logged_in()): ?>
         <!-- CSRF token för CMS -->
