@@ -103,7 +103,6 @@ header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
     </main>
     
     <?php include __DIR__ . '/includes/footer.php'; ?>
-    <?php include __DIR__ . '/includes/cookie-consent.php'; ?>
     
     <script src="/assets/js/cms.js"></script>
     
@@ -113,5 +112,7 @@ header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
             <?php echo csrf_field(); ?>
         </form>
     <?php endif; ?>
+    
+    <?php include __DIR__ . '/includes/cookie-consent.php'; ?>
 </body>
 </html>
