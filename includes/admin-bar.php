@@ -13,10 +13,8 @@ $username = $_SESSION['username'] ?? 'Admin';
 <div class="fixed top-0 left-0 right-0 bg-woodsmoke text-white shadow-2xl z-[10000]">
     <div class="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
         <div class="flex items-center gap-4">
-            <button onclick="window.location.href='/cms/admin-dashboard.php'" class="hover:opacity-80 transition">
-                <svg style="height: 2rem;" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
-                    <text x="10" y="40" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="white">agenci</text>
-                </svg>
+            <button onclick="window.location.href='/cms/dashboard.php'" class="hover:opacity-80 transition">
+                <img src="/assets/images/logo-light.png" alt="agenci" style="height: 2rem;">
             </button>
             <div class="h-6 w-px bg-white/20"></div>
             <button
@@ -37,13 +35,13 @@ $username = $_SESSION['username'] ?? 'Admin';
 
         <div class="flex items-center gap-3">
             <button
-                onclick="window.location.href='/cms/admin-dashboard.php'"
+                onclick="window.location.href='/cms/dashboard.php'"
                 class="px-4 py-1.5 bg-white/10 hover:bg-white/20 rounded-md font-semibold text-sm transition"
             >
                 Dashboard
             </button>
             <button
-                onclick="window.location.href='/cms/login.php?action=logout'"
+                onclick="window.location.href='/cms/admin.php?action=logout'"
                 class="px-4 py-1.5 bg-white/10 hover:bg-white/20 rounded-md font-semibold text-sm transition"
             >
                 Logga ut

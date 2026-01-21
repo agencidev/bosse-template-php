@@ -1,53 +1,39 @@
 <?php
 /**
- * CMS Admin Panel - EXAKT som Next.js-versionen
- * Dashboard med CTA-knappar
+ * CMS Admin Login - EXAKT som LoginForm.jsx i Next.js
+ * Routing: /cms/admin.php = login-sida
  */
 
 require_once __DIR__ . '/../config.example.php';
 require_once __DIR__ . '/../security/csrf.php';
 require_once __DIR__ . '/../security/session.php';
-require_once __DIR__ . '/../security/validation.php';
 
-// Hantera logout
+// Redirect if already logged in
+if (is_logged_in()) {
+    header('Location: /cms/dashboard.php');
+    exit;
+}
+
+// Handle logout
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     logout();
     header('Location: /cms/admin.php');
     exit;
 }
 
-// Hantera login
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
-    if (!csrf_verify()) {
-        $error = 'CSRF-validering misslyckades';
+// Handle login
+$error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = $_POST['username'] ?? '';
+    $password = $_POST['password'] ?? '';
+    
+    if ($username === ADMIN_USERNAME && $password === ADMIN_PASSWORD) {
+        login($username);
+        header('Location: /cms/dashboard.php');
+        exit;
     } else {
-        $username = $_POST['username'] ?? '';
-        $password = $_POST['password'] ?? '';
-        
-        if ($username === ADMIN_USERNAME && $password === ADMIN_PASSWORD) {
-            login($username);
-            header('Location: /cms/admin-dashboard.php');
-            exit;
-        } else {
-            $error = 'Felaktigt användarnamn eller lösenord';
-        }
+        $error = 'Felaktigt användarnamn eller lösenord';
     }
-                </div>
-            </div>
-            
-            <div class="card" style="margin-top: 2rem;">
-                <h3 class="card__title">Funktioner</h3>
-                <ul style="list-style: disc; padding-left: 1.5rem;">
-                    <li>Inline-redigering av text (klicka på text för att redigera)</li>
-                    <li>Bilduppladdning (klicka på bilder för att ändra)</li>
-                    <li>Automatisk sparning</li>
-                </ul>
-            </div>
-        </div>
-    </body>
-    </html>
-    <?php
-    exit;
 }
 ?>
 <!DOCTYPE html>
@@ -55,82 +41,131 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMS Login - <?php echo SITE_NAME; ?></title>
-    <link rel="stylesheet" href="/assets/css/main.css">
+    <title>Logga in - CMS</title>
     <style>
-        .login-container {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+            padding: 1rem;
         }
-        .login-card {
-            max-width: 400px;
+        .login-container {
             width: 100%;
-            margin: 2rem;
+            max-width: 28rem;
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            padding: 2rem;
         }
-        .login-header {
-            text-align: center;
+        .logo-container {
+            display: flex;
+            justify-content: center;
             margin-bottom: 2rem;
         }
-        .login-header h1 {
-            color: white;
-            margin-bottom: 0.5rem;
-        }
-        .login-header p {
-            color: rgba(255, 255, 255, 0.9);
+        .logo {
+            height: 3rem;
         }
         .form-group {
             margin-bottom: 1.5rem;
         }
-        .form-group label {
+        .label {
             display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #18181b;
             margin-bottom: 0.5rem;
-            font-weight: var(--font-medium);
+        }
+        .input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d4d4d4;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .input:focus {
+            border-color: transparent;
+            box-shadow: 0 0 0 2px #ff5722;
         }
         .error {
-            background-color: var(--color-error);
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+        .button {
+            width: 100%;
+            background-color: #ff5722;
             color: white;
-            padding: 1rem;
-            border-radius: var(--radius-md);
-            margin-bottom: 1rem;
+            font-weight: 600;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .button:hover {
+            background-color: #e64a19;
+        }
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <h1><?php echo SITE_NAME; ?></h1>
-                <p>CMS Admin Login</p>
-            </div>
-            
-            <div class="card">
-                <?php if (isset($error)): ?>
-                    <div class="error"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
-                <?php endif; ?>
-                
-                <form method="POST">
-                    <?php echo csrf_field(); ?>
-                    <input type="hidden" name="action" value="login">
-                    
-                    <div class="form-group">
-                        <label for="username">Användarnamn</label>
-                        <input type="text" id="username" name="username" class="input" required autofocus>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="password">Lösenord</label>
-                        <input type="password" id="password" name="password" class="input" required>
-                    </div>
-                    
-                    <button type="submit" class="button button--primary" style="width: 100%;">
-                        Logga in
-                    </button>
-                </form>
-            </div>
+        <div class="logo-container">
+            <img src="/assets/images/logo-dark.png" alt="agenci" class="logo">
         </div>
+        
+        <form method="POST">
+            <?php echo csrf_field(); ?>
+            
+            <div class="form-group">
+                <label class="label" for="username">Användarnamn</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    class="input" 
+                    required 
+                    autofocus
+                >
+            </div>
+
+            <div class="form-group">
+                <label class="label" for="password">Lösenord</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    class="input" 
+                    required
+                >
+            </div>
+
+            <?php if ($error): ?>
+                <div class="error"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
+            <?php endif; ?>
+
+            <button type="submit" class="button">
+                Logga in
+            </button>
+        </form>
     </div>
 </body>
 </html>
