@@ -11,6 +11,11 @@ $query = parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY);
 $routes = [
     '/admin' => '/cms/admin.php',
     '/dashboard' => '/cms/dashboard.php',
+    '/ai' => '/cms/ai.php',
+    '/seo' => '/cms/seo.php',
+    '/support' => '/cms/support.php',
+    '/projects' => '/cms/projects/index.php',
+    '/projects/new' => '/cms/projects/new.php',
 ];
 
 // Check if route exists
