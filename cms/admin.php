@@ -8,16 +8,41 @@ require_once __DIR__ . '/../config.example.php';
 require_once __DIR__ . '/../security/csrf.php';
 require_once __DIR__ . '/../security/session.php';
 
-// Redirect if already logged in
-if (is_logged_in()) {
-    header('Location: /cms/dashboard.php');
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Handle logout FIRST before any other checks
+if (isset($_GET['action']) && $_GET['action'] === 'logout') {
+    // Complete logout
+    $_SESSION = array();
+    
+    // Delete session cookie
+    if (isset($_COOKIE[session_name()])) {
+        setcookie(session_name(), '', time() - 3600, '/');
+    }
+    
+    // Destroy session
+    session_destroy();
+    
+    // Start new clean session
+    session_start();
+    
+    // Prevent caching
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Cache-Control: post-check=0, pre-check=0', false);
+    header('Pragma: no-cache');
+    header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+    
+    // Redirect to login page
+    header('Location: /admin');
     exit;
 }
 
-// Handle logout
-if (isset($_GET['action']) && $_GET['action'] === 'logout') {
-    logout();
-    header('Location: /cms/admin.php');
+// Redirect if already logged in
+if (is_logged_in()) {
+    header('Location: /dashboard');
     exit;
 }
 
@@ -28,8 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     
     if ($username === ADMIN_USERNAME && $password === ADMIN_PASSWORD) {
-        login($username);
-        header('Location: /cms/dashboard.php');
+        login_user($username);
+        header('Location: /dashboard');
         exit;
     } else {
         $error = 'Felaktigt användarnamn eller lösenord';
@@ -50,9 +75,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f5f5f5;
+            background: #fafafa;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 1rem;
@@ -72,6 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .logo {
             height: 3rem;
+            width: auto;
         }
         .form-group {
             margin-bottom: 1.5rem;
@@ -107,18 +134,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .button {
             width: 100%;
-            background-color: #ff5722;
+            background-color: #fe4f2a;
             color: white;
-            font-weight: 600;
-            padding: 0.75rem;
+            padding: 0.875rem;
             border: none;
-            border-radius: 0.5rem;
+            border-radius: 9999px;
             font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .button:hover {
-            background-color: #e64a19;
         }
         .button:disabled {
             opacity: 0.5;
@@ -129,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <div class="login-container">
         <div class="logo-container">
-            <img src="/assets/images/logo-dark.png" alt="agenci" class="logo">
+            <img src="/assets/images/logo-light.png" alt="<?php echo SITE_NAME; ?>" class="logo">
         </div>
         
         <form method="POST">

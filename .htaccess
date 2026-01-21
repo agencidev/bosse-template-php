@@ -9,6 +9,19 @@ Options +FollowSymLinks
 
 # Aktivera Rewrite Engine
 RewriteEngine On
+RewriteBase /
+
+# URL Rewriting - Ta bort .php och rena URLer
+# /admin -> /cms/admin.php
+RewriteRule ^admin/?$ cms/admin.php [L]
+
+# /dashboard -> /cms/dashboard.php
+RewriteRule ^dashboard/?$ cms/dashboard.php [L]
+
+# Ta bort .php från alla URLer
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.*)$ $1.php [L]
 
 # Skydda känsliga filer
 <FilesMatch "^\.env|^config\.php|^\.git|^composer\.(json|lock)">

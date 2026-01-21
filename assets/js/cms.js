@@ -70,7 +70,7 @@ function setupEditableText(element) {
   
   function startEditing() {
     isEditing = true;
-    originalValue = element.textContent;
+    originalValue = element.textContent.trim();
     
     const isMultiline = tag === 'p' || tag === 'div' || tag === 'textarea';
     
@@ -87,7 +87,7 @@ function setupEditableText(element) {
       inputElement.type = 'text';
     }
     
-    inputElement.value = element.textContent;
+    inputElement.value = element.textContent.trim();
     inputElement.className = 'border-2 border-persimmon bg-white text-woodsmoke rounded-lg p-4 w-full resize-none shadow-xl font-inherit text-inherit';
     inputElement.style.fontSize = 'inherit';
     inputElement.style.lineHeight = 'inherit';
@@ -147,6 +147,9 @@ function setupEditableText(element) {
     
     async function handleSave(newValue) {
       try {
+        // Trim whitespace to avoid spacing issues
+        const trimmedValue = newValue.trim();
+        
         // Fetch current content
         const res = await fetch(`/cms/api.php?action=get&_t=${Date.now()}`);
         const currentData = await res.json();
@@ -154,7 +157,7 @@ function setupEditableText(element) {
         // Update section
         const updatedSection = {
           ...(currentData[contentKey] || {}),
-          [field]: newValue
+          [field]: trimmedValue
         };
         
         // Save to server
@@ -168,7 +171,13 @@ function setupEditableText(element) {
         });
         
         if (saveRes.ok) {
-          element.textContent = newValue;
+          // Update the text node directly without changing DOM structure
+          const textNode = Array.from(element.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+          if (textNode) {
+            textNode.nodeValue = trimmedValue;
+          } else {
+            element.textContent = trimmedValue;
+          }
           showNotification('Sparat!', 'success');
         } else {
           showNotification('Kunde inte spara', 'error');
@@ -182,7 +191,13 @@ function setupEditableText(element) {
     }
     
     function handleCancel() {
-      element.textContent = originalValue;
+      // Update the text node directly without changing DOM structure
+      const textNode = Array.from(element.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+      if (textNode) {
+        textNode.nodeValue = originalValue;
+      } else {
+        element.textContent = originalValue;
+      }
       cleanup();
     }
     

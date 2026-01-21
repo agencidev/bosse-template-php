@@ -10,7 +10,16 @@ require_once __DIR__ . '/cms/content.php';
 require_once __DIR__ . '/seo/meta.php';
 require_once __DIR__ . '/seo/schema.php';
 
-init_secure_session();
+// Start session
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Prevent caching to ensure admin bar updates correctly
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
 ?>
 <!DOCTYPE html>
 <html lang="sv">
@@ -94,6 +103,7 @@ init_secure_session();
     </main>
     
     <?php include __DIR__ . '/includes/footer.php'; ?>
+    <?php include __DIR__ . '/includes/cookie-consent.php'; ?>
     
     <script src="/assets/js/cms.js"></script>
     

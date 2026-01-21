@@ -9,7 +9,7 @@
         <div class="header__content">
             <div class="header__logo">
                 <a href="/">
-                    <?php echo get_content('site.name', SITE_NAME); ?>
+                    <img src="/assets/images/logo-dark.png" alt="<?php echo SITE_NAME; ?>" class="header__logo-img">
                 </a>
             </div>
             
@@ -20,7 +20,7 @@
                 <a href="/kontakt" class="header__nav-link">Kontakt</a>
                 
                 <?php if (is_logged_in()): ?>
-                    <a href="/cms/admin.php" class="header__nav-link header__nav-link--admin">
+                    <a href="/admin" class="header__nav-link header__nav-link--admin">
                         CMS Admin
                     </a>
                 <?php endif; ?>
@@ -52,10 +52,14 @@
 }
 
 .header__logo a {
-    font-size: var(--text-xl);
-    font-weight: var(--font-bold);
-    color: var(--color-primary);
+    display: flex;
+    align-items: center;
     text-decoration: none;
+}
+
+.header__logo-img {
+    height: 2.5rem;
+    width: auto;
 }
 
 .header__nav {

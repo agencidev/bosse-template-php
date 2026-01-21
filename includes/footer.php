@@ -8,9 +8,9 @@
     <div class="container">
         <div class="footer__content">
             <div class="footer__section">
-                <h3 class="footer__title">
-                    <?php echo get_content('footer.company_name', SITE_NAME); ?>
-                </h3>
+                <div class="footer__logo">
+                    <img src="/assets/images/logo-light.png" alt="<?php echo SITE_NAME; ?>" class="footer__logo-img">
+                </div>
                 <?php editable_text('footer.description', 'Din partner för digitala lösningar', 'p', 'footer__text'); ?>
             </div>
             
@@ -62,6 +62,15 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+}
+
+.footer__logo {
+    margin-bottom: 0.5rem;
+}
+
+.footer__logo-img {
+    height: 2.5rem;
+    width: auto;
 }
 
 .footer__title {

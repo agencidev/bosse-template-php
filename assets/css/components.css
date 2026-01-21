@@ -28,54 +28,49 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
   padding: 0.75rem 1.5rem;
   font-size: var(--text-base);
   font-weight: var(--font-semibold);
   line-height: 1;
-  border-radius: var(--radius-md);
+  border-radius: 9999px;
   cursor: pointer;
-  transition: all var(--transition-base);
   border: none;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .button--primary {
-  background-color: var(--color-primary);
+  background: #fe4f2a;
   color: white;
-}
-
-.button--primary:hover {
-  background-color: var(--color-primary-dark);
-  text-decoration: none;
 }
 
 .button--secondary {
-  background-color: var(--color-secondary);
-  color: white;
-}
-
-.button--secondary:hover {
-  background-color: var(--color-secondary-dark);
+  background-color: #f4f4f5;
+  color: #18181b;
 }
 
 .button--outline {
   background-color: transparent;
-  border: 2px solid var(--color-primary);
-  color: var(--color-primary);
-}
-
-.button--outline:hover {
-  background-color: var(--color-primary);
-  color: white;
+  border: 2px solid #e4e4e7;
+  color: #18181b;
 }
 
 .button--ghost {
   background-color: transparent;
-  color: var(--color-primary);
+  color: #18181b;
 }
 
-.button--ghost:hover {
-  background-color: var(--color-gray-100);
+.button--sm {
+  height: 2.25rem;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+}
+
+.button--lg {
+  height: 3rem;
+  padding: 0 2rem;
+  font-size: 1.125rem;
 }
 
 /* Card */
