@@ -535,7 +535,7 @@ gtag('consent', 'default', {
 });
 
 // Cookie Consent Logic
-(function() {
+document.addEventListener('DOMContentLoaded', function() {
     const COOKIE_NAME = 'cookie_consent';
     const COOKIE_EXPIRY_DAYS = 365;
     
@@ -675,5 +675,5 @@ gtag('consent', 'default', {
             }
         }
     });
-})();
+});
 </script>
