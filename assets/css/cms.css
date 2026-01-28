@@ -33,6 +33,15 @@
 .transition { transition: all 0.2s; }
 .hover\:opacity-80:hover { opacity: 0.8; }
 .hover\:bg-white\/20:hover { background-color: rgba(255, 255, 255, 0.2); }
+.hover\:bg-gray-100:hover { background-color: #f3f4f6; }
+.hover\:bg-gray-200:hover { background-color: #e5e7eb; }
+.bg-gray-100 { background-color: #f3f4f6; }
+.text-gray-600 { color: #4b5563; }
+.text-gray-700 { color: #374151; }
+.items-center { align-items: center; }
+.justify-end { justify-content: flex-end; }
+.rounded-t-lg { border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem; }
+.rounded-b-lg { border-bottom-left-radius: 0.5rem; border-bottom-right-radius: 0.5rem; }
 .bg-white\/10 { background-color: rgba(255, 255, 255, 0.1); }
 .bg-white\/20 { background-color: rgba(255, 255, 255, 0.2); }
 .text-white\/60 { color: rgba(255, 255, 255, 0.6); }

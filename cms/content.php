@@ -154,7 +154,7 @@ function editable_image($contentKey, $field, $defaultValue = '/assets/images/pla
     $safeClassName = htmlspecialchars($className, ENT_QUOTES, 'UTF-8');
 
     if (!$is_admin) {
-        echo '<img src="' . $safeSrc . '" alt="' . $safeAlt . '" class="' . $safeClassName . '">';
+        echo '<img src="' . $safeSrc . '" alt="' . $safeAlt . '" class="' . $safeClassName . '" loading="lazy">';
         return;
     }
 
@@ -168,5 +168,6 @@ function editable_image($contentKey, $field, $defaultValue = '/assets/images/pla
         data-editable-image="true"
         data-content-key="' . $safeContentKey . '"
         data-field="' . $safeField . '"
+        loading="lazy"
     >';
 }

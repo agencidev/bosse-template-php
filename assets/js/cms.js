@@ -88,23 +88,59 @@ function setupEditableText(element) {
     }
     
     inputElement.value = element.textContent.trim();
-    inputElement.className = 'border-2 border-persimmon bg-white text-woodsmoke rounded-lg p-4 w-full resize-none shadow-xl font-inherit text-inherit';
+    inputElement.className = 'bg-white text-woodsmoke rounded-b-lg p-4 w-full resize-none font-inherit text-inherit';
+    inputElement.style.border = '2px solid #e5e7eb';
+    inputElement.style.borderTop = 'none';
+    inputElement.style.outline = 'none';
+    inputElement.style.boxShadow = 'none';
+    inputElement.style.transition = 'border-color 0.2s';
     inputElement.style.fontSize = 'inherit';
     inputElement.style.lineHeight = 'inherit';
     inputElement.style.fontWeight = 'inherit';
+    inputElement.style.width = '100%';
+    inputElement.style.boxSizing = 'border-box';
+    
+    // Focus state
+    inputElement.addEventListener('focus', function() {
+      inputElement.style.borderColor = '#ff5722';
+    });
+    inputElement.addEventListener('blur', function() {
+      inputElement.style.borderColor = '#e5e7eb';
+    });
     
     if (isMultiline) {
-      inputElement.rows = 4;
+      // Auto-resize textarea based on content
+      inputElement.rows = 1;
+      inputElement.style.minHeight = '80px';
+      inputElement.style.overflow = 'hidden';
+      
+      // Function to auto-resize
+      const autoResize = () => {
+        inputElement.style.height = 'auto';
+        inputElement.style.height = inputElement.scrollHeight + 'px';
+      };
+      
+      // Initial resize
+      setTimeout(autoResize, 0);
+      
+      // Resize on input
+      inputElement.addEventListener('input', autoResize);
+    } else {
+      inputElement.style.height = '48px';
     }
     
-    // Create buttons container
+    // Create buttons container (above input)
     const buttonsDiv = document.createElement('div');
-    buttonsDiv.className = 'absolute -bottom-14 left-0 flex gap-2 bg-woodsmoke rounded-lg shadow-2xl p-3 z-50';
+    buttonsDiv.className = 'flex gap-2 items-center justify-end bg-white rounded-t-lg p-2 z-50';
+    buttonsDiv.style.borderBottom = '1px solid #e5e7eb';
+    buttonsDiv.style.marginBottom = '0';
+    buttonsDiv.style.boxShadow = 'none';
     
     // Save button
     const saveBtn = document.createElement('button');
     saveBtn.textContent = '✓ Spara';
-    saveBtn.className = 'px-4 py-2 bg-persimmon text-white text-sm font-semibold rounded hover:bg-persimmon/90 disabled:opacity-50 transition';
+    saveBtn.className = 'px-4 py-2 bg-persimmon text-white text-xs font-semibold rounded-md hover:bg-persimmon/90 disabled:opacity-50 transition';
+    saveBtn.style.boxShadow = '0 1px 2px 0 rgb(0 0 0 / 0.05)';
     saveBtn.onclick = async function() {
       saveBtn.disabled = true;
       saveBtn.textContent = 'Sparar...';
@@ -113,17 +149,21 @@ function setupEditableText(element) {
     
     // Cancel button
     const cancelBtn = document.createElement('button');
-    cancelBtn.textContent = '✕ Avbryt';
-    cancelBtn.className = 'px-4 py-2 bg-white text-woodsmoke text-sm font-semibold rounded hover:bg-neutral-100 transition';
+    cancelBtn.textContent = '✕';
+    cancelBtn.className = 'px-3 py-2 text-gray-700 font-semibold rounded-md hover:bg-gray-100 transition';
+    cancelBtn.style.fontSize = '18px';
+    cancelBtn.style.lineHeight = '1';
+    cancelBtn.style.backgroundColor = 'transparent';
+    cancelBtn.title = 'Avbryt';
     cancelBtn.onclick = function() {
       handleCancel();
     };
     
-    buttonsDiv.appendChild(saveBtn);
     buttonsDiv.appendChild(cancelBtn);
+    buttonsDiv.appendChild(saveBtn);
     
-    wrapper.appendChild(inputElement);
     wrapper.appendChild(buttonsDiv);
+    wrapper.appendChild(inputElement);
     
     // Replace element with input
     element.style.display = 'none';
