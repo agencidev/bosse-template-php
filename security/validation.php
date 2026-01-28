@@ -81,10 +81,55 @@ function validate_file_upload($file, $allowed_types = ['image/jpeg', 'image/png'
 }
 
 /**
- * Generera säkert filnamn
+ * MIME-typ till extension mapping
  */
-function generate_safe_filename($original_filename) {
-    $extension = pathinfo($original_filename, PATHINFO_EXTENSION);
+function get_extension_from_mime($mime_type) {
+    $mime_map = [
+        'image/jpeg' => 'jpg',
+        'image/jpg' => 'jpg',
+        'image/png' => 'png',
+        'image/gif' => 'gif',
+        'image/webp' => 'webp',
+        'image/svg+xml' => 'svg',
+        'image/bmp' => 'bmp',
+        'image/tiff' => 'tiff',
+        'application/pdf' => 'pdf',
+        'text/plain' => 'txt',
+        'text/html' => 'html',
+        'text/css' => 'css',
+        'application/javascript' => 'js',
+        'application/json' => 'json',
+    ];
+
+    return $mime_map[$mime_type] ?? null;
+}
+
+/**
+ * Generera säkert filnamn baserat på MIME-typ (inte originalnamn)
+ */
+function generate_safe_filename($original_filename, $tmp_file = null) {
+    // Om tmp_file finns, bestäm extension från faktisk MIME-typ
+    if ($tmp_file !== null && file_exists($tmp_file)) {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($finfo, $tmp_file);
+        finfo_close($finfo);
+
+        $extension = get_extension_from_mime($mime_type);
+
+        if ($extension === null) {
+            // Fallback: använd original extension om MIME inte känns igen
+            $extension = strtolower(pathinfo($original_filename, PATHINFO_EXTENSION));
+            // Validera att extension är säker
+            $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'pdf'];
+            if (!in_array($extension, $allowed_extensions)) {
+                $extension = 'bin'; // Generisk extension för okända typer
+            }
+        }
+    } else {
+        // Fallback för bakåtkompatibilitet
+        $extension = strtolower(pathinfo($original_filename, PATHINFO_EXTENSION));
+    }
+
     $safe_name = bin2hex(random_bytes(16));
     return $safe_name . '.' . $extension;
 }

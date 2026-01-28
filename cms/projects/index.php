@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../config.example.php';
 require_once __DIR__ . '/../../security/session.php';
+require_once __DIR__ . '/../../security/csrf.php';
 
 if (!is_logged_in()) {
     header('Location: /cms/admin.php');
@@ -16,9 +17,10 @@ if (file_exists($projects_file)) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
+    csrf_require();
     $delete_id = $_POST['delete_id'];
     $projects = array_filter($projects, fn($p) => $p['id'] !== $delete_id);
-    file_put_contents($projects_file, json_encode(array_values($projects), JSON_PRETTY_PRINT));
+    file_put_contents($projects_file, json_encode(array_values($projects), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
     header('Location: /cms/projects/');
     exit;
 }
@@ -211,6 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
                         <div class="project-actions">
                             <a href="/cms/projects/edit.php?id=<?php echo urlencode($project['id']); ?>" class="button button-edit">Redigera</a>
                             <form method="POST" style="display: inline;" onsubmit="return confirm('Är du säker på att du vill ta bort detta inlägg?');">
+                                <?php echo csrf_field(); ?>
                                 <input type="hidden" name="delete_id" value="<?php echo htmlspecialchars($project['id'], ENT_QUOTES, 'UTF-8'); ?>">
                                 <button type="submit" class="button button-delete">Ta bort</button>
                             </form>

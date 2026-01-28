@@ -36,7 +36,9 @@ define('SITE_DESCRIPTION', $_ENV['SITE_DESCRIPTION'] ?? 'Site description');
 
 // Admin Configuration
 define('ADMIN_USERNAME', $_ENV['ADMIN_USERNAME'] ?? 'admin');
-define('ADMIN_PASSWORD', $_ENV['ADMIN_PASSWORD'] ?? 'admin123');
+// VIKTIGT: Lösenord måste vara hashat med password_hash()
+// Generera hash: php -r "echo password_hash('ditt-lösenord', PASSWORD_DEFAULT);"
+define('ADMIN_PASSWORD_HASH', $_ENV['ADMIN_PASSWORD_HASH'] ?? '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'); // default: password
 
 // Security
 define('SESSION_SECRET', $_ENV['SESSION_SECRET'] ?? 'change-this-secret');

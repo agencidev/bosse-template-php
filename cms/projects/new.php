@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         $projects[] = $project;
-        file_put_contents($projects_file, json_encode($projects, JSON_PRETTY_PRINT));
+        file_put_contents($projects_file, json_encode($projects, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
         
         header('Location: /cms/projects/');
         exit;

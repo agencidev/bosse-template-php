@@ -43,32 +43,51 @@ switch ($action) {
  * Hämta innehåll - EXAKT som Next.js /api/content
  */
 function handleGet() {
-    // Returnera hela content-objektet direkt (som Next.js)
-    echo json_encode(get_all_content());
+    // Returnera hela content-objektet med CSRF token för efterföljande requests
+    $response = get_all_content();
+    $response['_csrf'] = csrf_token();
+    echo json_encode($response);
 }
 
 /**
  * Uppdatera innehåll - EXAKT som Next.js /api/admin/content
  */
 function handleUpdate() {
+    // Validera Content-Type
+    $content_type = $_SERVER['CONTENT_TYPE'] ?? '';
+    if (strpos($content_type, 'application/json') === false) {
+        http_response_code(415);
+        echo json_encode(['success' => false, 'error' => 'Content-Type must be application/json']);
+        exit;
+    }
+
+    // Validera CSRF token (via header eller body)
+    if (!csrf_verify_json()) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'CSRF validation failed']);
+        exit;
+    }
+
     $data = json_decode(file_get_contents('php://input'), true);
     $key = $data['key'] ?? '';
     $value = $data['value'] ?? null;
-    
+
     if (empty($key)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'Key is required']);
         exit;
     }
-    
+
     // Läs nuvarande content
     $content = get_all_content();
-    
+
     // Uppdatera section (value är ett objekt med fields)
     $content[$key] = $value;
-    
-    // Spara hela content-filen
-    if (file_put_contents(CONTENT_FILE, json_encode($content, JSON_PRETTY_PRINT))) {
+
+    // Spara hela content-filen med fillåsning
+    if (file_put_contents(CONTENT_FILE, json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX)) {
+        // Invalidera content-cache
+        clear_content_cache();
         echo json_encode(['success' => true, '_version' => time()]);
     } else {
         http_response_code(500);
@@ -108,8 +127,8 @@ function handleUpload() {
         exit;
     }
     
-    // Generera säkert filnamn
-    $filename = generate_safe_filename($_FILES['image']['name']);
+    // Generera säkert filnamn baserat på faktisk MIME-typ
+    $filename = generate_safe_filename($_FILES['image']['name'], $_FILES['image']['tmp_name']);
     $upload_path = UPLOADS_PATH . '/' . $filename;
     
     // Flytta fil

@@ -23,14 +23,54 @@ function csrf_field() {
 }
 
 /**
- * Validera CSRF token
+ * Validera CSRF token (stödjer både POST och header)
  */
 function csrf_verify() {
-    if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token'])) {
+    if (!isset($_SESSION['csrf_token'])) {
         return false;
     }
-    
-    return hash_equals($_SESSION['csrf_token'], $_POST['csrf_token']);
+
+    // Kontrollera POST-parameter först
+    if (isset($_POST['csrf_token'])) {
+        return hash_equals($_SESSION['csrf_token'], $_POST['csrf_token']);
+    }
+
+    // Kontrollera X-CSRF-Token header (för AJAX/JSON requests)
+    $headers = getallheaders();
+    $csrf_header = $headers['X-CSRF-Token'] ?? $headers['X-Csrf-Token'] ?? $headers['x-csrf-token'] ?? null;
+
+    if ($csrf_header !== null) {
+        return hash_equals($_SESSION['csrf_token'], $csrf_header);
+    }
+
+    return false;
+}
+
+/**
+ * Validera CSRF token för JSON API
+ */
+function csrf_verify_json() {
+    if (!isset($_SESSION['csrf_token'])) {
+        return false;
+    }
+
+    // Kontrollera X-CSRF-Token header
+    $headers = getallheaders();
+    $csrf_header = $headers['X-CSRF-Token'] ?? $headers['X-Csrf-Token'] ?? $headers['x-csrf-token'] ?? null;
+
+    if ($csrf_header !== null) {
+        return hash_equals($_SESSION['csrf_token'], $csrf_header);
+    }
+
+    // Kontrollera även i JSON body
+    $input = file_get_contents('php://input');
+    $data = json_decode($input, true);
+
+    if (isset($data['csrf_token'])) {
+        return hash_equals($_SESSION['csrf_token'], $data['csrf_token']);
+    }
+
+    return false;
 }
 
 /**

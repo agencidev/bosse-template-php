@@ -49,15 +49,24 @@ if (is_logged_in()) {
 // Handle login
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
-    
-    if ($username === ADMIN_USERNAME && $password === ADMIN_PASSWORD) {
-        login_user($username);
-        header('Location: /dashboard');
-        exit;
+    // Rate limiting check
+    $rate_limit = check_login_rate_limit();
+    if (!$rate_limit['allowed']) {
+        $error = 'För många inloggningsförsök. Vänta ' . $rate_limit['wait_seconds'] . ' sekunder.';
     } else {
-        $error = 'Felaktigt användarnamn eller lösenord';
+        $username = $_POST['username'] ?? '';
+        $password = $_POST['password'] ?? '';
+
+        // Använd timing-safe jämförelse för användarnamn och password_verify för lösenord
+        if (hash_equals(ADMIN_USERNAME, $username) && password_verify($password, ADMIN_PASSWORD_HASH)) {
+            clear_login_attempts();
+            login_user($username);
+            header('Location: /dashboard');
+            exit;
+        } else {
+            record_login_attempt();
+            $error = 'Felaktigt användarnamn eller lösenord';
+        }
     }
 }
 ?>
