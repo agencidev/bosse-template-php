@@ -22,7 +22,7 @@ function organizationSchema($name = null, $logo = null, $description = null) {
         "contactPoint" => [
             "@type" => "ContactPoint",
             "contactType" => "customer service",
-            "email" => $_ENV['CONTACT_EMAIL'] ?? 'info@example.com'
+            "email" => defined('CONTACT_EMAIL') ? CONTACT_EMAIL : 'info@example.com'
         ]
     ];
     
