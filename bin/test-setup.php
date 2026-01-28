@@ -106,33 +106,66 @@ test("public/uploads/ mapp finns", function() {
 echo BLUE . "\n⚙️  Konfiguration\n" . RESET;
 echo str_repeat("-", 60) . "\n";
 
+test("bootstrap.php finns", function() {
+    return file_exists(__DIR__ . '/../bootstrap.php');
+});
+
 test("config.example.php är giltig PHP", function() {
-    require_once __DIR__ . '/../config.example.php';
-    return defined('SITE_NAME');
+    // Kolla att config.example.php är giltig syntax (utan att köra den)
+    $output = [];
+    $return = 0;
+    exec('php -l ' . escapeshellarg(__DIR__ . '/../config.example.php') . ' 2>&1', $output, $return);
+    return $return === 0;
 });
 
-test("SITE_NAME är definierad", function() {
-    return defined('SITE_NAME') && !empty(SITE_NAME);
-});
+// Ladda config.php om den finns (för att kunna testa konfiguration)
+$configFile = __DIR__ . '/../config.php';
+$hasConfig = file_exists($configFile);
+if ($hasConfig) {
+    require_once $configFile;
+}
 
-test("CONTACT_EMAIL är definierad", function() {
-    return defined('CONTACT_EMAIL') && !empty(CONTACT_EMAIL);
-});
-
-test("ADMIN_USERNAME är definierad", function() {
-    if (!defined('ADMIN_USERNAME') || ADMIN_USERNAME === 'admin') {
-        warn("Använd inte standardanvändarnamnet 'admin'");
+test("config.php finns", function() use ($hasConfig) {
+    if (!$hasConfig) {
+        warn("config.php saknas - kopiera config.example.php till config.php");
         return false;
     }
     return true;
 });
 
-test("CSRF_SECRET är definierad", function() {
-    if (!defined('CSRF_SECRET') || strlen(CSRF_SECRET) < 32) {
-        return "CSRF_SECRET måste vara minst 32 tecken";
-    }
-    return true;
-});
+if ($hasConfig) {
+    test("SITE_NAME är definierad", function() {
+        return defined('SITE_NAME') && !empty(SITE_NAME);
+    });
+
+    test("CONTACT_EMAIL är definierad", function() {
+        return defined('CONTACT_EMAIL') && !empty(CONTACT_EMAIL);
+    });
+
+    test("ADMIN_USERNAME är definierad", function() {
+        if (!defined('ADMIN_USERNAME') || ADMIN_USERNAME === 'admin') {
+            warn("Använd inte standardanvändarnamnet 'admin'");
+            return false;
+        }
+        return true;
+    });
+
+    test("SESSION_SECRET är definierad", function() {
+        if (!defined('SESSION_SECRET') || strlen(SESSION_SECRET) < 32) {
+            return "SESSION_SECRET måste vara minst 32 tecken";
+        }
+        return true;
+    });
+
+    test("CSRF_TOKEN_SALT är definierad", function() {
+        if (!defined('CSRF_TOKEN_SALT') || strlen(CSRF_TOKEN_SALT) < 32) {
+            return "CSRF_TOKEN_SALT måste vara minst 32 tecken";
+        }
+        return true;
+    });
+} else {
+    echo YELLOW . "⚠ Hoppar över config-tester (config.php saknas)\n" . RESET;
+}
 
 // 3. Säkerhet
 echo BLUE . "\n🔒 Säkerhet\n" . RESET;

@@ -3,7 +3,7 @@
  * CMS Admin Dashboard - EXAKT som Next.js-versionen
  */
 
-require_once __DIR__ . '/../config.example.php';
+require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../security/session.php';
 
 // Kräv inloggning

@@ -4,14 +4,9 @@
  * Routing: /cms/admin.php = login-sida
  */
 
-require_once __DIR__ . '/../config.example.php';
+require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../security/csrf.php';
 require_once __DIR__ . '/../security/session.php';
-
-// Start session if not already started
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 
 // Handle logout FIRST before any other checks
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {

@@ -4,7 +4,7 @@
  * Genererar XML sitemap för SEO
  */
 
-require_once __DIR__ . '/../config.example.php';
+require_once __DIR__ . '/../bootstrap.php';
 
 header('Content-Type: application/xml; charset=utf-8');
 

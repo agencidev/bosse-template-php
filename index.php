@@ -4,16 +4,11 @@
  * Huvudsida med exempel på CMS-integration
  */
 
-require_once __DIR__ . '/config.example.php';
+require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/security/session.php';
 require_once __DIR__ . '/cms/content.php';
 require_once __DIR__ . '/seo/meta.php';
 require_once __DIR__ . '/seo/schema.php';
-
-// Start session
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 
 // Prevent caching to ensure admin bar updates correctly
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');

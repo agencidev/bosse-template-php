@@ -14,5 +14,5 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo $secret . "\n";
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
 
-echo "Uppdatera CSRF_SECRET i config.example.php med detta värde.\n";
+echo "Uppdatera SESSION_SECRET och CSRF_TOKEN_SALT i config.php med detta värde.\n";
 echo "✓ Spara aldrig detta värde i version control!\n";

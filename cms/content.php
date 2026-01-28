@@ -4,7 +4,7 @@
  * Hanterar innehåll från JSON-fil
  */
 
-require_once __DIR__ . '/../config.example.php';
+require_once __DIR__ . '/../bootstrap.php';
 
 // Path till content-fil
 define('CONTENT_FILE', DATA_PATH . '/content.json');
