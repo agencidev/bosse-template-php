@@ -7,6 +7,7 @@
 // Hämta företagsinformation från config
 $company_name = defined('SITE_NAME') ? SITE_NAME : 'Företaget';
 $contact_email = defined('CONTACT_EMAIL') ? CONTACT_EMAIL : 'info@example.com';
+$contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 ?>
 
 <!-- Cookie Consent Banner -->
@@ -14,7 +15,7 @@ $contact_email = defined('CONTACT_EMAIL') ? CONTACT_EMAIL : 'info@example.com';
     <div class="cookie-banner-content">
         <h3 class="cookie-banner-title">Vi använder cookies</h3>
         <p class="cookie-banner-text">
-            Vi använder cookies för att förbättra din upplevelse på vår webbplats. Vissa cookies är nödvändiga för att webbplatsen ska fungera, medan andra hjälper oss att förstå hur du använder sajten. Du kan läsa mer i vår <strong>cookie policy</strong> och <strong>integritetspolicy</strong>.
+            Vi använder cookies för att förbättra din upplevelse på vår webbplats. Vissa cookies är nödvändiga för att webbplatsen ska fungera, medan andra hjälper oss att förstå hur du använder sajten. Du kan läsa mer i vår <a href="/cookies" style="color: white; text-decoration: underline;">cookie policy</a> och <a href="/integritetspolicy" style="color: white; text-decoration: underline;">integritetspolicy</a>.
         </p>
         <div class="cookie-banner-actions">
             <button id="cookie-accept-all" class="cookie-banner-btn cookie-banner-btn-primary">Acceptera alla</button>
@@ -119,6 +120,36 @@ $contact_email = defined('CONTACT_EMAIL') ? CONTACT_EMAIL : 'info@example.com';
                 <div class="cookie-info-content" id="more-info-content" style="display: none;">
                     <p><strong>Kontakt:</strong> <?php echo htmlspecialchars($contact_email); ?></p>
                     <p><strong>Företag:</strong> <?php echo htmlspecialchars($company_name); ?></p>
+                </div>
+            </div>
+
+            <div class="cookie-info-section">
+                <button class="cookie-info-toggle" id="cookie-policy-toggle">
+                    <span>Cookie policy</span>
+                    <svg class="cookie-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <div class="cookie-info-content" id="cookie-policy-content" style="display: none;">
+                    <p><strong><?php echo htmlspecialchars($company_name); ?></strong> använder cookies på denna webbplats. Nedan beskrivs vilka cookies vi använder och varför.</p>
+
+                    <p style="margin-top: 0.75rem;"><strong style="color: var(--color-primary, #8b5cf6);">Nödvändiga cookies</strong><br>
+                    Dessa krävs för att webbplatsen ska fungera korrekt, t.ex. sessionshantering och CSRF-skydd. De kan inte stängas av. Lagringstid: sessionens längd.</p>
+
+                    <p style="margin-top: 0.75rem;"><strong style="color: var(--color-primary, #8b5cf6);">Analytiska cookies</strong><br>
+                    Hjälper oss förstå hur besökare använder webbplatsen genom anonymiserad statistik (t.ex. Google Analytics). Lagringstid: upp till 365 dagar.</p>
+
+                    <p style="margin-top: 0.75rem;"><strong style="color: var(--color-primary, #8b5cf6);">Funktionella cookies</strong><br>
+                    Gör det möjligt att komma ihåg dina val, t.ex. språk och visningsinställningar. Lagringstid: upp till 365 dagar.</p>
+
+                    <p style="margin-top: 0.75rem;"><strong style="color: var(--color-primary, #8b5cf6);">Marknadsföringscookies</strong><br>
+                    Används för att visa relevanta annonser baserat på dina intressen. Lagringstid: upp till 365 dagar.</p>
+
+                    <p style="margin-top: 0.75rem;"><strong>Ditt samtycke</strong><br>
+                    Ditt samtycke sparas i 365 dagar. Du kan när som helst ändra dina inställningar via cookie-inställningarna.</p>
+
+                    <p style="margin-top: 0.75rem;"><strong>Kontakt</strong><br>
+                    Har du frågor om vår cookie policy? Kontakta oss på <a href="mailto:<?php echo htmlspecialchars($contact_email); ?>" style="color: var(--color-primary, #8b5cf6);"><?php echo htmlspecialchars($contact_email); ?></a><?php if (!empty($contact_phone)): ?> eller ring <strong><?php echo htmlspecialchars($contact_phone); ?></strong><?php endif; ?>.</p>
                 </div>
             </div>
         </div>
@@ -404,7 +435,7 @@ $contact_email = defined('CONTACT_EMAIL') ? CONTACT_EMAIL : 'info@example.com';
 }
 
 .cookie-toggle input:checked + .cookie-toggle-slider {
-    background-color: #fe4f2a;
+    background-color: var(--color-primary, #fe4f2a);
 }
 
 .cookie-toggle input:checked + .cookie-toggle-slider:before {
@@ -627,6 +658,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Toggle for more info
     document.getElementById('more-info-toggle').addEventListener('click', function() {
         const content = document.getElementById('more-info-content');
+        if (content.style.display === 'none' || !content.style.display) {
+            content.style.display = 'block';
+            this.classList.add('active');
+        } else {
+            content.style.display = 'none';
+            this.classList.remove('active');
+        }
+    });
+
+    // Toggle for cookie policy
+    document.getElementById('cookie-policy-toggle').addEventListener('click', function() {
+        const content = document.getElementById('cookie-policy-content');
         if (content.style.display === 'none' || !content.style.display) {
             content.style.display = 'block';
             this.classList.add('active');

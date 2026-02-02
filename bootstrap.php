@@ -6,9 +6,18 @@
 // Ladda config
 $configPath = __DIR__ . '/config.php';
 if (!file_exists($configPath)) {
-    die('config.php saknas. Kopiera config.example.php till config.php');
+    $currentUri = $_SERVER['REQUEST_URI'] ?? '';
+    if (strpos($currentUri, '/setup') === false
+        && basename($_SERVER['SCRIPT_FILENAME'] ?? '') !== 'setup.php') {
+        header('Location: /setup');
+        exit;
+    }
+    return;
 }
 require_once $configPath;
+
+// Ladda version
+require_once __DIR__ . '/version.php';
 
 // Sätt paths
 define('ROOT_PATH', __DIR__);
@@ -34,3 +43,6 @@ ini_set('session.cookie_secure', 1);
 ini_set('session.cookie_samesite', 'Strict');
 ini_set('session.use_strict_mode', 1);
 session_start();
+
+// Ladda super admin (efter session start)
+require_once __DIR__ . '/security/super-admin.php';

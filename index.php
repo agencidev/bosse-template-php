@@ -30,6 +30,14 @@ header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
     );
     ?>
     
+    <?php if (file_exists(__DIR__ . '/includes/fonts.php')) include __DIR__ . '/includes/fonts.php'; ?>
+    <?php if (file_exists(__DIR__ . '/includes/analytics.php')) include __DIR__ . '/includes/analytics.php'; ?>
+    <?php if (file_exists(__DIR__ . '/assets/images/favicon.png')): ?>
+    <link rel="icon" type="image/png" href="/assets/images/favicon.png">
+    <?php endif; ?>
+    <?php if (file_exists(__DIR__ . '/assets/images/apple-touch-icon.png')): ?>
+    <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
+    <?php endif; ?>
     <link rel="stylesheet" href="/assets/css/main.css">
     
     <?php 

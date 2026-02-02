@@ -12,7 +12,7 @@
 
 /* Section */
 .section {
-  padding: var(--spacing-16) 0;
+  padding: var(--section-padding, var(--spacing-16)) 0;
 }
 
 .section--white {
@@ -33,7 +33,7 @@
   font-size: var(--text-base);
   font-weight: var(--font-semibold);
   line-height: 1;
-  border-radius: 9999px;
+  border-radius: var(--button-radius, var(--radius-full));
   cursor: pointer;
   border: none;
   text-decoration: none;
@@ -41,7 +41,7 @@
 }
 
 .button--primary {
-  background: #fe4f2a;
+  background: var(--color-primary);
   color: white;
 }
 

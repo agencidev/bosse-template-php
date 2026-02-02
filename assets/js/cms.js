@@ -189,21 +189,25 @@ function setupEditableText(element) {
       try {
         // Trim whitespace to avoid spacing issues
         const trimmedValue = newValue.trim();
-        
-        // Fetch current content
+
+        // Fetch current content (includes CSRF token)
         const res = await fetch(`/cms/api.php?action=get&_t=${Date.now()}`);
         const currentData = await res.json();
-        
+        const csrfToken = currentData._csrf || '';
+
         // Update section
         const updatedSection = {
           ...(currentData[contentKey] || {}),
           [field]: trimmedValue
         };
-        
-        // Save to server
+
+        // Save to server with CSRF token
         const saveRes = await fetch('/cms/api.php?action=update', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          },
           body: JSON.stringify({
             key: contentKey,
             value: updatedSection
@@ -293,11 +297,16 @@ function initImageUpload() {
       const contentKey = input.dataset.contentKey;
       const field = input.dataset.field;
       
+      // Get CSRF token first
+      const tokenRes = await fetch(`/cms/api.php?action=get&_t=${Date.now()}`);
+      const tokenData = await tokenRes.json();
+
       const formData = new FormData();
       formData.append('image', file);
       formData.append('key', contentKey);
       formData.append('field', field);
-      
+      formData.append('csrf_token', tokenData._csrf || '');
+
       try {
         const res = await fetch('/cms/api.php?action=upload', {
           method: 'POST',
@@ -343,13 +352,89 @@ function uploadImage(contentKey, field) {
  * Show notification
  */
 function showNotification(message, type = 'info') {
+  // Inject CSS once
+  if (!document.getElementById('cms-notification-styles')) {
+    const style = document.createElement('style');
+    style.id = 'cms-notification-styles';
+    style.textContent = `
+      .cms-notification {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        padding: 0.875rem 1.25rem;
+        border-radius: 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        z-index: 10001;
+        animation: cmsSlideIn 0.3s ease-out;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
+      .cms-notification--success {
+        background: #10b981;
+        color: white;
+      }
+      .cms-notification--error {
+        background: #ef4444;
+        color: white;
+      }
+      .cms-notification--info {
+        background: #3b82f6;
+        color: white;
+      }
+      @keyframes cmsSlideIn {
+        from { transform: translateY(1rem); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+      @keyframes cmsSlideOut {
+        from { transform: translateY(0); opacity: 1; }
+        to { transform: translateY(1rem); opacity: 0; }
+      }
+      .cms-editable-active {
+        outline: 2px dashed rgba(254, 79, 42, 0.4);
+        outline-offset: 4px;
+        cursor: pointer;
+        transition: outline-color 0.2s;
+      }
+      .cms-editable-active:hover {
+        outline-color: rgba(254, 79, 42, 0.8);
+      }
+      .cms-image-wrapper {
+        position: relative;
+        display: inline-block;
+      }
+      .cms-image-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        border-radius: inherit;
+      }
+      .cms-edit-mode .cms-image-wrapper:hover .cms-image-overlay {
+        display: flex;
+      }
+      .cms-image-btn {
+        padding: 0.5rem 1rem;
+        background: white;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   const notification = document.createElement('div');
   notification.className = `cms-notification cms-notification--${type}`;
   notification.textContent = message;
   document.body.appendChild(notification);
-  
+
   setTimeout(() => {
-    notification.style.animation = 'slideOut 0.3s ease-out';
+    notification.style.animation = 'cmsSlideOut 0.3s ease-out';
     setTimeout(() => notification.remove(), 300);
   }, 3000);
 }

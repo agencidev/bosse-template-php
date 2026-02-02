@@ -18,16 +18,37 @@ RewriteRule ^admin/?$ cms/admin.php [L]
 # /dashboard -> /cms/dashboard.php
 RewriteRule ^dashboard/?$ cms/dashboard.php [L]
 
+# /setup -> /setup.php
+RewriteRule ^setup/?$ setup.php [L]
+
+# /super-admin -> /cms/super-admin.php
+RewriteRule ^super-admin/?$ cms/super-admin.php [L]
+
+# /api/super -> /cms/api-super.php
+RewriteRule ^api/super/?$ cms/api-super.php [QSA,L]
+
+# /kontakt -> /kontakt.php
+RewriteRule ^kontakt/?$ kontakt.php [L]
+
+# /cookies -> /cookies.php
+RewriteRule ^cookies/?$ cookies.php [L]
+
+# /integritetspolicy -> /integritetspolicy.php
+RewriteRule ^integritetspolicy/?$ integritetspolicy.php [L]
+
 # Ta bort .php från alla URLer
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.php -f
 RewriteRule ^(.*)$ $1.php [L]
 
 # Skydda känsliga filer
-<FilesMatch "^\.env|^config\.php|^\.git|^composer\.(json|lock)">
+<FilesMatch "^\.env|^config\.php|^\.git|^composer\.(json|lock)|update-state\.json|backup-meta\.json">
     Order allow,deny
     Deny from all
 </FilesMatch>
+
+# Skydda data/backups och data/tmp
+RewriteRule ^data/(backups|tmp)/ - [F,L]
 
 # Förhindra PHP-exekvering i uploads
 <Directory "uploads">

@@ -20,6 +20,9 @@ $logo_src = '/assets/images/logo-dark.png';
             <a href="/dashboard" class="admin-bar__logo">
                 <img src="<?php echo $logo_src; ?>" alt="<?php echo SITE_NAME; ?>">
             </a>
+            <?php if (is_super_admin()): ?>
+                <span class="admin-bar__sa-badge" title="Super Admin"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M2.5 19.5h19v2h-19v-2Zm19.57-9.36c-.22-.8-1.04-1.27-1.84-1.06L16.5 10.2l-3.12-5.4a1.5 1.5 0 0 0-2.59-.02L7.5 10.2l-3.73-1.12c-.8-.24-1.64.2-1.87 1-.12.4-.05.84.18 1.18L6 16.5h12l3.9-5.24c.25-.35.32-.78.17-1.12Z"/></svg></span>
+            <?php endif; ?>
             <?php if ($is_frontend): ?>
                 <div class="admin-bar__divider"></div>
                 <button id="toggle-edit-mode" class="admin-bar__button admin-bar__button--edit">
@@ -49,6 +52,16 @@ $logo_src = '/assets/images/logo-dark.png';
     z-index: 10000;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     height: 3rem;
+    /* CMS-isolering: ignorera brand guide-variabler */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.admin-bar *,
+.admin-bar *::before,
+.admin-bar *::after {
+    font-family: inherit !important;
 }
 
 .admin-bar--dark {
@@ -121,6 +134,14 @@ $logo_src = '/assets/images/logo-dark.png';
 .admin-bar__button--edit.active {
     background: #fe4f2a;
     color: white;
+}
+
+.admin-bar__sa-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #f59e0b;
+    flex-shrink: 0;
 }
 
 body.has-admin-bar {

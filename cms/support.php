@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../security/session.php';
 require_once __DIR__ . '/../security/csrf.php';
+require_once __DIR__ . '/../includes/mailer.php';
 
 if (!is_logged_in()) {
     header('Location: /cms/admin.php');
@@ -9,10 +10,58 @@ if (!is_logged_in()) {
 }
 
 $sent = false;
+$mail_error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_require();
-    $sent = true;
+
+    $subject = trim($_POST['subject'] ?? '');
+    $message = trim($_POST['message'] ?? '');
+
+    if (empty($subject) || empty($message)) {
+        $mail_error = 'Ämne och meddelande krävs.';
+    } else {
+        $admin_user = defined('ADMIN_USERNAME') ? ADMIN_USERNAME : 'admin';
+        $site_name = defined('SITE_NAME') ? SITE_NAME : 'Webbplats';
+        $safe_subject = htmlspecialchars($subject, ENT_QUOTES, 'UTF-8');
+        $safe_message = nl2br(htmlspecialchars($message, ENT_QUOTES, 'UTF-8'));
+        $timestamp = date('Y-m-d H:i:s');
+
+        $htmlBody = <<<HTML
+<!DOCTYPE html>
+<html lang="sv">
+<head><meta charset="UTF-8"></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #18181b; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h2 style="color: #fe4f2a; border-bottom: 2px solid #fe4f2a; padding-bottom: 10px;">Supportärende</h2>
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr><td style="padding: 8px 0; font-weight: 600; width: 120px;">Admin:</td><td style="padding: 8px 0;">{$admin_user}</td></tr>
+        <tr><td style="padding: 8px 0; font-weight: 600;">Ämne:</td><td style="padding: 8px 0;">{$safe_subject}</td></tr>
+        <tr><td style="padding: 8px 0; font-weight: 600;">Tidpunkt:</td><td style="padding: 8px 0;">{$timestamp}</td></tr>
+    </table>
+    <h3 style="margin-top: 20px;">Meddelande</h3>
+    <div style="background: #f4f4f5; padding: 15px; border-radius: 8px; line-height: 1.6;">{$safe_message}</div>
+    <p style="color: #71717a; font-size: 12px; margin-top: 30px;">Skickat via supportformuläret på {$site_name}</p>
+</body>
+</html>
+HTML;
+
+        $contact_email = defined('CONTACT_EMAIL') ? CONTACT_EMAIL : '';
+        $mail_subject = '[Support] ' . $subject;
+
+        if (empty($contact_email)) {
+            $mail_error = 'Kontaktadressen är inte konfigurerad.';
+        } else {
+            $result = send_mail($contact_email, $mail_subject, $htmlBody, [
+                'html' => true,
+            ]);
+
+            if ($result) {
+                $sent = true;
+            } else {
+                $mail_error = 'Meddelandet kunde inte skickas. Kontrollera SMTP-inställningarna.';
+            }
+        }
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -145,7 +194,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php else: ?>
             <a href="/dashboard" class="back-link">← Tillbaka</a>
-            
+
+            <?php if (!empty($mail_error)): ?>
+            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 0.75rem; padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
+                <p style="color: #dc2626; font-size: 0.875rem; margin: 0;"><?php echo htmlspecialchars($mail_error); ?></p>
+            </div>
+            <?php endif; ?>
+
             <h1 class="title">Support</h1>
             <p class="subtitle">
                 Har du frågor eller behöver hjälp? Skicka ett meddelande så återkommer vi.

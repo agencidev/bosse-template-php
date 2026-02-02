@@ -211,7 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
                         </div>
                         
                         <div class="project-actions">
-                            <a href="/cms/projects/edit.php?id=<?php echo urlencode($project['id']); ?>" class="button button-edit">Redigera</a>
+                            <a href="/projects/edit?id=<?php echo urlencode($project['id']); ?>" class="button button-edit">Redigera</a>
                             <form method="POST" style="display: inline;" onsubmit="return confirm('Är du säker på att du vill ta bort detta inlägg?');">
                                 <?php echo csrf_field(); ?>
                                 <input type="hidden" name="delete_id" value="<?php echo htmlspecialchars($project['id'], ENT_QUOTES, 'UTF-8'); ?>">

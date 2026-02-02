@@ -69,6 +69,18 @@ test("config.example.php finns", function() {
     return file_exists(__DIR__ . '/../config.example.php');
 });
 
+test("setup.php finns", function() {
+    return file_exists(__DIR__ . '/../setup.php');
+});
+
+test("templates/brand-guide-template.md finns", function() {
+    return file_exists(__DIR__ . '/../templates/brand-guide-template.md');
+});
+
+test("templates/ai-rules-template.md finns", function() {
+    return file_exists(__DIR__ . '/../templates/ai-rules-template.md');
+});
+
 test("router.php finns", function() {
     return file_exists(__DIR__ . '/../router.php');
 });
@@ -87,6 +99,14 @@ test("includes/ mapp finns", function() {
 
 test("cms/ mapp finns", function() {
     return is_dir(__DIR__ . '/../cms');
+});
+
+test("includes/mailer.php finns", function() {
+    return file_exists(__DIR__ . '/../includes/mailer.php');
+});
+
+test("kontakt.php finns", function() {
+    return file_exists(__DIR__ . '/../kontakt.php');
 });
 
 test("data/ mapp finns", function() {
@@ -163,8 +183,47 @@ if ($hasConfig) {
         }
         return true;
     });
+
+    test("SMTP_HOST är definierad", function() {
+        if (!defined('SMTP_HOST')) {
+            warn("SMTP_HOST är inte definierad — e-post fungerar inte");
+            return false;
+        }
+        return !empty(SMTP_HOST);
+    });
+
+    test("SMTP_PORT är definierad", function() {
+        if (!defined('SMTP_PORT')) {
+            warn("SMTP_PORT är inte definierad — e-post fungerar inte");
+            return false;
+        }
+        return SMTP_PORT > 0 && SMTP_PORT <= 65535;
+    });
 } else {
     echo YELLOW . "⚠ Hoppar över config-tester (config.php saknas)\n" . RESET;
+}
+
+// 2b. Setup-genererade filer
+$setupComplete = file_exists(__DIR__ . '/../data/.setup-complete');
+if ($setupComplete) {
+    echo BLUE . "\n🔧 Setup-genererade filer\n" . RESET;
+    echo str_repeat("-", 60) . "\n";
+
+    test(".windsurf/brand-guide.md finns", function() {
+        return file_exists(__DIR__ . '/../.windsurf/brand-guide.md');
+    });
+
+    test(".windsurf/ai-rules.md finns", function() {
+        return file_exists(__DIR__ . '/../.windsurf/ai-rules.md');
+    });
+
+    test("includes/fonts.php finns", function() {
+        return file_exists(__DIR__ . '/../includes/fonts.php');
+    });
+
+    test("data/.setup-complete finns", function() {
+        return file_exists(__DIR__ . '/../data/.setup-complete');
+    });
 }
 
 // 3. Säkerhet
@@ -287,8 +346,13 @@ echo str_repeat("-", 60) . "\n";
 
 test("router.php är giltig", function() {
     $router = file_get_contents(__DIR__ . '/../router.php');
-    return strpos($router, '/admin') !== false && 
+    return strpos($router, '/admin') !== false &&
            strpos($router, '/dashboard') !== false;
+});
+
+test("router.php har /kontakt-route", function() {
+    $router = file_get_contents(__DIR__ . '/../router.php');
+    return strpos($router, "'/kontakt'") !== false;
 });
 
 test(".htaccess har rewrite-regler", function() {

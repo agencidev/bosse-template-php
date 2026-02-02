@@ -7,4 +7,5 @@ config.php
 .DS_Store
 Thumbs.db
 *.log
+data/.setup-complete
 .claude

@@ -1,0 +1,13 @@
+/**
+ * Design Overrides
+ * Denna fil laddas SIST och vinner över allt annat.
+ *
+ * REGLER:
+ * - Alla visuella ändringar som avviker från brand guiden skrivs HÄR
+ * - Ändra ALDRIG variables.css eller components.css direkt
+ * - Denna fil överlever omgenerering av setup-wizarden
+ *
+ * EXEMPEL:
+ * .button--primary { border-radius: 0; background: linear-gradient(...); }
+ * .card { box-shadow: none; border: 2px solid #000; }
+ */

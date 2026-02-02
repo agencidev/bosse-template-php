@@ -25,6 +25,15 @@ function organizationSchema($name = null, $logo = null, $description = null) {
             "email" => defined('CONTACT_EMAIL') ? CONTACT_EMAIL : 'info@example.com'
         ]
     ];
+
+    // Sociala medier (sameAs)
+    $sameAs = [];
+    if (defined('SOCIAL_FACEBOOK') && SOCIAL_FACEBOOK) $sameAs[] = SOCIAL_FACEBOOK;
+    if (defined('SOCIAL_INSTAGRAM') && SOCIAL_INSTAGRAM) $sameAs[] = SOCIAL_INSTAGRAM;
+    if (defined('SOCIAL_LINKEDIN') && SOCIAL_LINKEDIN) $sameAs[] = SOCIAL_LINKEDIN;
+    if (!empty($sameAs)) {
+        $schema['sameAs'] = $sameAs;
+    }
     
     echo '<script type="application/ld+json">';
     echo json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
@@ -77,6 +86,37 @@ function localBusinessSchema($businessType = 'LocalBusiness', $address = [], $ge
             "latitude" => $geo['lat'] ?? '',
             "longitude" => $geo['lng'] ?? ''
         ];
+    }
+
+    // Öppettider från config
+    if (defined('HOURS_WEEKDAYS') && HOURS_WEEKDAYS) {
+        $schema['openingHoursSpecification'] = [
+            [
+                "@type" => "OpeningHoursSpecification",
+                "dayOfWeek" => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "opens" => "",
+                "closes" => "",
+                "description" => HOURS_WEEKDAYS
+            ]
+        ];
+        if (defined('HOURS_WEEKENDS') && HOURS_WEEKENDS && strtolower(HOURS_WEEKENDS) !== 'stängt') {
+            $schema['openingHoursSpecification'][] = [
+                "@type" => "OpeningHoursSpecification",
+                "dayOfWeek" => ["Saturday", "Sunday"],
+                "opens" => "",
+                "closes" => "",
+                "description" => HOURS_WEEKENDS
+            ];
+        }
+    }
+
+    // Sociala medier
+    $sameAs = [];
+    if (defined('SOCIAL_FACEBOOK') && SOCIAL_FACEBOOK) $sameAs[] = SOCIAL_FACEBOOK;
+    if (defined('SOCIAL_INSTAGRAM') && SOCIAL_INSTAGRAM) $sameAs[] = SOCIAL_INSTAGRAM;
+    if (defined('SOCIAL_LINKEDIN') && SOCIAL_LINKEDIN) $sameAs[] = SOCIAL_LINKEDIN;
+    if (!empty($sameAs)) {
+        $schema['sameAs'] = $sameAs;
     }
     
     echo '<script type="application/ld+json">';

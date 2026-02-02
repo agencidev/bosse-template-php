@@ -7,6 +7,19 @@
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $query = parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY);
 
+// Setup wizard redirect
+if (!file_exists(__DIR__ . '/config.php')) {
+    if ($uri === '/setup' || $uri === '/setup.php') {
+        require __DIR__ . '/setup.php';
+        return true;
+    }
+    if (preg_match('/\.(css|js|png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)$/', $uri)) {
+        return false;
+    }
+    header('Location: /setup');
+    exit;
+}
+
 // URL routing
 $routes = [
     '/admin' => '/cms/admin.php',
@@ -16,6 +29,13 @@ $routes = [
     '/support' => '/cms/support.php',
     '/projects' => '/cms/projects/index.php',
     '/projects/new' => '/cms/projects/new.php',
+    '/projects/edit' => '/cms/projects/edit.php',
+    '/kontakt' => '/kontakt.php',
+    '/cookies' => '/cookies.php',
+    '/integritetspolicy' => '/integritetspolicy.php',
+    '/setup' => '/setup.php',
+    '/super-admin' => '/cms/super-admin.php',
+    '/api/super' => '/cms/api-super.php',
 ];
 
 // Check if route exists

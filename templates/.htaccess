@@ -1,0 +1,3 @@
+# Blockera all direkt webbåtkomst till templates-mappen
+Order allow,deny
+Deny from all
