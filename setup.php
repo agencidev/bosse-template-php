@@ -1263,7 +1263,7 @@ $saved = $_SESSION['setup_data'] ?? [];
                     <div class="form-group">
                         <label for="smtp_host">SMTP-server</label>
                         <input type="text" id="smtp_host" name="smtp_host"
-                               value="<?php echo htmlspecialchars($saved['smtp_host'] ?? 'server16.serverdrift.com'); ?>"
+                               value="<?php echo htmlspecialchars($saved['smtp_host'] ?? ''); ?>"
                                placeholder="smtp.example.com">
                     </div>
                     <div class="form-group">
@@ -1285,7 +1285,7 @@ $saved = $_SESSION['setup_data'] ?? [];
                     <div class="form-group">
                         <label for="smtp_username">SMTP-användarnamn</label>
                         <input type="email" id="smtp_username" name="smtp_username"
-                               value="<?php echo htmlspecialchars($saved['smtp_username'] ?? 'webb@peys.se'); ?>"
+                               value="<?php echo htmlspecialchars($saved['smtp_username'] ?? ''); ?>"
                                placeholder="user@example.com">
                     </div>
                 </div>

@@ -12,10 +12,10 @@ define('CONTACT_EMAIL', 'info@example.com');
 define('CONTACT_PHONE', '+46 70 000 00 00');
 
 // SMTP
-define('SMTP_HOST', 'server16.serverdrift.com');
+define('SMTP_HOST', 'smtp.example.com');
 define('SMTP_PORT', 465);
 define('SMTP_ENCRYPTION', 'ssl');
-define('SMTP_USERNAME', 'webb@peys.se');
+define('SMTP_USERNAME', 'user@example.com');
 define('SMTP_PASSWORD', '...');
 
 // Admin (generera hash: php bin/generate-password-hash.php)
