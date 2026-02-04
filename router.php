@@ -36,20 +36,37 @@ $routes = [
     '/setup' => '/setup.php',
     '/super-admin' => '/cms/super-admin.php',
     '/api/super' => '/cms/api-super.php',
+    '/projekt' => '/projekt.php',
 ];
 
 // Check if route exists
 if (isset($routes[$uri])) {
     $_SERVER['SCRIPT_NAME'] = $routes[$uri];
     $_SERVER['PHP_SELF'] = $routes[$uri];
-    
+
     // Preserve query string
     if ($query) {
         $_SERVER['QUERY_STRING'] = $query;
         parse_str($query, $_GET);
     }
-    
+
     require __DIR__ . $routes[$uri];
+    return true;
+}
+
+// Dynamic route: /projekt/{slug}
+if (preg_match('#^/projekt/([a-z0-9-]+)/?$#', $uri, $matches)) {
+    $_GET['slug'] = $matches[1];
+    $_SERVER['SCRIPT_NAME'] = '/projekt-single.php';
+    $_SERVER['PHP_SELF'] = '/projekt-single.php';
+
+    // Preserve additional query string
+    if ($query) {
+        parse_str($query, $extraParams);
+        $_GET = array_merge($_GET, $extraParams);
+    }
+
+    require __DIR__ . '/projekt-single.php';
     return true;
 }
 

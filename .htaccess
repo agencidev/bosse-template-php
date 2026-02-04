@@ -36,6 +36,12 @@ RewriteRule ^cookies/?$ cookies.php [L]
 # /integritetspolicy -> /integritetspolicy.php
 RewriteRule ^integritetspolicy/?$ integritetspolicy.php [L]
 
+# /projekt -> /projekt.php
+RewriteRule ^projekt/?$ projekt.php [L]
+
+# /projekt/{slug} -> /projekt-single.php?slug={slug}
+RewriteRule ^projekt/([a-z0-9-]+)/?$ projekt-single.php?slug=$1 [QSA,L]
+
 # Ta bort .php från alla URLer
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.php -f

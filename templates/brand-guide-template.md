@@ -140,3 +140,16 @@ Exempel: Om en specifik knapp ska ha en annan stil än brand guiden:
     border-radius: 0;
 }
 ```
+
+---
+
+## CMS-integration
+
+För fullständig dokumentation av CMS-systemet, se `.windsurf/ai-rules.md` under sektionen **"CMS-användning"**.
+
+### Snabbref
+
+- **Sidinnehåll:** `data/content.json`
+- **Inlägg/projekt:** `data/projects.json`
+- **Redigerbara element:** Använd `editable_text()` och `editable_image()`
+- **Publika projekt:** Visas på `/projekt` och `/projekt/{slug}`

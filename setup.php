@@ -507,6 +507,41 @@ function generateAllFiles(array $data): array {
     // 6. data/.setup-complete
     file_put_contents($dataDir . '/.setup-complete', 'Setup completed: ' . date('Y-m-d H:i:s') . "\n");
 
+    // 6b. data/projects.json (tom array om den inte finns)
+    $projectsFile = $dataDir . '/projects.json';
+    if (!file_exists($projectsFile)) {
+        file_put_contents($projectsFile, json_encode([], JSON_PRETTY_PRINT));
+    }
+
+    // 6c. CLAUDE.md (referens-fil för Claude Code)
+    $claudeMdContent = "# CLAUDE.md\n\n";
+    $claudeMdContent .= "Se `.windsurf/ai-rules.md` för fullständiga AI-regler och kodstandarder.\n";
+    $claudeMdContent .= "Se `.windsurf/brand-guide.md` för varumärkesguide (färger, typsnitt, tonalitet).\n\n";
+    $claudeMdContent .= "## Snabbref\n\n";
+    $claudeMdContent .= "### CSS-ändringar\n";
+    $claudeMdContent .= "- **Skriv alltid i:** `assets/css/overrides.css`\n";
+    $claudeMdContent .= "- **Ändra ALDRIG:** `variables.css` eller `components.css`\n\n";
+    $claudeMdContent .= "### Innehåll\n";
+    $claudeMdContent .= "- **Sidinnehåll:** `data/content.json`\n";
+    $claudeMdContent .= "- **Inlägg/projekt:** `data/projects.json` (status: `\"published\"` för att synas)\n\n";
+    $claudeMdContent .= "### Nya sektioner\n";
+    $claudeMdContent .= "Använd ALLTID `editable_text()` och `editable_image()` för redigerbart innehåll:\n\n";
+    $claudeMdContent .= "```php\n";
+    $claudeMdContent .= "<?php editable_text('sektion', 'titel', 'Standardrubrik', 'h2', 'css-klass'); ?>\n";
+    $claudeMdContent .= "<?php editable_text('sektion', 'text', 'Standardtext', 'p', 'css-klass'); ?>\n";
+    $claudeMdContent .= "<?php editable_image('sektion', 'bild', '/assets/images/placeholder.jpg', 'Alt-text', 'css-klass'); ?>\n";
+    $claudeMdContent .= "```\n\n";
+    $claudeMdContent .= "### Publika sidor\n";
+    $claudeMdContent .= "- `/` — Huvudsida (index.php)\n";
+    $claudeMdContent .= "- `/kontakt` — Kontaktformulär\n";
+    $claudeMdContent .= "- `/projekt` — Projekt-lista\n";
+    $claudeMdContent .= "- `/projekt/{slug}` — Enskilt projekt\n\n";
+    $claudeMdContent .= "### CMS-admin (kräver inloggning)\n";
+    $claudeMdContent .= "- `/admin` — Logga in\n";
+    $claudeMdContent .= "- `/dashboard` — Översikt\n";
+    $claudeMdContent .= "- `/projects` — Hantera inlägg\n";
+    file_put_contents(__DIR__ . '/CLAUDE.md', $claudeMdContent);
+
     // 7. includes/fonts.php
     $fontsContent = "<?php\n// Genererad av Setup Wizard\n";
     $googleFonts = [];

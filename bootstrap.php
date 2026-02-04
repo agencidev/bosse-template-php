@@ -12,7 +12,7 @@ if (!file_exists($configPath)) {
         header('Location: /setup');
         exit;
     }
-    return;
+    exit;
 }
 require_once $configPath;
 

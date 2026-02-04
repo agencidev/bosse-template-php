@@ -156,12 +156,95 @@ Använd `editable_text()` för innehåll som ska vara redigerbart via CMS:
 
 ---
 
+## CMS-användning
+
+### Inlägg/Projekt
+
+Inlägg hanteras via JSON-fil. Skapa INTE inlägg manuellt i filer — använd CMS:et (`/cms/projects/new`) eller följ detta format:
+
+**Filplats:** `data/projects.json`
+
+**Format per inlägg:**
+```json
+{
+  "id": "unikt-id-123",
+  "title": "Titel på inlägget",
+  "slug": "url-vanlig-titel",
+  "category": "Projekt|Blogg|Nyhet|Event",
+  "summary": "Kort beskrivning",
+  "content": "Fullständig beskrivning av inlägget...",
+  "status": "published|draft",
+  "coverImage": "/uploads/bild.jpg",
+  "gallery": [],
+  "createdAt": "2026-02-04 12:00:00"
+}
+```
+
+**Viktigt:**
+- `status` måste vara `"published"` för att synas publikt
+- `slug` genereras från titel (å→a, ä→a, ö→o, mellanslag→bindestreck)
+- Använd `uniqid()` eller UUID för `id`
+- Publika projekt visas på `/projekt` och `/projekt/{slug}`
+
+### Redigerbara fält
+
+När du skapar nya sektioner, använd ALLTID `editable_text()` och `editable_image()`:
+
+```php
+<?php editable_text('sektion', 'titel', 'Standardrubrik', 'h2', 'css-klass'); ?>
+<?php editable_text('sektion', 'text', 'Standardtext', 'p', 'css-klass'); ?>
+<?php editable_image('sektion', 'bild', '/assets/images/placeholder.jpg', 'Alt-text', 'css-klass'); ?>
+```
+
+**Parametrar för editable_text():**
+1. `$contentKey` — Sektionsnamn (t.ex. 'hero', 'about', 'services')
+2. `$field` — Fältnamn (t.ex. 'title', 'description')
+3. `$defaultValue` — Standardvärde (visas om inget finns i content.json)
+4. `$as` — HTML-tagg (h1, h2, h3, p, span, div)
+5. `$className` — CSS-klasser
+
+**Parametrar för editable_image():**
+1. `$contentKey` — Sektionsnamn
+2. `$field` — Fältnamn
+3. `$defaultValue` — Standard bildväg
+4. `$alt` — Alt-text
+5. `$className` — CSS-klasser
+
+**Redigerbarhet kräver:**
+- Användaren måste vara inloggad i CMS (`/admin`)
+- Admin-bar måste vara synlig (inkluderas via `includes/admin-bar.php`)
+- "Aktivera redigering" måste vara klickad i admin-bar
+
+**Exempel på ny sektion:**
+```php
+<section class="section section--white">
+    <div class="container">
+        <?php editable_text('about', 'title', 'Om oss', 'h2', 'text-center'); ?>
+        <?php editable_text('about', 'description', 'Vi är ett företag...', 'p', 'text-lg text-center'); ?>
+        <?php editable_image('about', 'image', '/assets/images/team.jpg', 'Vårt team', 'about-image'); ?>
+    </div>
+</section>
+```
+
+### Filöversikt — Publikt vs Admin
+
+| Typ | Filer | Beskrivning |
+|-----|-------|-------------|
+| **Publika sidor** | `index.php`, `kontakt.php`, `projekt.php`, `projekt-single.php`, `cookies.php`, `integritetspolicy.php` | Synliga för besökare |
+| **CMS-admin** | `cms/*.php`, `cms/projects/*.php` | Kräver inloggning |
+| **Data** | `data/content.json`, `data/projects.json` | JSON-lagring |
+| **Uploads** | `uploads/` | Uppladdade bilder (max 5MB per fil) |
+
+---
+
 ## Filstruktur
 
 ```
 /
 ├── index.php              # Huvudsida
 ├── kontakt.php            # Kontaktformulär
+├── projekt.php            # Publika projekt-lista
+├── projekt-single.php     # Enskilt projekt
 ├── router.php             # URL-routing
 ├── bootstrap.php          # Miljösetup
 ├── config.php             # Konfiguration (gitignored)
@@ -175,9 +258,20 @@ Använd `editable_text()` för innehåll som ska vara redigerbart via CMS:
 │   │   └── cms.js         # CMS JavaScript
 │   └── images/            # Statiska bilder
 ├── cms/                   # Admin-sidor
+│   ├── admin.php          # Inloggning
+│   ├── dashboard.php      # Översikt
+│   └── projects/          # Inlägg-hantering
+│       ├── index.php      # Lista inlägg
+│       ├── new.php        # Skapa inlägg
+│       └── edit.php       # Redigera inlägg
 ├── includes/              # PHP-komponenter
+│   ├── admin-bar.php      # Admin-bar (visas vid inloggning)
+│   ├── header.php         # Global header
+│   ├── footer.php         # Global footer
 │   └── mailer.php         # SMTP-mailsystem
 ├── data/                  # JSON-data
+│   ├── content.json       # Sidinnehåll
+│   └── projects.json      # Inlägg/projekt
 ├── security/              # Säkerhetsmoduler
 ├── seo/                   # SEO-verktyg
 └── uploads/               # Användaruppladdningar
