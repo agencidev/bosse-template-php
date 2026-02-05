@@ -156,36 +156,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($section === 'logos') {
         // Handle logo uploads
         $imgDir = ROOT_PATH . '/assets/images';
-        $allowedMimes = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'];
-        $maxSize = 5 * 1024 * 1024;
-        $uploadErrors = [];
 
-        foreach (['logo_dark', 'logo_light'] as $logoField) {
-            if (isset($_FILES[$logoField]) && $_FILES[$logoField]['error'] === UPLOAD_ERR_OK) {
-                $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                $mime = finfo_file($finfo, $_FILES[$logoField]['tmp_name']);
-                finfo_close($finfo);
-
-                if (!in_array($mime, $allowedMimes)) {
-                    $uploadErrors[] = ucfirst(str_replace('_', ' ', $logoField)) . ': Ogiltigt filformat.';
-                } elseif ($_FILES[$logoField]['size'] > $maxSize) {
-                    $uploadErrors[] = ucfirst(str_replace('_', ' ', $logoField)) . ': Filen är för stor (max 5MB).';
-                } else {
-                    $dest = $imgDir . '/' . str_replace('_', '-', $logoField) . '.png';
-                    move_uploaded_file($_FILES[$logoField]['tmp_name'], $dest);
-                }
-            }
+        // Skapa mapp om den inte finns
+        if (!is_dir($imgDir)) {
+            mkdir($imgDir, 0755, true);
         }
 
-        if (!empty($uploadErrors)) {
-            $error = implode(' ', $uploadErrors);
+        // Kontrollera att mappen är skrivbar
+        if (!is_writable($imgDir)) {
+            $error = 'Mappen assets/images är inte skrivbar. Kontrollera filrättigheter.';
         } else {
-            $success = 'Logotyper uppdaterade!';
+            $allowedMimes = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'];
+            $maxSize = 5 * 1024 * 1024;
+            $uploadErrors = [];
+            $uploadedAny = false;
+
+            foreach (['logo_dark', 'logo_light'] as $logoField) {
+                if (isset($_FILES[$logoField]) && $_FILES[$logoField]['error'] === UPLOAD_ERR_OK) {
+                    $uploadedAny = true;
+                    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                    $mime = finfo_file($finfo, $_FILES[$logoField]['tmp_name']);
+                    finfo_close($finfo);
+
+                    if (!in_array($mime, $allowedMimes)) {
+                        $uploadErrors[] = ucfirst(str_replace('_', ' ', $logoField)) . ': Ogiltigt filformat.';
+                    } elseif ($_FILES[$logoField]['size'] > $maxSize) {
+                        $uploadErrors[] = ucfirst(str_replace('_', ' ', $logoField)) . ': Filen är för stor (max 5MB).';
+                    } else {
+                        // Behåll originaländelse för bättre kompatibilitet
+                        $ext = strtolower(pathinfo($_FILES[$logoField]['name'], PATHINFO_EXTENSION));
+                        if (!in_array($ext, ['png', 'jpg', 'jpeg', 'svg', 'webp'])) {
+                            $ext = 'png';
+                        }
+                        $dest = $imgDir . '/' . str_replace('_', '-', $logoField) . '.' . $ext;
+                        if (!move_uploaded_file($_FILES[$logoField]['tmp_name'], $dest)) {
+                            $uploadErrors[] = ucfirst(str_replace('_', ' ', $logoField)) . ': Kunde inte spara filen.';
+                        }
+                    }
+                }
+            }
+
+            if (!empty($uploadErrors)) {
+                $error = implode(' ', $uploadErrors);
+            } elseif ($uploadedAny) {
+                $success = 'Logotyper uppdaterade!';
+            } else {
+                $error = 'Ingen fil vald.';
+            }
         }
     } elseif ($section === 'favicon') {
         // Handle favicon upload
         $imgDir = ROOT_PATH . '/assets/images';
-        if (isset($_FILES['favicon']) && $_FILES['favicon']['error'] === UPLOAD_ERR_OK) {
+
+        // Skapa mapp om den inte finns
+        if (!is_dir($imgDir)) {
+            mkdir($imgDir, 0755, true);
+        }
+
+        // Kontrollera att mappen är skrivbar
+        if (!is_writable($imgDir)) {
+            $error = 'Mappen assets/images är inte skrivbar. Kontrollera filrättigheter.';
+        } elseif (isset($_FILES['favicon']) && $_FILES['favicon']['error'] === UPLOAD_ERR_OK) {
             $faviconMimes = ['image/png', 'image/x-icon', 'image/vnd.microsoft.icon', 'image/svg+xml'];
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             $faviconMime = finfo_file($finfo, $_FILES['favicon']['tmp_name']);
@@ -202,11 +233,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $faviconDest = $imgDir . '/favicon.png';
                 }
-                move_uploaded_file($_FILES['favicon']['tmp_name'], $faviconDest);
-                $success = 'Favicon uppdaterad!';
+                if (move_uploaded_file($_FILES['favicon']['tmp_name'], $faviconDest)) {
+                    $success = 'Favicon uppdaterad!';
+                } else {
+                    $error = 'Kunde inte spara favicon. Kontrollera filrättigheter.';
+                }
             }
         } else {
-            $error = 'Ingen fil vald.';
+            $uploadError = $_FILES['favicon']['error'] ?? UPLOAD_ERR_NO_FILE;
+            if ($uploadError === UPLOAD_ERR_NO_FILE) {
+                $error = 'Ingen fil vald.';
+            } elseif ($uploadError === UPLOAD_ERR_INI_SIZE || $uploadError === UPLOAD_ERR_FORM_SIZE) {
+                $error = 'Filen är för stor.';
+            } else {
+                $error = 'Uppladdningsfel (kod: ' . $uploadError . ')';
+            }
         }
     } elseif ($section === 'smtp') {
         // Update SMTP settings
@@ -597,13 +638,28 @@ function adjustBrightness(string $hex, int $percent): string {
                     <?php echo csrf_field(); ?>
                     <input type="hidden" name="section" value="logos">
 
+                    <?php
+                    // Hitta logotypfiler oavsett filändelse
+                    function findLogoFile($baseName) {
+                        $extensions = ['png', 'jpg', 'jpeg', 'svg', 'webp'];
+                        foreach ($extensions as $ext) {
+                            $path = ROOT_PATH . '/assets/images/' . $baseName . '.' . $ext;
+                            if (file_exists($path)) {
+                                return '/assets/images/' . $baseName . '.' . $ext;
+                            }
+                        }
+                        return null;
+                    }
+                    $logoDarkPath = findLogoFile('logo-dark');
+                    $logoLightPath = findLogoFile('logo-light');
+                    ?>
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Mörk logotyp</label>
                             <p class="hint">För ljusa bakgrunder</p>
-                            <?php if (file_exists(ROOT_PATH . '/assets/images/logo-dark.png')): ?>
+                            <?php if ($logoDarkPath): ?>
                             <div class="current-logo">
-                                <img src="/assets/images/logo-dark.png?v=<?php echo time(); ?>" alt="Nuvarande">
+                                <img src="<?php echo $logoDarkPath; ?>?v=<?php echo time(); ?>" alt="Nuvarande">
                                 <span>Nuvarande</span>
                             </div>
                             <?php endif; ?>
@@ -618,9 +674,9 @@ function adjustBrightness(string $hex, int $percent): string {
                         <div class="form-group">
                             <label class="form-label">Ljus logotyp</label>
                             <p class="hint">För mörka bakgrunder</p>
-                            <?php if (file_exists(ROOT_PATH . '/assets/images/logo-light.png')): ?>
+                            <?php if ($logoLightPath): ?>
                             <div class="current-logo">
-                                <img src="/assets/images/logo-light.png?v=<?php echo time(); ?>" alt="Nuvarande" style="background: #333; padding: 4px; border-radius: 4px;">
+                                <img src="<?php echo $logoLightPath; ?>?v=<?php echo time(); ?>" alt="Nuvarande" style="background: #333; padding: 4px; border-radius: 4px;">
                                 <span>Nuvarande</span>
                             </div>
                             <?php endif; ?>

@@ -117,14 +117,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-bottom: 2rem;
         }
         .logo {
-            height: 3rem;
+            height: 2.5rem;
             width: auto;
-        }
-        .logo-text {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #18181b;
-            letter-spacing: -0.025em;
         }
         .form-group {
             margin-bottom: 1.5rem;
@@ -178,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <div class="login-container">
         <div class="logo-container">
-            <span class="logo-text">Bosse</span>
+            <img src="/assets/images/cms/agenci-logo-light.png" alt="Agenci" class="logo">
         </div>
         
         <form method="POST">

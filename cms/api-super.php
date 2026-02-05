@@ -117,9 +117,18 @@ function handle_apply_update(): void {
         $result['rolled_back'] = true;
     }
 
-    // Lägg till nya versionen i responsen
+    // Lägg till nya versionen i responsen + rensa update-available-flaggan
     if ($result['success']) {
         $result['new_version'] = $state['latest_version'] ?? '';
+
+        // Spara staten med update_available = false så bannern försvinner
+        $state['update_available'] = false;
+        $state['current_version'] = $state['latest_version'];
+        save_update_state($state);
+
+        // Logga händelsen
+        log_update_event('success', $state['latest_version'] ?? '?',
+            count($result['updated_files']) . ' filer uppdaterade via Super Admin');
     }
 
     echo json_encode($result);

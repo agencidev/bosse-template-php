@@ -39,7 +39,7 @@ $updatableFiles = [
 ];
 
 // Hela mappar som ingar
-$updatableDirs = ['bin', 'templates'];
+$updatableDirs = ['bin', 'templates', 'assets/images/cms'];
 
 // --- Argument ---
 

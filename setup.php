@@ -460,10 +460,11 @@ function generateAllFiles(array $data): array {
     }
 
     // 3. data/content.json
+    // OBS: hero.description ska ALDRIG vara site_description - den är för SEO/Google
     $contentJson = [
         'hero' => [
             'title' => 'Välkommen till ' . $data['site_name'],
-            'description' => $data['site_description'],
+            'description' => 'Vi hjälper dig att nå dina mål med moderna lösningar',
             'cta_primary' => 'Kontakta oss',
             'cta_secondary' => 'Läs mer',
         ],
