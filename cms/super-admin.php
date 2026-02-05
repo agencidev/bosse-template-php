@@ -265,16 +265,36 @@ function format_bytes(float $bytes): string {
             right: 2rem;
             background: #18181b;
             color: white;
-            padding: 0.75rem 1.25rem;
-            border-radius: 0.75rem;
-            font-size: 0.875rem;
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            font-size: 0.9375rem;
             font-weight: 500;
             z-index: 10001;
             transform: translateY(100px);
             opacity: 0;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
         .sa-toast.show { transform: translateY(0); opacity: 1; }
+        .sa-toast--success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        .sa-toast--error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        .sa-toast__icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
 
         /* Loading */
         .sa-spinner {
@@ -554,10 +574,25 @@ function format_bytes(float $bytes): string {
     const CSRF_TOKEN = '<?php echo htmlspecialchars($csrfToken, ENT_QUOTES); ?>';
     const API_URL = '/api/super';
 
-    function showToast(msg, duration) {
+    function showToast(msg, duration, type) {
         duration = duration || 3000;
+        type = type || 'default';
         const t = document.getElementById('sa-toast');
-        t.textContent = msg;
+
+        // Reset classes
+        t.className = 'sa-toast';
+
+        // Add type class
+        if (type === 'success') {
+            t.className += ' sa-toast--success';
+            t.innerHTML = '<span class="sa-toast__icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L5.5 10.5L12 3.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' + msg;
+        } else if (type === 'error') {
+            t.className += ' sa-toast--error';
+            t.innerHTML = '<span class="sa-toast__icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3.5 3.5L10.5 10.5M10.5 3.5L3.5 10.5" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span>' + msg;
+        } else {
+            t.textContent = msg;
+        }
+
         t.classList.add('show');
         setTimeout(function() { t.classList.remove('show'); }, duration);
     }
@@ -593,17 +628,17 @@ function format_bytes(float $bytes): string {
         apiRequest('check-update').then(function(data) {
             setLoading('btn-check-update', false);
             if (data.error) {
-                showToast('Fel: ' + data.error);
+                showToast('Fel: ' + data.error, 4000, 'error');
             } else if (data.update_available) {
                 document.getElementById('latest-version').textContent = data.latest_version;
-                showToast('Ny version: ' + data.latest_version);
-                location.reload();
+                showToast('Ny version tillganglig: ' + data.latest_version, 4000, 'success');
+                setTimeout(function() { location.reload(); }, 1500);
             } else {
-                showToast('Redan pa senaste versionen');
+                showToast('Du kor redan senaste versionen!', 3000, 'success');
             }
         }).catch(function(e) {
             setLoading('btn-check-update', false);
-            showToast('Natverksfel');
+            showToast('Natverksfel', 4000, 'error');
         });
     }
 
@@ -615,15 +650,40 @@ function format_bytes(float $bytes): string {
             setLoading('btn-apply-update', false);
             setLoading('btn-apply-update-2', false);
             if (data.success) {
-                showToast('Uppdatering klar! Laddar om...', 5000);
-                setTimeout(function() { location.reload(); }, 2000);
+                // Ta bort update-bannern
+                var banner = document.querySelector('.sa-update-banner');
+                if (banner) {
+                    banner.style.transition = 'all 0.3s';
+                    banner.style.opacity = '0';
+                    banner.style.transform = 'translateY(-20px)';
+                    setTimeout(function() { banner.remove(); }, 300);
+                }
+
+                // Uppdatera version i UI
+                var versionBadge = document.querySelector('.sa-version');
+                if (versionBadge && data.new_version) {
+                    versionBadge.textContent = 'v' + data.new_version;
+                }
+
+                // Uppdatera panelens badge
+                var updateBadge = document.querySelector('.sa-panel:nth-child(2) .sa-badge');
+                if (updateBadge) {
+                    updateBadge.className = 'sa-badge sa-badge--ok';
+                    updateBadge.textContent = 'Senaste';
+                }
+
+                // Visa grön success-toast
+                showToast('Uppdatering klar! Du kör nu senaste versionen.', 6000, 'success');
+
+                // Ladda om efter en stund
+                setTimeout(function() { location.reload(); }, 3000);
             } else {
-                showToast('Fel: ' + (data.errors ? data.errors.join(', ') : 'Okant fel'));
+                showToast('Fel: ' + (data.errors ? data.errors.join(', ') : 'Okant fel'), 5000, 'error');
             }
         }).catch(function(e) {
             setLoading('btn-apply-update', false);
             setLoading('btn-apply-update-2', false);
-            showToast('Natverksfel vid uppdatering');
+            showToast('Natverksfel vid uppdatering', 5000, 'error');
         });
     }
 

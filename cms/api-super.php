@@ -117,6 +117,11 @@ function handle_apply_update(): void {
         $result['rolled_back'] = true;
     }
 
+    // Lägg till nya versionen i responsen
+    if ($result['success']) {
+        $result['new_version'] = $state['latest_version'] ?? '';
+    }
+
     echo json_encode($result);
 }
 
