@@ -1,0 +1,34 @@
+name: Deploy to SiteGround
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to SiteGround
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.SITEGROUND_HOST }}
+          port: 21
+          protocol: ftp
+          username: ${{ secrets.SITEGROUND_USER }}
+          password: ${{ secrets.SITEGROUND_PASSWORD }}
+          local-dir: ./
+          server-dir: ${{ secrets.SITEGROUND_PATH }}
+          dangerous-clean-slate: true
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.DS_Store
+            **/.env*

@@ -24,7 +24,7 @@ const UPDATABLE_FILES = [
 ];
 
 // Wildcard-matchade uppdateringsbara mappar
-const UPDATABLE_DIRS = ['bin', 'templates'];
+const UPDATABLE_DIRS = ['bin', 'templates', '.github'];
 
 // Filer som ALDRIG rors
 const PROTECTED_FILES = [
