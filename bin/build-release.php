@@ -13,7 +13,7 @@
  *   dist/releases/1.1.0.zip
  *   dist/manifest.json
  *
- * Kopiera hela dist/-mappen till agenci/bosse-updates-repot och pusha.
+ * Kopiera hela dist/-mappen till agencidev/bosse-updates-repot och pusha.
  */
 
 // --- Konfiguration ---
@@ -152,7 +152,7 @@ $manifest = [
     'release_date' => date('Y-m-d'),
     'min_php_version' => '8.0',
     'changelog' => '',
-    'download_url' => 'https://raw.githubusercontent.com/agenci/bosse-updates/main/releases/' . $version . '.zip',
+    'download_url' => 'https://raw.githubusercontent.com/agencidev/bosse-updates/main/releases/' . $version . '.zip',
     'signature' => $signature,
     'migrations' => $migrations,
     'critical' => false,
@@ -172,7 +172,7 @@ $manifestPath = $distDir . '/manifest.json';
 file_put_contents($manifestPath, json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
 echo "  Manifest: {$manifestPath}\n";
-echo "\nKlar! Kopiera dist/ till agenci/bosse-updates-repot:\n";
+echo "\nKlar! Kopiera dist/ till agencidev/bosse-updates-repot:\n";
 echo "  cp -r dist/* /path/to/bosse-updates/\n";
 echo "  cd /path/to/bosse-updates && git add . && git commit -m 'Release v{$version}' && git push\n";
 
