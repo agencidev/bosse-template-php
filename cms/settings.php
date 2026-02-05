@@ -29,6 +29,10 @@ $currentConfig = [
     'hours_weekdays' => defined('HOURS_WEEKDAYS') ? HOURS_WEEKDAYS : '',
     'hours_weekends' => defined('HOURS_WEEKENDS') ? HOURS_WEEKENDS : '',
     'ga_id' => defined('GOOGLE_ANALYTICS_ID') ? GOOGLE_ANALYTICS_ID : '',
+    'smtp_host' => defined('SMTP_HOST') ? SMTP_HOST : '',
+    'smtp_port' => defined('SMTP_PORT') ? SMTP_PORT : 465,
+    'smtp_encryption' => defined('SMTP_ENCRYPTION') ? SMTP_ENCRYPTION : 'ssl',
+    'smtp_username' => defined('SMTP_USERNAME') ? SMTP_USERNAME : '',
 ];
 
 // Read colors from variables.css
@@ -177,6 +181,87 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = implode(' ', $uploadErrors);
         } else {
             $success = 'Logotyper uppdaterade!';
+        }
+    } elseif ($section === 'favicon') {
+        // Handle favicon upload
+        $imgDir = ROOT_PATH . '/assets/images';
+        if (isset($_FILES['favicon']) && $_FILES['favicon']['error'] === UPLOAD_ERR_OK) {
+            $faviconMimes = ['image/png', 'image/x-icon', 'image/vnd.microsoft.icon', 'image/svg+xml'];
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $faviconMime = finfo_file($finfo, $_FILES['favicon']['tmp_name']);
+            finfo_close($finfo);
+
+            if (!in_array($faviconMime, $faviconMimes)) {
+                $error = 'Favicon: Ogiltigt filformat. Tillåtna: PNG, ICO, SVG.';
+            } elseif ($_FILES['favicon']['size'] > 1024 * 1024) {
+                $error = 'Favicon: Filen är för stor (max 1MB).';
+            } else {
+                $ext = strtolower(pathinfo($_FILES['favicon']['name'], PATHINFO_EXTENSION));
+                if ($ext === 'ico') {
+                    $faviconDest = $imgDir . '/favicon.ico';
+                } else {
+                    $faviconDest = $imgDir . '/favicon.png';
+                }
+                move_uploaded_file($_FILES['favicon']['tmp_name'], $faviconDest);
+                $success = 'Favicon uppdaterad!';
+            }
+        } else {
+            $error = 'Ingen fil vald.';
+        }
+    } elseif ($section === 'smtp') {
+        // Update SMTP settings
+        $smtpHost = trim($_POST['smtp_host'] ?? '');
+        $smtpPort = (int)($_POST['smtp_port'] ?? 465);
+        $smtpEncryption = $_POST['smtp_encryption'] ?? 'ssl';
+        $smtpUsername = trim($_POST['smtp_username'] ?? '');
+        $smtpPassword = $_POST['smtp_password'] ?? '';
+
+        // Validate
+        if (!empty($smtpHost)) {
+            if ($smtpPort < 1 || $smtpPort > 65535) {
+                $error = 'Ange en giltig SMTP-port (1-65535).';
+            } elseif (empty($smtpUsername)) {
+                $error = 'SMTP-användarnamn krävs.';
+            } elseif (empty($smtpPassword) && !defined('SMTP_PASSWORD')) {
+                $error = 'SMTP-lösenord krävs.';
+            } elseif (!in_array($smtpEncryption, ['ssl', 'tls'])) {
+                $error = 'Ogiltig kryptering.';
+            }
+        }
+
+        if (empty($error)) {
+            $configPath = ROOT_PATH . '/config.php';
+            if (file_exists($configPath)) {
+                $config = file_get_contents($configPath);
+
+                // Check if SMTP section exists
+                if (preg_match("/define\('SMTP_HOST'/", $config)) {
+                    // Update existing
+                    $config = preg_replace("/define\('SMTP_HOST',\s*'[^']*'\);/", "define('SMTP_HOST', " . var_export($smtpHost, true) . ");", $config);
+                    $config = preg_replace("/define\('SMTP_PORT',\s*\d+\);/", "define('SMTP_PORT', " . $smtpPort . ");", $config);
+                    $config = preg_replace("/define\('SMTP_ENCRYPTION',\s*'[^']*'\);/", "define('SMTP_ENCRYPTION', " . var_export($smtpEncryption, true) . ");", $config);
+                    $config = preg_replace("/define\('SMTP_USERNAME',\s*'[^']*'\);/", "define('SMTP_USERNAME', " . var_export($smtpUsername, true) . ");", $config);
+                    if (!empty($smtpPassword)) {
+                        $config = preg_replace("/define\('SMTP_PASSWORD',\s*'[^']*'\);/", "define('SMTP_PASSWORD', " . var_export($smtpPassword, true) . ");", $config);
+                    }
+                } elseif (!empty($smtpHost)) {
+                    // Add new SMTP section
+                    $smtpBlock = "\n// SMTP\n";
+                    $smtpBlock .= "define('SMTP_HOST', " . var_export($smtpHost, true) . ");\n";
+                    $smtpBlock .= "define('SMTP_PORT', " . $smtpPort . ");\n";
+                    $smtpBlock .= "define('SMTP_ENCRYPTION', " . var_export($smtpEncryption, true) . ");\n";
+                    $smtpBlock .= "define('SMTP_USERNAME', " . var_export($smtpUsername, true) . ");\n";
+                    $smtpBlock .= "define('SMTP_PASSWORD', " . var_export($smtpPassword, true) . ");\n";
+                    $config = preg_replace("/(\/\/ Environment)/", $smtpBlock . "\n$1", $config);
+                }
+
+                file_put_contents($configPath, $config, LOCK_EX);
+                $success = 'SMTP-inställningar uppdaterade!';
+                $currentConfig['smtp_host'] = $smtpHost;
+                $currentConfig['smtp_port'] = $smtpPort;
+                $currentConfig['smtp_encryption'] = $smtpEncryption;
+                $currentConfig['smtp_username'] = $smtpUsername;
+            }
         }
     }
 }
@@ -550,6 +635,88 @@ function adjustBrightness(string $hex, int $percent): string {
                     </div>
 
                     <button type="submit" class="btn btn-primary">Ladda upp</button>
+                </form>
+            </div>
+
+            <!-- Favicon -->
+            <div class="card">
+                <h2 class="card-title">Favicon</h2>
+                <form method="POST" enctype="multipart/form-data">
+                    <?php echo csrf_field(); ?>
+                    <input type="hidden" name="section" value="favicon">
+
+                    <div class="form-group">
+                        <label class="form-label">Favicon</label>
+                        <p class="hint">Liten ikon som visas i webbläsarfliken</p>
+                        <?php
+                        $hasFavicon = file_exists(ROOT_PATH . '/assets/images/favicon.png') || file_exists(ROOT_PATH . '/assets/images/favicon.ico');
+                        $faviconPath = file_exists(ROOT_PATH . '/assets/images/favicon.ico') ? '/assets/images/favicon.ico' : '/assets/images/favicon.png';
+                        ?>
+                        <?php if ($hasFavicon): ?>
+                        <div class="current-logo">
+                            <img src="<?php echo $faviconPath; ?>?v=<?php echo time(); ?>" alt="Nuvarande favicon" style="width: 32px; height: 32px;">
+                            <span>Nuvarande favicon</span>
+                        </div>
+                        <?php endif; ?>
+                        <div class="file-upload">
+                            <input type="file" name="favicon" accept=".png,.ico,.svg">
+                            <div class="file-upload-text">
+                                <strong>Välj fil</strong><br>
+                                <small>PNG, ICO, SVG (max 1MB, rekommenderat 32x32px)</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Ladda upp</button>
+                </form>
+            </div>
+
+            <!-- SMTP -->
+            <div class="card">
+                <h2 class="card-title">E-post (SMTP)</h2>
+                <form method="POST">
+                    <?php echo csrf_field(); ?>
+                    <input type="hidden" name="section" value="smtp">
+
+                    <div class="form-group">
+                        <label class="form-label" for="smtp_host">SMTP-server</label>
+                        <input type="text" id="smtp_host" name="smtp_host" class="form-input"
+                               value="<?php echo htmlspecialchars($currentConfig['smtp_host']); ?>"
+                               placeholder="t.ex. smtp.gmail.com">
+                        <p class="hint">Lämna tomt för att inaktivera SMTP</p>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="smtp_port">Port</label>
+                            <input type="number" id="smtp_port" name="smtp_port" class="form-input"
+                                   value="<?php echo (int)$currentConfig['smtp_port']; ?>"
+                                   min="1" max="65535">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="smtp_encryption">Kryptering</label>
+                            <select id="smtp_encryption" name="smtp_encryption" class="form-input">
+                                <option value="ssl" <?php echo $currentConfig['smtp_encryption'] === 'ssl' ? 'selected' : ''; ?>>SSL</option>
+                                <option value="tls" <?php echo $currentConfig['smtp_encryption'] === 'tls' ? 'selected' : ''; ?>>TLS</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="smtp_username">Användarnamn</label>
+                        <input type="text" id="smtp_username" name="smtp_username" class="form-input"
+                               value="<?php echo htmlspecialchars($currentConfig['smtp_username']); ?>"
+                               placeholder="din@email.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="smtp_password">Lösenord</label>
+                        <input type="password" id="smtp_password" name="smtp_password" class="form-input"
+                               placeholder="<?php echo defined('SMTP_PASSWORD') ? '••••••••' : ''; ?>">
+                        <p class="hint"><?php echo defined('SMTP_PASSWORD') ? 'Lämna tomt för att behålla nuvarande lösenord' : 'Ange SMTP-lösenord'; ?></p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Spara</button>
                 </form>
             </div>
 
