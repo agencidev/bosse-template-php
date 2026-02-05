@@ -167,35 +167,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $uploadedAny = false;
 
         foreach (['logo_dark', 'logo_light'] as $logoField) {
-            if (isset($_FILES[$logoField]) && $_FILES[$logoField]['error'] === UPLOAD_ERR_OK) {
-                $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                $mime = finfo_file($finfo, $_FILES[$logoField]['tmp_name']);
-                finfo_close($finfo);
+            // Kontrollera om fil valts
+            if (!isset($_FILES[$logoField]) || $_FILES[$logoField]['error'] === UPLOAD_ERR_NO_FILE) {
+                continue; // Ingen fil vald för detta fält, helt ok
+            }
 
-                if (in_array($mime, $allowedMimes) && $_FILES[$logoField]['size'] <= $maxSize) {
-                    $ext = strtolower(pathinfo($_FILES[$logoField]['name'], PATHINFO_EXTENSION));
-                    if (!in_array($ext, ['png', 'jpg', 'jpeg', 'svg', 'webp'])) {
-                        $ext = 'png';
-                    }
-                    $destFile = str_replace('_', '-', $logoField) . '.' . $ext;
-                    $destPath = $imgDir . '/' . $destFile;
+            // Hantera upload-fel
+            $uploadErr = $_FILES[$logoField]['error'];
+            if ($uploadErr !== UPLOAD_ERR_OK) {
+                $errMsg = match($uploadErr) {
+                    UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Filen är för stor (max 5MB)',
+                    UPLOAD_ERR_PARTIAL => 'Uppladdningen avbröts',
+                    UPLOAD_ERR_NO_TMP_DIR => 'Serverfel: Temp-mapp saknas',
+                    UPLOAD_ERR_CANT_WRITE => 'Serverfel: Kan inte skriva till disk',
+                    UPLOAD_ERR_EXTENSION => 'Uppladdning blockerad av server',
+                    default => 'Uppladdningsfel (kod ' . $uploadErr . ')',
+                };
+                $uploadErrors[] = ucfirst(str_replace('_', ' ', $logoField)) . ': ' . $errMsg;
+                continue;
+            }
 
-                    // Ta bort gamla logofiler med andra ändelser
-                    foreach (['png', 'jpg', 'jpeg', 'svg', 'webp'] as $oldExt) {
-                        $oldFile = $imgDir . '/' . str_replace('_', '-', $logoField) . '.' . $oldExt;
-                        if (file_exists($oldFile) && $oldFile !== $destPath) {
-                            @unlink($oldFile);
-                        }
-                    }
+            // Validera MIME-typ
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = finfo_file($finfo, $_FILES[$logoField]['tmp_name']);
+            finfo_close($finfo);
 
-                    if (move_uploaded_file($_FILES[$logoField]['tmp_name'], $destPath)) {
-                        $uploadedAny = true;
-                    } else {
-                        $uploadErrors[] = ucfirst(str_replace('_', ' ', $logoField)) . ': Kunde inte spara.';
-                    }
-                } else {
-                    $uploadErrors[] = ucfirst(str_replace('_', ' ', $logoField)) . ': Ogiltigt format eller för stor.';
+            if (in_array($mime, $allowedMimes) && $_FILES[$logoField]['size'] <= $maxSize) {
+                $ext = strtolower(pathinfo($_FILES[$logoField]['name'], PATHINFO_EXTENSION));
+                if (!in_array($ext, ['png', 'jpg', 'jpeg', 'svg', 'webp'])) {
+                    $ext = 'png';
                 }
+                $destFile = str_replace('_', '-', $logoField) . '.' . $ext;
+                $destPath = $imgDir . '/' . $destFile;
+
+                // Ta bort gamla logofiler med andra ändelser
+                foreach (['png', 'jpg', 'jpeg', 'svg', 'webp'] as $oldExt) {
+                    $oldFile = $imgDir . '/' . str_replace('_', '-', $logoField) . '.' . $oldExt;
+                    if (file_exists($oldFile) && $oldFile !== $destPath) {
+                        @unlink($oldFile);
+                    }
+                }
+
+                if (move_uploaded_file($_FILES[$logoField]['tmp_name'], $destPath)) {
+                    $uploadedAny = true;
+                } else {
+                    $uploadErrors[] = ucfirst(str_replace('_', ' ', $logoField)) . ': Kunde inte spara till disk.';
+                }
+            } else {
+                $uploadErrors[] = ucfirst(str_replace('_', ' ', $logoField)) . ': Ogiltigt format eller för stor (max 5MB).';
             }
         }
 
@@ -203,6 +222,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = implode(' ', $uploadErrors);
         } elseif ($uploadedAny) {
             $success = 'Logotyper uppdaterade!';
+        } else {
+            $error = 'Ingen fil vald. Välj minst en logotyp att ladda upp.';
         }
     } elseif ($section === 'delete_logo') {
         // Ta bort logotyp
@@ -227,38 +248,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             mkdir($imgDir, 0755, true);
         }
 
-        if (isset($_FILES['favicon']) && $_FILES['favicon']['error'] === UPLOAD_ERR_OK) {
-            $faviconMimes = ['image/png', 'image/x-icon', 'image/vnd.microsoft.icon', 'image/svg+xml'];
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $mime = finfo_file($finfo, $_FILES['favicon']['tmp_name']);
-            finfo_close($finfo);
-
-            if (in_array($mime, $faviconMimes) && $_FILES['favicon']['size'] <= 1024 * 1024) {
-                $ext = strtolower(pathinfo($_FILES['favicon']['name'], PATHINFO_EXTENSION));
-
-                // Ta bort gamla favicon-filer
-                @unlink($imgDir . '/favicon.png');
-                @unlink($imgDir . '/favicon.ico');
-                @unlink($imgDir . '/favicon.svg');
-
-                if ($ext === 'ico') {
-                    $destPath = $imgDir . '/favicon.ico';
-                } elseif ($ext === 'svg') {
-                    $destPath = $imgDir . '/favicon.svg';
-                } else {
-                    $destPath = $imgDir . '/favicon.png';
-                }
-
-                if (move_uploaded_file($_FILES['favicon']['tmp_name'], $destPath)) {
-                    $success = 'Favicon uppdaterad!';
-                } else {
-                    $error = 'Kunde inte spara favicon.';
-                }
-            } else {
-                $error = 'Favicon: Ogiltigt format eller för stor fil (max 1MB).';
-            }
-        } else {
+        // Kontrollera om fil valts
+        if (!isset($_FILES['favicon']) || $_FILES['favicon']['error'] === UPLOAD_ERR_NO_FILE) {
             $error = 'Ingen fil vald.';
+        } else {
+            // Hantera upload-fel
+            $uploadErr = $_FILES['favicon']['error'];
+            if ($uploadErr !== UPLOAD_ERR_OK) {
+                $error = match($uploadErr) {
+                    UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Filen är för stor (max 1MB)',
+                    UPLOAD_ERR_PARTIAL => 'Uppladdningen avbröts',
+                    UPLOAD_ERR_NO_TMP_DIR => 'Serverfel: Temp-mapp saknas',
+                    UPLOAD_ERR_CANT_WRITE => 'Serverfel: Kan inte skriva till disk',
+                    UPLOAD_ERR_EXTENSION => 'Uppladdning blockerad av server',
+                    default => 'Uppladdningsfel (kod ' . $uploadErr . ')',
+                };
+            } else {
+                $faviconMimes = ['image/png', 'image/x-icon', 'image/vnd.microsoft.icon', 'image/svg+xml'];
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $mime = finfo_file($finfo, $_FILES['favicon']['tmp_name']);
+                finfo_close($finfo);
+
+                if (in_array($mime, $faviconMimes) && $_FILES['favicon']['size'] <= 1024 * 1024) {
+                    $ext = strtolower(pathinfo($_FILES['favicon']['name'], PATHINFO_EXTENSION));
+
+                    // Ta bort gamla favicon-filer
+                    @unlink($imgDir . '/favicon.png');
+                    @unlink($imgDir . '/favicon.ico');
+                    @unlink($imgDir . '/favicon.svg');
+
+                    if ($ext === 'ico') {
+                        $destPath = $imgDir . '/favicon.ico';
+                    } elseif ($ext === 'svg') {
+                        $destPath = $imgDir . '/favicon.svg';
+                    } else {
+                        $destPath = $imgDir . '/favicon.png';
+                    }
+
+                    if (move_uploaded_file($_FILES['favicon']['tmp_name'], $destPath)) {
+                        $success = 'Favicon uppdaterad!';
+                    } else {
+                        $error = 'Kunde inte spara favicon till disk.';
+                    }
+                } else {
+                    $error = 'Favicon: Ogiltigt format eller för stor fil (max 1MB).';
+                }
+            }
         }
     } elseif ($section === 'delete_favicon') {
         // Ta bort favicon
@@ -701,14 +736,6 @@ function adjustBrightness(string $hex, int $percent): string {
                                     <small>PNG, JPG, SVG, WebP</small>
                                 </div>
                             </div>
-                            <?php if ($logoDarkPath): ?>
-                            <form method="POST" style="margin-top: 0.5rem;">
-                                <?php echo csrf_field(); ?>
-                                <input type="hidden" name="section" value="delete_logo">
-                                <input type="hidden" name="logo_type" value="logo-dark">
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Ta bort mörk logotyp?')">Ta bort</button>
-                            </form>
-                            <?php endif; ?>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Ljus logotyp</label>
@@ -726,19 +753,32 @@ function adjustBrightness(string $hex, int $percent): string {
                                     <small>PNG, JPG, SVG, WebP</small>
                                 </div>
                             </div>
-                            <?php if ($logoLightPath): ?>
-                            <form method="POST" style="margin-top: 0.5rem;">
-                                <?php echo csrf_field(); ?>
-                                <input type="hidden" name="section" value="delete_logo">
-                                <input type="hidden" name="logo_type" value="logo-light">
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Ta bort ljus logotyp?')">Ta bort</button>
-                            </form>
-                            <?php endif; ?>
                         </div>
                     </div>
 
                     <button type="submit" class="btn btn-primary">Ladda upp</button>
                 </form>
+
+                <?php if ($logoDarkPath || $logoLightPath): ?>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e5e5;">
+                    <?php if ($logoDarkPath): ?>
+                    <form method="POST">
+                        <?php echo csrf_field(); ?>
+                        <input type="hidden" name="section" value="delete_logo">
+                        <input type="hidden" name="logo_type" value="logo-dark">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Ta bort mörk logotyp?')">Ta bort mörk</button>
+                    </form>
+                    <?php endif; ?>
+                    <?php if ($logoLightPath): ?>
+                    <form method="POST">
+                        <?php echo csrf_field(); ?>
+                        <input type="hidden" name="section" value="delete_logo">
+                        <input type="hidden" name="logo_type" value="logo-light">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Ta bort ljus logotyp?')">Ta bort ljus</button>
+                    </form>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
             </div>
 
             <!-- Favicon -->
@@ -771,17 +811,16 @@ function adjustBrightness(string $hex, int $percent): string {
                         </div>
                     </div>
 
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button type="submit" class="btn btn-primary">Ladda upp</button>
-                        <?php if ($hasFavicon): ?>
-                        </form>
-                        <form method="POST">
-                            <?php echo csrf_field(); ?>
-                            <input type="hidden" name="section" value="delete_favicon">
-                            <button type="submit" class="btn btn-danger" onclick="return confirm('Ta bort favicon?')">Ta bort</button>
-                        <?php endif; ?>
-                    </div>
+                    <button type="submit" class="btn btn-primary">Ladda upp</button>
                 </form>
+
+                <?php if ($hasFavicon): ?>
+                <form method="POST" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e5e5;">
+                    <?php echo csrf_field(); ?>
+                    <input type="hidden" name="section" value="delete_favicon">
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Ta bort favicon?')">Ta bort favicon</button>
+                </form>
+                <?php endif; ?>
             </div>
 
             <!-- SMTP -->

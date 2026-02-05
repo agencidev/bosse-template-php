@@ -7,7 +7,7 @@
 // Filer som far skrivas over vid uppdatering
 const UPDATABLE_FILES = [
     'bootstrap.php', 'router.php', 'setup.php', 'version.php',
-    '.htaccess', '403.php', '404.php', '500.php', 'robots.php',
+    '.htaccess', '.user.ini', '403.php', '404.php', '500.php', 'robots.php',
     'site.webmanifest',
     'projekt.php', 'projekt-single.php', 'CLAUDE.md',
     'cms/admin.php', 'cms/dashboard.php', 'cms/content.php',
@@ -65,10 +65,18 @@ function is_updatable_file(string $relativePath): bool {
 
 /**
  * Kolla om en fil ar skyddad
+ * OBS: UPDATABLE_DIRS har prioritet over PROTECTED_DIRS
  */
 function is_protected_file(string $relativePath): bool {
     if (in_array($relativePath, PROTECTED_FILES, true)) {
         return true;
+    }
+
+    // Kolla forst om filen ar i en uppdateringsbar mapp (de har prioritet)
+    foreach (UPDATABLE_DIRS as $dir) {
+        if (strpos($relativePath, $dir . '/') === 0) {
+            return false; // Inte skyddad - uppdateringsbar mapp har prioritet
+        }
     }
 
     foreach (PROTECTED_DIRS as $dir) {

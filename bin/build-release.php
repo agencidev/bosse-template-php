@@ -23,7 +23,7 @@ $templateRoot = dirname(__DIR__); // apps/template/php/
 // Core-filer som ingar i uppdateringen (samma lista som UPDATABLE_FILES i updater.php)
 $updatableFiles = [
     'bootstrap.php', 'router.php', 'setup.php', 'version.php',
-    '.htaccess', '403.php', '404.php', '500.php', 'robots.php',
+    '.htaccess', '.user.ini', '403.php', '404.php', '500.php', 'robots.php',
     'site.webmanifest',
     'cms/admin.php', 'cms/dashboard.php', 'cms/content.php',
     'cms/api.php', 'cms/api-super.php', 'cms/super-admin.php',
