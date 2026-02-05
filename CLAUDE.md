@@ -3,6 +3,25 @@
 Se `.windsurf/ai-rules.md` för fullständiga AI-regler och kodstandarder.
 Se `.windsurf/brand-guide.md` för varumärkesguide (färger, typsnitt, tonalitet).
 
+## ⚠️ KRITISKT — Läs först!
+
+**När du skapar inlägg/nyheter/event:**
+- **ALDRIG** hårdkoda i PHP-filer (index.php etc.)
+- **ALLTID** lägg till i `data/projects.json`
+
+```json
+{
+  "id": "event-namn-2026",
+  "title": "Event-namn",
+  "slug": "event-namn",
+  "category": "Event",
+  "summary": "Kort beskrivning",
+  "status": "published",
+  "coverImage": "/uploads/bild.jpg",
+  "createdAt": "2026-02-14 18:00:00"
+}
+```
+
 ## Snabbref
 
 ### CSS-ändringar

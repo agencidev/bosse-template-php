@@ -1,5 +1,40 @@
 # AI-regler - {{COMPANY_NAME}}
 
+## ⚠️ KRITISKA REGLER — LÄS FÖRST
+
+### Inlägg/Nyheter/Event — ALDRIG hårdkoda!
+När användaren ber dig skapa **inlägg**, **nyheter**, **event**, **blogginlägg** eller liknande:
+
+1. **ALDRIG** skriv innehållet direkt i PHP-filer (t.ex. `index.php`)
+2. **ALLTID** lägg till dem i `data/projects.json`
+3. Följ exakt JSON-format (se CMS-användning nedan)
+
+❌ **FEL** — Hårdkodad HTML i index.php:
+```php
+<article class="news-card">
+    <h3>Alla hjärtans dag</h3>
+    <p>Event 14 februari...</p>
+</article>
+```
+
+✅ **RÄTT** — Lägg till i data/projects.json:
+```json
+{
+  "id": "alla-hjartans-dag-2026",
+  "title": "Alla hjärtans dag",
+  "slug": "alla-hjartans-dag",
+  "category": "Event",
+  "summary": "Event 14 februari...",
+  "status": "published",
+  "coverImage": "/uploads/valentines.jpg",
+  "createdAt": "2026-02-14 18:00:00"
+}
+```
+
+Inlägg i `projects.json` visas automatiskt på `/projekt` och kan hanteras via CMS.
+
+---
+
 ## Prioritetsordning
 
 1. **Brand Guide** (`.windsurf/brand-guide.md`) - Färger, typsnitt, tonalitet
@@ -158,33 +193,93 @@ Använd `editable_text()` för innehåll som ska vara redigerbart via CMS:
 
 ## CMS-användning
 
-### Inlägg/Projekt
+### Inlägg/Projekt/Nyheter/Event
 
-Inlägg hanteras via JSON-fil. Skapa INTE inlägg manuellt i filer — använd CMS:et (`/cms/projects/new`) eller följ detta format:
+⚠️ **KRITISKT:** Alla inlägg, nyheter, event, blogginlägg etc. ska ALLTID lagras i `data/projects.json` — ALDRIG hårdkodas i PHP-filer!
 
 **Filplats:** `data/projects.json`
+
+**När användaren ber dig skapa inlägg:**
+1. Öppna `data/projects.json`
+2. Lägg till nya objekt i JSON-arrayen
+3. Generera unikt `id` med format `titel-åååå` eller `uniqid()`
+4. Sätt `status: "published"` om det ska synas direkt
 
 **Format per inlägg:**
 ```json
 {
-  "id": "unikt-id-123",
-  "title": "Titel på inlägget",
-  "slug": "url-vanlig-titel",
-  "category": "Projekt|Blogg|Nyhet|Event",
-  "summary": "Kort beskrivning",
-  "content": "Fullständig beskrivning av inlägget...",
-  "status": "published|draft",
-  "coverImage": "/uploads/bild.jpg",
+  "id": "event-alla-hjartans-dag-2026",
+  "title": "Alla hjärtans dag",
+  "slug": "alla-hjartans-dag",
+  "category": "Event",
+  "summary": "Fira kärleken med en exklusiv 5-rätters middag.",
+  "content": "Fullständig beskrivning av eventet...",
+  "status": "published",
+  "coverImage": "/uploads/valentines.jpg",
   "gallery": [],
-  "createdAt": "2026-02-04 12:00:00"
+  "createdAt": "2026-02-14 18:00:00"
 }
 ```
 
-**Viktigt:**
-- `status` måste vara `"published"` för att synas publikt
-- `slug` genereras från titel (å→a, ä→a, ö→o, mellanslag→bindestreck)
-- Använd `uniqid()` eller UUID för `id`
-- Publika projekt visas på `/projekt` och `/projekt/{slug}`
+**Kategorier att använda:**
+- `Projekt` — Genomförda projekt/case
+- `Blogg` — Blogginlägg
+- `Nyhet` — Nyheter
+- `Event` — Kommande event/händelser
+
+**Fältförklaring:**
+| Fält | Beskrivning | Obligatoriskt |
+|------|-------------|---------------|
+| `id` | Unikt ID (t.ex. `event-2026-02-14`) | Ja |
+| `title` | Rubrik som visas | Ja |
+| `slug` | URL-vänlig (å→a, ä→a, ö→o, mellanslag→-) | Ja |
+| `category` | Projekt/Blogg/Nyhet/Event | Ja |
+| `summary` | Kort text för listor (max 160 tecken) | Ja |
+| `content` | Fullständig text/HTML | Nej |
+| `status` | `published` eller `draft` | Ja |
+| `coverImage` | Sökväg till bild | Nej |
+| `gallery` | Array med extra bilder | Nej |
+| `createdAt` | Datum `YYYY-MM-DD HH:MM:SS` | Ja |
+
+**Publika sidor:**
+- `/projekt` — Visar alla publicerade inlägg
+- `/projekt/{slug}` — Visar enskilt inlägg
+
+**Exempel — Skapa 3 event:**
+```json
+[
+  {
+    "id": "event-alla-hjartans-dag",
+    "title": "Alla hjärtans dag",
+    "slug": "alla-hjartans-dag",
+    "category": "Event",
+    "summary": "Fira kärleken med en exklusiv 5-rätters middag.",
+    "status": "published",
+    "coverImage": "https://images.unsplash.com/photo-...",
+    "createdAt": "2026-02-14 18:00:00"
+  },
+  {
+    "id": "event-burgundy-kvall",
+    "title": "Burgundy Kväll",
+    "slug": "burgundy-kvall",
+    "category": "Event",
+    "summary": "Upptäck Burgundys finaste viner med vår sommelier.",
+    "status": "published",
+    "coverImage": "https://images.unsplash.com/photo-...",
+    "createdAt": "2026-02-22 19:00:00"
+  },
+  {
+    "id": "event-jazz-dine",
+    "title": "Jazz & Dine",
+    "slug": "jazz-dine",
+    "category": "Event",
+    "summary": "Live jazzmusik varje lördagskväll.",
+    "status": "published",
+    "coverImage": "https://images.unsplash.com/photo-...",
+    "createdAt": "2026-03-01 19:00:00"
+  }
+]
+```
 
 ### Redigerbara fält
 

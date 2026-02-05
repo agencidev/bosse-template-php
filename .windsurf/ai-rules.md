@@ -1,4 +1,39 @@
-# AI-regler - Målarkompetens AB
+# AI-regler - Bosse Template
+
+## ⚠️ KRITISKA REGLER — LÄS FÖRST
+
+### Inlägg/Nyheter/Event — ALDRIG hårdkoda!
+När användaren ber dig skapa **inlägg**, **nyheter**, **event**, **blogginlägg** eller liknande:
+
+1. **ALDRIG** skriv innehållet direkt i PHP-filer (t.ex. `index.php`)
+2. **ALLTID** lägg till dem i `data/projects.json`
+3. Följ exakt JSON-format (se CMS-användning nedan)
+
+❌ **FEL** — Hårdkodad HTML i index.php:
+```php
+<article class="news-card">
+    <h3>Alla hjärtans dag</h3>
+    <p>Event 14 februari...</p>
+</article>
+```
+
+✅ **RÄTT** — Lägg till i data/projects.json:
+```json
+{
+  "id": "alla-hjartans-dag-2026",
+  "title": "Alla hjärtans dag",
+  "slug": "alla-hjartans-dag",
+  "category": "Event",
+  "summary": "Event 14 februari...",
+  "status": "published",
+  "coverImage": "/uploads/valentines.jpg",
+  "createdAt": "2026-02-14 18:00:00"
+}
+```
+
+Inlägg i `projects.json` visas automatiskt på `/projekt` och kan hanteras via CMS.
+
+---
 
 ## Prioritetsordning
 
@@ -134,13 +169,71 @@ Snabbguide:
 
 ---
 
+## CMS-användning
+
+### Inlägg/Projekt/Nyheter/Event
+
+⚠️ **KRITISKT:** Alla inlägg, nyheter, event, blogginlägg etc. ska ALLTID lagras i `data/projects.json` — ALDRIG hårdkodas i PHP-filer!
+
+**Filplats:** `data/projects.json`
+
+**När användaren ber dig skapa inlägg:**
+1. Öppna `data/projects.json`
+2. Lägg till nya objekt i JSON-arrayen
+3. Generera unikt `id` med format `titel-åååå` eller `uniqid()`
+4. Sätt `status: "published"` om det ska synas direkt
+
+**Format per inlägg:**
+```json
+{
+  "id": "event-alla-hjartans-dag-2026",
+  "title": "Alla hjärtans dag",
+  "slug": "alla-hjartans-dag",
+  "category": "Event",
+  "summary": "Fira kärleken med en exklusiv 5-rätters middag.",
+  "content": "Fullständig beskrivning av eventet...",
+  "status": "published",
+  "coverImage": "/uploads/valentines.jpg",
+  "gallery": [],
+  "createdAt": "2026-02-14 18:00:00"
+}
+```
+
+**Kategorier att använda:**
+- `Projekt` — Genomförda projekt/case
+- `Blogg` — Blogginlägg
+- `Nyhet` — Nyheter
+- `Event` — Kommande event/händelser
+
+**Fältförklaring:**
+| Fält | Beskrivning | Obligatoriskt |
+|------|-------------|---------------|
+| `id` | Unikt ID (t.ex. `event-2026-02-14`) | Ja |
+| `title` | Rubrik som visas | Ja |
+| `slug` | URL-vänlig (å→a, ä→a, ö→o, mellanslag→-) | Ja |
+| `category` | Projekt/Blogg/Nyhet/Event | Ja |
+| `summary` | Kort text för listor (max 160 tecken) | Ja |
+| `content` | Fullständig text/HTML | Nej |
+| `status` | `published` eller `draft` | Ja |
+| `coverImage` | Sökväg till bild | Nej |
+| `gallery` | Array med extra bilder | Nej |
+| `createdAt` | Datum `YYYY-MM-DD HH:MM:SS` | Ja |
+
+**Publika sidor:**
+- `/projekt` — Visar alla publicerade inlägg
+- `/projekt/{slug}` — Visar enskilt inlägg
+
+---
+
 ## Innehållshantering
 
 ### Redigerbara texter
 Använd `editable_text()` för innehåll som ska vara redigerbart via CMS:
 
 ```php
-<?php editable_text('section.key', 'Standardtext', 'h2', 'css-klass'); ?>
+<?php editable_text('sektion', 'titel', 'Standardrubrik', 'h2', 'css-klass'); ?>
+<?php editable_text('sektion', 'text', 'Standardtext', 'p', 'css-klass'); ?>
+<?php editable_image('sektion', 'bild', '/assets/images/placeholder.jpg', 'Alt-text', 'css-klass'); ?>
 ```
 
 ### Innehållsdata
@@ -162,6 +255,8 @@ Använd `editable_text()` för innehåll som ska vara redigerbart via CMS:
 /
 ├── index.php              # Huvudsida
 ├── kontakt.php            # Kontaktformulär
+├── projekt.php            # Publika projekt-lista
+├── projekt-single.php     # Enskilt projekt
 ├── router.php             # URL-routing
 ├── bootstrap.php          # Miljösetup
 ├── config.php             # Konfiguration (gitignored)
@@ -175,9 +270,20 @@ Använd `editable_text()` för innehåll som ska vara redigerbart via CMS:
 │   │   └── cms.js         # CMS JavaScript
 │   └── images/            # Statiska bilder
 ├── cms/                   # Admin-sidor
+│   ├── admin.php          # Inloggning
+│   ├── dashboard.php      # Översikt
+│   └── projects/          # Inlägg-hantering
+│       ├── index.php      # Lista inlägg
+│       ├── new.php        # Skapa inlägg
+│       └── edit.php       # Redigera inlägg
 ├── includes/              # PHP-komponenter
+│   ├── admin-bar.php      # Admin-bar (visas vid inloggning)
+│   ├── header.php         # Global header
+│   ├── footer.php         # Global footer
 │   └── mailer.php         # SMTP-mailsystem
 ├── data/                  # JSON-data
+│   ├── content.json       # Sidinnehåll
+│   └── projects.json      # Inlägg/projekt
 ├── security/              # Säkerhetsmoduler
 ├── seo/                   # SEO-verktyg
 └── uploads/               # Användaruppladdningar
