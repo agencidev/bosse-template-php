@@ -1,6 +1,6 @@
 <?php
 /**
- * Uppdateringssystem for Bosse Template
+ * Uppdateringssystem för Bosse Template
  * Hanterar versionskontroll, nedladdning, backup och applicering
  */
 
@@ -26,7 +26,7 @@ const UPDATABLE_FILES = [
 // Wildcard-matchade uppdateringsbara mappar
 const UPDATABLE_DIRS = ['bin', 'templates', '.github'];
 
-// Filer som ALDRIG rors
+// Filer som ALDRIG rörs
 const PROTECTED_FILES = [
     'config.php', '.env',
     'data/content.json', 'data/projects.json',
@@ -81,7 +81,7 @@ function is_protected_file(string $relativePath): bool {
 }
 
 /**
- * Hamta uppdateringsstatus fran cache
+ * Hämta uppdateringsstatus från cache
  */
 function get_update_state(): array {
     $stateFile = DATA_PATH . '/update-state.json';
@@ -131,13 +131,13 @@ function save_update_state(array $state): void {
 }
 
 /**
- * Kolla om uppdatering finns tillganglig
- * Hamtar manifest.json fran update-servern
+ * Kolla om uppdatering finns tillgänglig
+ * Hämtar manifest.json från update-servern
  */
 function check_for_update(): array {
     $updateUrl = defined('AGENCI_UPDATE_URL') ? AGENCI_UPDATE_URL : '';
     if (empty($updateUrl)) {
-        return ['error' => 'AGENCI_UPDATE_URL ar inte konfigurerad'];
+        return ['error' => 'AGENCI_UPDATE_URL är inte konfigurerad'];
     }
 
     $manifestUrl = rtrim($updateUrl, '/') . '/manifest.json';
@@ -192,7 +192,7 @@ function check_for_update(): array {
 }
 
 /**
- * Verifiera HMAC-signatur pa en fil
+ * Verifiera HMAC-signatur på en fil
  */
 function verify_signature(string $filePath, string $expected): bool {
     if (!defined('AGENCI_UPDATE_KEY') || AGENCI_UPDATE_KEY === '') {
@@ -221,7 +221,7 @@ function download_update(string $url, string $signature): string|false {
         mkdir($tmpDir, 0755, true);
     }
 
-    // Lock-fil for att forhindra parallella uppdateringar
+    // Lock-fil för att forhindra parallella uppdateringar
     $lockFile = $tmpDir . '/.update-lock';
     if (file_exists($lockFile)) {
         $lockAge = time() - filemtime($lockFile);
@@ -314,7 +314,7 @@ function create_backup(): string {
 }
 
 /**
- * Rekursiv kopieringsfunktion for backup
+ * Rekursiv kopieringsfunktion för backup
  */
 function backup_directory(string $src, string $dest): void {
     if (!is_dir($dest)) {
@@ -337,7 +337,7 @@ function backup_directory(string $src, string $dest): void {
 }
 
 /**
- * Applicera uppdatering fran ZIP
+ * Applicera uppdatering från ZIP
  */
 function apply_update(string $zipPath): array {
     $result = [
@@ -349,7 +349,7 @@ function apply_update(string $zipPath): array {
     ];
 
     if (!class_exists('ZipArchive')) {
-        $result['errors'][] = 'ZipArchive ar inte tillganglig pa servern';
+        $result['errors'][] = 'ZipArchive är inte tillgänglig på servern';
         return $result;
     }
 
@@ -359,19 +359,19 @@ function apply_update(string $zipPath): array {
     $backupDir = create_backup();
     $result['backup_dir'] = $backupDir;
 
-    // Oppna ZIP
+    // Öppna ZIP
     $zip = new ZipArchive();
     $res = $zip->open($zipPath);
     if ($res !== true) {
-        $result['errors'][] = 'Kunde inte oppna ZIP-filen (felkod: ' . $res . ')';
+        $result['errors'][] = 'Kunde inte öppna ZIP-filen (felkod: ' . $res . ')';
         return $result;
     }
 
-    // Extrahera bara godkanda filer
+    // Extrahera bara godkända filer
     for ($i = 0; $i < $zip->numFiles; $i++) {
         $filename = $zip->getNameIndex($i);
 
-        // Hoppa over mappar
+        // Hoppa över mappar
         if (substr($filename, -1) === '/') {
             continue;
         }
@@ -402,7 +402,7 @@ function apply_update(string $zipPath): array {
         // Extrahera filen
         $content = $zip->getFromIndex($i);
         if ($content === false) {
-            $result['errors'][] = 'Kunde inte lasa ' . $filename . ' fran ZIP';
+            $result['errors'][] = 'Kunde inte läsa ' . $filename . ' från ZIP';
             continue;
         }
 
@@ -421,7 +421,7 @@ function apply_update(string $zipPath): array {
 
     $zip->close();
 
-    // Kor migrationer
+    // Kör migrationer
     $state = get_update_state();
     $migrations = $state['migrations'] ?? [];
     if (!empty($migrations)) {
@@ -442,18 +442,18 @@ function apply_update(string $zipPath): array {
 }
 
 /**
- * Kor migrationer fran ZIP
+ * Kör migrationer från ZIP
  */
 function run_migrations(string $fromVersion, string $toVersion, string $zipPath): array {
     $results = [];
 
     if (!class_exists('ZipArchive')) {
-        return ['error' => 'ZipArchive ar inte tillganglig'];
+        return ['error' => 'ZipArchive är inte tillgänglig'];
     }
 
     $zip = new ZipArchive();
     if ($zip->open($zipPath) !== true) {
-        return ['error' => 'Kunde inte oppna ZIP for migrationer'];
+        return ['error' => 'Kunde inte öppna ZIP för migrationer'];
     }
 
     // Samla alla migreringsfiler
@@ -471,15 +471,15 @@ function run_migrations(string $fromVersion, string $toVersion, string $zipPath)
     // Sortera efter version
     uksort($migrations, 'version_compare');
 
-    // Kor i ordning
+    // Kör i ordning
     foreach ($migrations as $version => $migrationFile) {
         $content = $zip->getFromName($migrationFile);
         if ($content === false) {
-            $results[] = ['version' => $version, 'status' => 'error', 'message' => 'Kunde inte lasa migreringsfilen'];
+            $results[] = ['version' => $version, 'status' => 'error', 'message' => 'Kunde inte läsa migreringsfilen'];
             continue;
         }
 
-        // Spara temporart och kor
+        // Spara temporärt och kor
         $tmpFile = DATA_PATH . '/tmp/_migration_' . $version . '.php';
         file_put_contents($tmpFile, $content);
 
@@ -498,7 +498,7 @@ function run_migrations(string $fromVersion, string $toVersion, string $zipPath)
 }
 
 /**
- * Aterstall fran backup
+ * Återställ från backup
  */
 function rollback_update(string $backupDir): bool {
     if (!is_dir($backupDir)) {
@@ -543,7 +543,7 @@ function rollback_update(string $backupDir): bool {
 }
 
 /**
- * Rekursiv aterstallning fran backup
+ * Rekursiv återställning från backup
  */
 function restore_directory(string $src, string $dest): void {
     if (!is_dir($dest)) {
@@ -650,7 +650,7 @@ function should_check_for_update(): bool {
 }
 
 /**
- * Automatisk uppdatering — kor hela flodet tyst
+ * Automatisk uppdatering — kör hela flodet tyst
  * Kollar → laddar ner → backup → applicerar → loggar
  * Returnerar true om uppdatering applicerades
  */
@@ -682,12 +682,12 @@ function auto_update(): bool {
 }
 
 /**
- * Applicera uppdatering fran cachad state (intern funktion)
+ * Applicera uppdatering från cachad state (intern funktion)
  */
 function auto_apply_from_state(array $state): bool {
     // PHP-versionskontroll
     if (!empty($state['min_php_version']) && version_compare(PHP_VERSION, $state['min_php_version'], '<')) {
-        log_update_event('skip', $state['latest_version'] ?? '?', 'Kraver PHP ' . $state['min_php_version']);
+        log_update_event('skip', $state['latest_version'] ?? '?', 'Kräver PHP ' . $state['min_php_version']);
         return false;
     }
 
@@ -710,7 +710,7 @@ function auto_apply_from_state(array $state): bool {
         log_update_event('success', $state['latest_version'] ?? '?',
             count($result['updated_files']) . ' filer uppdaterade');
 
-        // Stada gamla backups och tmp-filer
+        // Städa gamla backups och tmp-filer
         cleanup_old_data();
 
         return true;
@@ -718,7 +718,7 @@ function auto_apply_from_state(array $state): bool {
 
     // Misslyckades — rollback skedde automatiskt i apply_update
     log_update_event('error', $state['latest_version'] ?? '?',
-        implode('; ', $result['errors'] ?? ['Okant fel']));
+        implode('; ', $result['errors'] ?? ['Okänt fel']));
     return false;
 }
 
@@ -791,7 +791,7 @@ function cleanup_old_data(): void {
 }
 
 /**
- * Hamta uppdateringslogg
+ * Hämta uppdateringslogg
  */
 function get_update_log(): array {
     $logFile = DATA_PATH . '/update-log.json';

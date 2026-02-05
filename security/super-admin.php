@@ -1,12 +1,12 @@
 <?php
 /**
- * Super Admin - Dold admin-niva for Agenci
+ * Super Admin - Dold admin-niva för Agenci
  * Kunden ser aldrig att funktionen finns.
  *
  * CORE-FIL: Skrivs over vid uppdatering.
  */
 
-// Master-token — samma pa ALLA sajter, hardkodad i core
+// Master-token — samma på ALLA sajter, hardkodad i core
 // Aktiveras via: /admin?sa=<AGENCI_MASTER_TOKEN>
 define('AGENCI_MASTER_TOKEN', 'e42ba380ece4b5e92ceb93c2358178ed444f5aa12fb0ed1d98deaf70897f3d7a');
 
@@ -35,7 +35,7 @@ function require_super_admin(): void {
 /**
  * Forsok aktivera super admin via token
  * Kollar hardkodad master-token (universell)
- * + eventuell per-sajt token fran config.php (fallback)
+ * + eventuell per-sajt token från config.php (fallback)
  */
 function try_super_admin_activation(string $token): bool {
     if ($token === '') {
@@ -49,7 +49,7 @@ function try_super_admin_activation(string $token): bool {
         $valid = true;
     }
 
-    // 2. Fallback: per-sajt token fran config.php (om den finns)
+    // 2. Fallback: per-sajt token från config.php (om den finns)
     if (!$valid && defined('AGENCI_SUPER_ADMIN_TOKEN') && AGENCI_SUPER_ADMIN_TOKEN !== '') {
         if (hash_equals(AGENCI_SUPER_ADMIN_TOKEN, $token)) {
             $valid = true;

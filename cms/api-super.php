@@ -19,7 +19,7 @@ header('Cache-Control: no-store');
 $action = $_GET['action'] ?? '';
 $method = $_SERVER['REQUEST_METHOD'];
 
-// CSRF-verifiering for alla requests
+// CSRF-verifiering för alla requests
 $csrfHeader = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
 if (empty($csrfHeader) || !isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrfHeader)) {
     http_response_code(403);
@@ -66,7 +66,7 @@ switch ($action) {
 
     default:
         http_response_code(404);
-        echo json_encode(['error' => 'Okand action']);
+        echo json_encode(['error' => 'Okänd action']);
         exit;
 }
 
@@ -82,7 +82,7 @@ function handle_check_update(): void {
 }
 
 function handle_apply_update(): void {
-    // Hamta aktuell status
+    // Hämta aktuell status
     $state = check_for_update();
 
     if (isset($state['error'])) {
@@ -91,13 +91,13 @@ function handle_apply_update(): void {
     }
 
     if (empty($state['update_available'])) {
-        echo json_encode(['success' => false, 'errors' => ['Ingen uppdatering tillganglig']]);
+        echo json_encode(['success' => false, 'errors' => ['Ingen uppdatering tillgänglig']]);
         return;
     }
 
     // PHP-versionskontroll
     if (!empty($state['min_php_version']) && version_compare(PHP_VERSION, $state['min_php_version'], '<')) {
-        echo json_encode(['success' => false, 'errors' => ['Kraver PHP ' . $state['min_php_version'] . ', du har ' . PHP_VERSION]]);
+        echo json_encode(['success' => false, 'errors' => ['Kräver PHP ' . $state['min_php_version'] . ', du har ' . PHP_VERSION]]);
         return;
     }
 
@@ -161,7 +161,7 @@ function handle_delete_backup(): void {
 function handle_system_info(): void {
     $info = [
         'php_version' => PHP_VERSION,
-        'server' => $_SERVER['SERVER_SOFTWARE'] ?? 'Okand',
+        'server' => $_SERVER['SERVER_SOFTWARE'] ?? 'Okänd',
         'os' => PHP_OS,
         'memory_limit' => ini_get('memory_limit'),
         'memory_usage' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB',
@@ -186,7 +186,7 @@ function handle_system_info(): void {
 
 function handle_test_smtp(): void {
     if (!defined('SMTP_HOST') || SMTP_HOST === '') {
-        echo json_encode(['success' => false, 'error' => 'SMTP ar inte konfigurerat']);
+        echo json_encode(['success' => false, 'error' => 'SMTP är inte konfigurerat']);
         return;
     }
 
@@ -198,8 +198,8 @@ function handle_test_smtp(): void {
         return;
     }
 
-    $subject = 'SMTP-test fran ' . (defined('SITE_NAME') ? SITE_NAME : 'Bosse Template');
-    $body = "Detta ar ett testmail skickat fran Super Admin-panelen.\n\n";
+    $subject = 'SMTP-test från ' . (defined('SITE_NAME') ? SITE_NAME : 'Bosse Template');
+    $body = "Detta ar ett testmail skickat från Super Admin-panelen.\n\n";
     $body .= "Tidpunkt: " . date('Y-m-d H:i:s') . "\n";
     $body .= "Server: " . ($_SERVER['SERVER_NAME'] ?? 'localhost') . "\n";
     $body .= "PHP: " . PHP_VERSION . "\n";

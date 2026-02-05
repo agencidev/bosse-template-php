@@ -1,7 +1,7 @@
 <?php
 /**
  * Super Admin Dashboard
- * Endast tillganglig for Agenci via super admin-token
+ * Endast tillgänglig för Agenci via super admin-token
  */
 
 require_once __DIR__ . '/../bootstrap.php';
@@ -12,7 +12,7 @@ require_once __DIR__ . '/../security/updater.php';
 // Krav: super admin
 require_super_admin();
 
-// Hamta data
+// Hämta data
 $updateState = get_update_state();
 $backups = list_backups();
 $updateLog = get_update_log();
@@ -21,7 +21,7 @@ $csrfToken = csrf_token();
 // System info
 $systemInfo = [
     'php_version' => PHP_VERSION,
-    'server' => $_SERVER['SERVER_SOFTWARE'] ?? 'Okand',
+    'server' => $_SERVER['SERVER_SOFTWARE'] ?? 'Okänd',
     'os' => PHP_OS,
     'memory_limit' => ini_get('memory_limit'),
     'upload_max' => ini_get('upload_max_filesize'),
@@ -341,7 +341,7 @@ function format_bytes(float $bytes): string {
         <?php if (!empty($updateState['update_available']) && $updateState['update_available']): ?>
         <div class="sa-update-banner <?php echo !empty($updateState['critical']) ? 'sa-update-banner--critical' : ''; ?>">
             <div>
-                <p>Version <?php echo htmlspecialchars($updateState['latest_version'] ?? ''); ?> tillganglig<?php echo !empty($updateState['critical']) ? ' (kritisk)' : ''; ?></p>
+                <p>Version <?php echo htmlspecialchars($updateState['latest_version'] ?? ''); ?> tillgänglig<?php echo !empty($updateState['critical']) ? ' (kritisk)' : ''; ?></p>
                 <small><?php echo htmlspecialchars($updateState['changelog'] ?? ''); ?></small>
             </div>
             <button class="sa-btn sa-btn--primary" onclick="applyUpdate()" id="btn-apply-update">Uppdatera nu</button>
@@ -385,7 +385,7 @@ function format_bytes(float $bytes): string {
                         <span class="sa-value"><?php echo htmlspecialchars($systemInfo['disk_free']); ?> / <?php echo htmlspecialchars($systemInfo['disk_total']); ?></span>
                     </div>
                     <div class="sa-info-row">
-                        <span class="sa-label">Tillagg</span>
+                        <span class="sa-label">Tillägg</span>
                         <span class="sa-value"><?php echo htmlspecialchars($systemInfo['extensions']); ?></span>
                     </div>
                 </div>
@@ -408,7 +408,7 @@ function format_bytes(float $bytes): string {
                     </div>
                     <div class="sa-info-row">
                         <span class="sa-label">Senaste</span>
-                        <span class="sa-value" id="latest-version"><?php echo htmlspecialchars($updateState['latest_version'] ?? 'Okand'); ?></span>
+                        <span class="sa-value" id="latest-version"><?php echo htmlspecialchars($updateState['latest_version'] ?? 'Okänd'); ?></span>
                     </div>
                     <div class="sa-info-row">
                         <span class="sa-label">Senaste koll</span>
@@ -421,7 +421,7 @@ function format_bytes(float $bytes): string {
                     </div>
                     <?php endif; ?>
                     <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
-                        <button class="sa-btn sa-btn--secondary" onclick="checkUpdate()" id="btn-check-update">Sok uppdatering</button>
+                        <button class="sa-btn sa-btn--secondary" onclick="checkUpdate()" id="btn-check-update">Sök uppdatering</button>
                         <?php if (!empty($updateState['update_available'])): ?>
                         <button class="sa-btn sa-btn--primary" onclick="applyUpdate()" id="btn-apply-update-2">Uppdatera</button>
                         <?php endif; ?>
@@ -437,7 +437,7 @@ function format_bytes(float $bytes): string {
                 </div>
                 <div class="sa-panel__body">
                     <?php if (empty($backups)): ?>
-                        <p style="font-size: 0.875rem; color: #a3a3a3;">Inga backups annu. En skapas automatiskt fore varje uppdatering.</p>
+                        <p style="font-size: 0.875rem; color: #a3a3a3;">Inga backups ännu. En skapas automatiskt före varje uppdatering.</p>
                     <?php else: ?>
                         <?php foreach ($backups as $backup): ?>
                         <div class="sa-backup-item">
@@ -446,7 +446,7 @@ function format_bytes(float $bytes): string {
                                 <div class="sa-backup-date"><?php echo htmlspecialchars($backup['date'] ?? ''); ?></div>
                             </div>
                             <div class="sa-backup-actions">
-                                <button class="sa-btn sa-btn--secondary" onclick="rollbackBackup('<?php echo htmlspecialchars($backup['dir_name'] ?? ''); ?>')">Aterstall</button>
+                                <button class="sa-btn sa-btn--secondary" onclick="rollbackBackup('<?php echo htmlspecialchars($backup['dir_name'] ?? ''); ?>')">Återställ</button>
                                 <button class="sa-btn sa-btn--danger" onclick="deleteBackup('<?php echo htmlspecialchars($backup['dir_name'] ?? ''); ?>')">Ta bort</button>
                             </div>
                         </div>
@@ -459,11 +459,11 @@ function format_bytes(float $bytes): string {
             <div class="sa-panel sa-panel--full">
                 <div class="sa-panel__header">
                     <h2>Uppdateringshistorik</h2>
-                    <span class="sa-badge sa-badge--ok"><?php echo count($updateLog); ?> handelser</span>
+                    <span class="sa-badge sa-badge--ok"><?php echo count($updateLog); ?> händelser</span>
                 </div>
                 <div class="sa-panel__body">
                     <?php if (empty($updateLog)): ?>
-                        <p style="font-size: 0.875rem; color: #a3a3a3;">Inga uppdateringar har korts annu. Uppdateringar sker automatiskt.</p>
+                        <p style="font-size: 0.875rem; color: #a3a3a3;">Inga uppdateringar har körts ännu. Uppdateringar sker automatiskt.</p>
                     <?php else: ?>
                         <?php foreach (array_slice($updateLog, 0, 15) as $entry): ?>
                         <div class="sa-info-row">
@@ -506,14 +506,14 @@ function format_bytes(float $bytes): string {
                         <span class="sa-value"><?php echo htmlspecialchars(defined('SMTP_ENCRYPTION') ? SMTP_ENCRYPTION : 'ssl'); ?></span>
                     </div>
                     <div class="sa-info-row">
-                        <span class="sa-label">Anvandare</span>
+                        <span class="sa-label">Användare</span>
                         <span class="sa-value"><?php echo htmlspecialchars(defined('SMTP_USERNAME') ? SMTP_USERNAME : ''); ?></span>
                     </div>
                     <div style="margin-top: 1rem;">
                         <button class="sa-btn sa-btn--success" onclick="testSmtp()" id="btn-smtp-test">Skicka testmail</button>
                     </div>
                     <?php else: ?>
-                    <p style="font-size: 0.875rem; color: #a3a3a3;">SMTP ar inte konfigurerat. Lagg till SMTP-installningar i config.php.</p>
+                    <p style="font-size: 0.875rem; color: #a3a3a3;">SMTP är inte konfigurerat. Lägg till SMTP-inställningar i config.php.</p>
                     <?php endif; ?>
                     <div id="smtp-result" style="margin-top: 0.75rem; font-size: 0.8125rem;"></div>
                 </div>
@@ -544,7 +544,7 @@ function format_bytes(float $bytes): string {
                     <?php if (!empty($errorLog)): ?>
                     <div class="sa-log" id="error-log-content"><?php echo htmlspecialchars($errorLog); ?></div>
                     <?php else: ?>
-                    <p style="font-size: 0.875rem; color: #a3a3a3;" id="error-log-content">Inga felloggar hittades eller error_log ar inte lasbar.</p>
+                    <p style="font-size: 0.875rem; color: #a3a3a3;" id="error-log-content">Inga felloggar hittades eller error_log är inte lasbar.</p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -557,7 +557,7 @@ function format_bytes(float $bytes): string {
                 </div>
                 <div class="sa-panel__body">
                     <p style="font-size: 0.875rem; color: #a3a3a3; margin-bottom: 1rem;">
-                        Jamfor core-filers status. Upptacker om filer har andrats manuellt eller saknas.
+                        Jämför core-filers status. Upptäcker om filer har ändrats manuellt eller saknas.
                     </p>
                     <button class="sa-btn sa-btn--secondary" onclick="checkIntegrity()">Kontrollera filer</button>
                     <div id="integrity-result" style="margin-top: 1rem;"></div>
@@ -631,14 +631,14 @@ function format_bytes(float $bytes): string {
                 showToast('Fel: ' + data.error, 4000, 'error');
             } else if (data.update_available) {
                 document.getElementById('latest-version').textContent = data.latest_version;
-                showToast('Ny version tillganglig: ' + data.latest_version, 4000, 'success');
+                showToast('Ny version tillgänglig: ' + data.latest_version, 4000, 'success');
                 setTimeout(function() { location.reload(); }, 1500);
             } else {
-                showToast('Du kor redan senaste versionen!', 3000, 'success');
+                showToast('Du kör redan senaste versionen!', 3000, 'success');
             }
         }).catch(function(e) {
             setLoading('btn-check-update', false);
-            showToast('Natverksfel', 4000, 'error');
+            showToast('Nätverksfel', 4000, 'error');
         });
     }
 
@@ -678,25 +678,25 @@ function format_bytes(float $bytes): string {
                 // Ladda om efter en stund
                 setTimeout(function() { location.reload(); }, 3000);
             } else {
-                showToast('Fel: ' + (data.errors ? data.errors.join(', ') : 'Okant fel'), 5000, 'error');
+                showToast('Fel: ' + (data.errors ? data.errors.join(', ') : 'Okänt fel'), 5000, 'error');
             }
         }).catch(function(e) {
             setLoading('btn-apply-update', false);
             setLoading('btn-apply-update-2', false);
-            showToast('Natverksfel vid uppdatering', 5000, 'error');
+            showToast('Nätverksfel vid uppdatering', 5000, 'error');
         });
     }
 
     function rollbackBackup(dirName) {
-        if (!confirm('Aterstall fran backup ' + dirName + '? Nuvarande filer skrivs over.')) return;
+        if (!confirm('Återställ från backup ' + dirName + '? Nuvarande filer skrivs över.')) return;
         apiRequest('rollback', 'POST', { backup: dirName }).then(function(data) {
             if (data.success) {
-                showToast('Aterstellning klar!');
+                showToast('Återställning klar!');
                 setTimeout(function() { location.reload(); }, 1500);
             } else {
-                showToast('Fel: ' + (data.error || 'Okant fel'));
+                showToast('Fel: ' + (data.error || 'Okänt fel'));
             }
-        }).catch(function() { showToast('Natverksfel'); });
+        }).catch(function() { showToast('Nätverksfel'); });
     }
 
     function deleteBackup(dirName) {
@@ -706,9 +706,9 @@ function format_bytes(float $bytes): string {
                 showToast('Backup borttagen');
                 setTimeout(function() { location.reload(); }, 1000);
             } else {
-                showToast('Fel: ' + (data.error || 'Okant fel'));
+                showToast('Fel: ' + (data.error || 'Okänt fel'));
             }
-        }).catch(function() { showToast('Natverksfel'); });
+        }).catch(function() { showToast('Nätverksfel'); });
     }
 
     function testSmtp() {
@@ -724,7 +724,7 @@ function format_bytes(float $bytes): string {
             }
         }).catch(function() {
             setLoading('btn-smtp-test', false);
-            showToast('Natverksfel');
+            showToast('Nätverksfel');
         });
     }
 
@@ -737,7 +737,7 @@ function format_bytes(float $bytes): string {
             } else {
                 el.textContent = 'Inga felloggar hittades.';
             }
-        }).catch(function() { showToast('Natverksfel'); });
+        }).catch(function() { showToast('Nätverksfel'); });
     }
 
     function checkIntegrity() {
@@ -751,9 +751,9 @@ function format_bytes(float $bytes): string {
             } else {
                 badge.className = 'sa-badge sa-badge--ok';
                 badge.textContent = 'Alla filer OK';
-                el.innerHTML = '<div style="font-size: 0.8125rem; color: #15803d;">Alla core-filer ar pa plats.</div>';
+                el.innerHTML = '<div style="font-size: 0.8125rem; color: #15803d;">Alla core-filer är på plats.</div>';
             }
-        }).catch(function() { showToast('Natverksfel'); });
+        }).catch(function() { showToast('Nätverksfel'); });
     }
     </script>
 </body>

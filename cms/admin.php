@@ -24,7 +24,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'deactivate-sa') {
     exit;
 }
 
-// Handle logout FIRST before any other checks
+// Handle logout FIRST beföre any other checks
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     // Complete logout
     $_SESSION = array();
