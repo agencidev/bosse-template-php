@@ -382,7 +382,7 @@ function generateAllFiles(array $data): array {
     $saToken = bin2hex(random_bytes(32)); // 64 tecken
     $configContent .= "// Agenci\n";
     $configContent .= "define('AGENCI_SUPER_ADMIN_TOKEN', " . var_export($saToken, true) . ");\n";
-    $configContent .= "define('AGENCI_UPDATE_URL', 'https://raw.githubusercontent.com/agenci/bosse-updates/main');\n";
+    $configContent .= "define('AGENCI_UPDATE_URL', 'https://raw.githubusercontent.com/agencidev/bosse-updates/main');\n";
     $configContent .= "define('AGENCI_UPDATE_KEY', '');\n";
 
     if (file_put_contents(__DIR__ . '/config.php', $configContent) === false) {

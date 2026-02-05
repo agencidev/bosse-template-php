@@ -43,5 +43,5 @@ define('ENVIRONMENT', 'production');
 
 // Agenci (satts vid installation, synlig bara i config.php)
 define('AGENCI_SUPER_ADMIN_TOKEN', ''); // Tom = inaktiverad
-define('AGENCI_UPDATE_URL', 'https://raw.githubusercontent.com/agenci/bosse-updates/main');
+define('AGENCI_UPDATE_URL', 'https://raw.githubusercontent.com/agencidev/bosse-updates/main');
 define('AGENCI_UPDATE_KEY', ''); // HMAC-nyckel for verifiering
