@@ -10,6 +10,9 @@ const UPDATABLE_FILES = [
     '.htaccess', '.user.ini', '403.php', '404.php', '500.php', 'robots.php',
     'site.webmanifest',
     'projekt.php', 'projekt-single.php', 'CLAUDE.md',
+    // CMS-logotyper (explicit för bakåtkompatibilitet med äldre updaters)
+    'assets/images/cms/agenci-logo-dark.png',
+    'assets/images/cms/agenci-logo-light.png',
     'cms/admin.php', 'cms/dashboard.php', 'cms/content.php',
     'cms/api.php', 'cms/api-super.php', 'cms/super-admin.php',
     'cms/seo.php', 'cms/support.php', 'cms/ai.php', 'cms/settings.php',
