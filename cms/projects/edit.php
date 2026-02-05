@@ -36,8 +36,32 @@ if ($project === null) {
 
 $error = '';
 
+/**
+ * Konvertera PHP-storlek (t.ex. "8M") till bytes
+ */
+function convertToBytes(string $value): int {
+    $value = trim($value);
+    $unit = strtolower(substr($value, -1));
+    $bytes = (int) $value;
+    switch ($unit) {
+        case 'g': $bytes *= 1024;
+        case 'm': $bytes *= 1024;
+        case 'k': $bytes *= 1024;
+    }
+    return $bytes;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    csrf_require();
+    // Detektera om POST-data trunkerades pga PHP-gränser
+    $contentLength = $_SERVER['CONTENT_LENGTH'] ?? 0;
+    $postMaxSize = ini_get('post_max_size');
+    $postMaxBytes = convertToBytes($postMaxSize);
+
+    if ($contentLength > $postMaxBytes || (empty($_POST) && $contentLength > 0)) {
+        $error = 'Filen är för stor för servern. Max: ' . $postMaxSize . '. Kontakta din webbhost för att öka gränsen, eller använd en mindre bild.';
+    } else {
+        csrf_require();
+    }
 
     $title = $_POST['title'] ?? '';
     $category = $_POST['category'] ?? '';
