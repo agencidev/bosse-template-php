@@ -200,8 +200,8 @@ function format_bytes(float $bytes): string {
 
         /* Update banner */
         .sa-update-banner {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border: 1px solid #f59e0b;
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border: 1px solid #10b981;
             border-radius: 1rem;
             padding: 1.25rem 1.5rem;
             margin-bottom: 1.5rem;
@@ -214,8 +214,8 @@ function format_bytes(float $bytes): string {
             background: linear-gradient(135deg, #fee2e2, #fecaca);
             border-color: #ef4444;
         }
-        .sa-update-banner p { font-size: 0.9375rem; font-weight: 500; }
-        .sa-update-banner small { font-size: 0.8125rem; color: #92400e; }
+        .sa-update-banner p { font-size: 0.9375rem; font-weight: 500; color: #065f46; }
+        .sa-update-banner small { font-size: 0.8125rem; color: #047857; }
 
         /* Status badges */
         .sa-badge {

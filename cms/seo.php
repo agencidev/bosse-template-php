@@ -28,7 +28,7 @@ if (!is_logged_in()) {
             padding: 3rem 1.5rem;
         }
         .container {
-            max-width: 64rem;
+            max-width: 36rem;
             margin: 0 auto;
         }
         .back-link {

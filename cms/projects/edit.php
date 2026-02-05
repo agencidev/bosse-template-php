@@ -54,11 +54,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
         $slug = trim($slug, '-');
 
+        // Handle cover image upload
+        $coverImage = $projects[$projectIndex]['coverImage'] ?? '';
+        if (isset($_FILES['cover_image']) && $_FILES['cover_image']['error'] === UPLOAD_ERR_OK) {
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+            $maxSize = 5 * 1024 * 1024; // 5MB
+
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = finfo_file($finfo, $_FILES['cover_image']['tmp_name']);
+            finfo_close($finfo);
+
+            if (in_array($mime, $allowedMimes) && $_FILES['cover_image']['size'] <= $maxSize) {
+                $uploadDir = __DIR__ . '/../../uploads/projects/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+
+                $ext = pathinfo($_FILES['cover_image']['name'], PATHINFO_EXTENSION);
+                $filename = $slug . '-' . time() . '.' . $ext;
+                $destPath = $uploadDir . $filename;
+
+                if (move_uploaded_file($_FILES['cover_image']['tmp_name'], $destPath)) {
+                    // Delete old cover image if exists
+                    if (!empty($coverImage) && file_exists(__DIR__ . '/../../' . ltrim($coverImage, '/'))) {
+                        @unlink(__DIR__ . '/../../' . ltrim($coverImage, '/'));
+                    }
+                    $coverImage = '/uploads/projects/' . $filename;
+                }
+            }
+        }
+
         $projects[$projectIndex]['title'] = $title;
         $projects[$projectIndex]['slug'] = $slug;
         $projects[$projectIndex]['category'] = $category;
         $projects[$projectIndex]['summary'] = $summary;
         $projects[$projectIndex]['status'] = $status;
+        $projects[$projectIndex]['coverImage'] = $coverImage;
         $projects[$projectIndex]['updatedAt'] = date('Y-m-d H:i:s');
 
         file_put_contents($projects_file, json_encode($projects, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
@@ -143,6 +174,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             resize: none;
             min-height: 6rem;
         }
+        .file-upload {
+            border: 2px dashed #d4d4d4;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .file-upload:hover {
+            border-color: #fe4f2a;
+            background: #fff7ed;
+        }
+        .file-upload input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .file-upload-text {
+            font-size: 0.875rem;
+            color: #737373;
+        }
+        .file-upload-text strong {
+            color: #fe4f2a;
+        }
+        .image-preview {
+            max-height: 120px;
+            max-width: 100%;
+            margin-top: 0.75rem;
+            border-radius: 0.5rem;
+        }
+        .current-image {
+            margin-bottom: 0.75rem;
+        }
+        .current-image img {
+            max-height: 100px;
+            border-radius: 0.5rem;
+        }
+        .current-image small {
+            display: block;
+            color: #a3a3a3;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
         .error {
             background: #fef2f2;
             border: 1px solid #fecaca;
@@ -210,7 +286,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="error"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
             <?php endif; ?>
 
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <?php echo csrf_field(); ?>
 
                 <div class="form-group">
@@ -248,6 +324,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="form-group">
+                    <label class="form-label">Omslagsbild</label>
+                    <?php if (!empty($project['coverImage'])): ?>
+                    <div class="current-image">
+                        <img src="<?php echo htmlspecialchars($project['coverImage'], ENT_QUOTES, 'UTF-8'); ?>" alt="Nuvarande omslagsbild">
+                        <small>Nuvarande bild — ladda upp ny för att ersätta</small>
+                    </div>
+                    <?php endif; ?>
+                    <div class="file-upload" id="cover-upload">
+                        <input type="file" name="cover_image" accept="image/jpeg,image/png,image/webp,image/gif"
+                               onchange="previewImage(this)">
+                        <div class="file-upload-text">
+                            <strong>Välj bild</strong> eller dra hit
+                            <br><small>JPG, PNG, WebP, GIF (max 5MB)</small>
+                        </div>
+                        <img class="image-preview" id="cover-preview" alt="Förhandsgranskning" style="display: none;">
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label class="form-label" for="status">Status</label>
                     <select id="status" name="status" class="form-select">
                         <option value="draft" <?php echo ($project['status'] ?? 'draft') === 'draft' ? 'selected' : ''; ?>>Utkast</option>
@@ -263,5 +358,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
     </div>
+    <script>
+    function previewImage(input) {
+        const preview = document.getElementById('cover-preview');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+    </script>
 </body>
 </html>

@@ -139,9 +139,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $font_heading = $_POST['font_heading'] ?? 'System UI';
             $font_body = $_POST['font_body'] ?? 'System UI';
 
-            $allowedFonts = ['System UI', 'Inter', 'Poppins', 'Playfair Display', 'Roboto', 'DM Sans', 'Montserrat', 'Lora'];
-            if (!in_array($font_heading, $allowedFonts)) $font_heading = 'System UI';
-            if (!in_array($font_body, $allowedFonts)) $font_body = 'System UI';
+            $allowedFonts = [
+                'System UI',
+                // Sans-serif
+                'Inter', 'Roboto', 'Open Sans', 'Lato', 'Montserrat', 'Poppins', 'Nunito', 'Raleway',
+                'Ubuntu', 'Rubik', 'Work Sans', 'DM Sans', 'Manrope', 'Plus Jakarta Sans', 'Outfit',
+                'Figtree', 'Sora', 'Space Grotesk', 'Albert Sans', 'Be Vietnam Pro', 'Lexend',
+                'Barlow', 'Mulish', 'Jost', 'Karla', 'Quicksand', 'Cabin', 'Archivo', 'Heebo',
+                'Fira Sans', 'Source Sans 3', 'Noto Sans', 'PT Sans', 'Asap', 'Exo 2', 'Overpass',
+                // Serif
+                'Playfair Display', 'Lora', 'Merriweather', 'PT Serif', 'Libre Baskerville', 'Crimson Text',
+                'EB Garamond', 'Source Serif 4', 'Cormorant Garamond', 'Bitter', 'Spectral', 'Fraunces',
+                'DM Serif Display', 'Libre Caslon Text', 'Bodoni Moda', 'Noto Serif', 'Vollkorn',
+                'Josefin Slab', 'Cardo', 'Old Standard TT', 'Literata', 'Newsreader',
+                // Display
+                'Oswald', 'Bebas Neue', 'Anton', 'Righteous', 'Abril Fatface', 'Alfa Slab One',
+                'Staatliches', 'Russo One', 'Bungee', 'Fredoka One', 'Pacifico', 'Lobster',
+                'Permanent Marker', 'Satisfy', 'Dancing Script', 'Great Vibes', 'Caveat', 'Kalam',
+                // Monospace
+                'Fira Code', 'JetBrains Mono', 'Source Code Pro', 'IBM Plex Mono', 'Space Mono',
+                'Roboto Mono', 'Ubuntu Mono', 'Inconsolata',
+                // Swedish/Scandinavian friendly
+                'Rethink Sans', 'Instrument Sans', 'Onest', 'Satoshi', 'General Sans',
+                'Custom'  // For custom uploaded fonts
+            ];
+            // Allow custom font names as well
+            if (!in_array($font_heading, $allowedFonts) && $font_heading !== 'Custom') $font_heading = 'System UI';
+            if (!in_array($font_body, $allowedFonts) && $font_body !== 'Custom') $font_body = 'System UI';
 
             // Nya brand guide-fält
             $border_radius = $_POST['border_radius'] ?? 'rounded';
@@ -188,6 +212,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errors = array_merge($errors, $logoErrors);
             }
 
+            // Favicon validation
+            if (isset($_FILES['favicon']) && $_FILES['favicon']['error'] === UPLOAD_ERR_OK) {
+                $faviconMimes = ['image/png', 'image/x-icon', 'image/vnd.microsoft.icon', 'image/svg+xml'];
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $faviconMime = finfo_file($finfo, $_FILES['favicon']['tmp_name']);
+                finfo_close($finfo);
+
+                if (!in_array($faviconMime, $faviconMimes)) {
+                    $logoErrors[] = 'Favicon: Ogiltigt filformat. Tillåtna: PNG, ICO, SVG.';
+                } elseif ($_FILES['favicon']['size'] > 1024 * 1024) { // 1MB max for favicon
+                    $logoErrors[] = 'Favicon: Filen är för stor (max 1MB).';
+                }
+            }
+
+            if (!empty($logoErrors)) {
+                $errors = array_merge($errors, $logoErrors);
+            }
+
             if (empty($errors)) {
                 // Spara logotyper
                 $imgDir = __DIR__ . '/assets/images';
@@ -195,6 +237,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (isset($_FILES[$logoField]) && $_FILES[$logoField]['error'] === UPLOAD_ERR_OK) {
                         $dest = $imgDir . '/' . str_replace('_', '-', $logoField) . '.png';
                         move_uploaded_file($_FILES[$logoField]['tmp_name'], $dest);
+                    }
+                }
+
+                // Spara favicon
+                if (isset($_FILES['favicon']) && $_FILES['favicon']['error'] === UPLOAD_ERR_OK) {
+                    $ext = strtolower(pathinfo($_FILES['favicon']['name'], PATHINFO_EXTENSION));
+                    if ($ext === 'ico') {
+                        $faviconDest = $imgDir . '/favicon.ico';
+                    } else {
+                        $faviconDest = $imgDir . '/favicon.png';
+                    }
+                    move_uploaded_file($_FILES['favicon']['tmp_name'], $faviconDest);
+                    $_SESSION['setup_data']['has_custom_favicon'] = true;
+                }
+
+                // Spara custom font
+                if (isset($_FILES['custom_font']) && $_FILES['custom_font']['error'] === UPLOAD_ERR_OK) {
+                    $fontDir = __DIR__ . '/assets/fonts';
+                    if (!is_dir($fontDir)) {
+                        mkdir($fontDir, 0755, true);
+                    }
+                    $fontExt = strtolower(pathinfo($_FILES['custom_font']['name'], PATHINFO_EXTENSION));
+                    $fontName = pathinfo($_FILES['custom_font']['name'], PATHINFO_FILENAME);
+                    $fontName = preg_replace('/[^a-zA-Z0-9-_]/', '', $fontName);
+                    $fontDest = $fontDir . '/custom-font.' . $fontExt;
+                    if (move_uploaded_file($_FILES['custom_font']['tmp_name'], $fontDest)) {
+                        $_SESSION['setup_data']['custom_font_file'] = 'custom-font.' . $fontExt;
+                        $_SESSION['setup_data']['custom_font_name'] = $fontName;
                     }
                 }
 
@@ -543,25 +613,44 @@ function generateAllFiles(array $data): array {
     file_put_contents(__DIR__ . '/CLAUDE.md', $claudeMdContent);
 
     // 7. includes/fonts.php
-    $fontsContent = "<?php\n// Genererad av Setup Wizard\n";
+    $fontsContent = "<?php\n// Genererad av Setup Wizard\n?>\n";
     $googleFonts = [];
+    $hasCustomFont = !empty($data['custom_font_file']);
+
     foreach ([$data['font_heading'], $data['font_body']] as $font) {
-        if ($font !== 'System UI' && !in_array($font, $googleFonts)) {
+        if ($font !== 'System UI' && $font !== 'Custom' && !in_array($font, $googleFonts)) {
             $googleFonts[] = $font;
         }
     }
 
+    // Custom font @font-face
+    if ($hasCustomFont) {
+        $fontFile = $data['custom_font_file'];
+        $fontName = $data['custom_font_name'] ?? 'Custom Font';
+        $fontsContent .= "<style>\n";
+        $fontsContent .= "@font-face {\n";
+        $fontsContent .= "  font-family: 'Custom Font';\n";
+        $fontsContent .= "  src: url('/assets/fonts/" . htmlspecialchars($fontFile) . "');\n";
+        $fontsContent .= "  font-weight: 100 900;\n";
+        $fontsContent .= "  font-display: swap;\n";
+        $fontsContent .= "}\n";
+        $fontsContent .= "</style>\n";
+    }
+
+    // Google Fonts
     if (!empty($googleFonts)) {
         $families = [];
         foreach ($googleFonts as $font) {
             $families[] = 'family=' . urlencode($font) . ':wght@400;500;600;700';
         }
         $url = 'https://fonts.googleapis.com/css2?' . implode('&', $families) . '&display=swap';
-        $fontsContent .= "?>\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n";
+        $fontsContent .= "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n";
         $fontsContent .= "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n";
         $fontsContent .= "<link href=\"" . htmlspecialchars($url) . "\" rel=\"stylesheet\">\n";
-    } else {
-        $fontsContent .= "// System UI - ingen extern font behövs\n";
+    }
+
+    if (empty($googleFonts) && !$hasCustomFont) {
+        $fontsContent = "<?php\n// System UI - ingen extern font behövs\n";
     }
 
     file_put_contents(__DIR__ . '/includes/fonts.php', $fontsContent);
@@ -690,6 +779,9 @@ function adjustBrightness(string $hex, int $percent): string {
 function buildFontStack(string $font): string {
     if ($font === 'System UI') {
         return "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    }
+    if ($font === 'Custom') {
+        return "'Custom Font', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
     }
     return "'" . $font . "', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 }
@@ -1410,7 +1502,8 @@ $saved = $_SESSION['setup_data'] ?? [];
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Logo (mörk bakgrund)</label>
+                        <label>Ladda upp mörk logotyp</label>
+                        <p class="hint" style="margin-bottom: 0.5rem;">Mörk logo för ljusa bakgrunder (header)</p>
                         <div class="file-upload" id="upload-dark">
                             <input type="file" name="logo_dark" accept=".png,.jpg,.jpeg,.svg,.webp"
                                    onchange="previewLogo(this, 'preview-dark')">
@@ -1422,7 +1515,8 @@ $saved = $_SESSION['setup_data'] ?? [];
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Logo (ljus bakgrund)</label>
+                        <label>Ladda upp ljus logotyp</label>
+                        <p class="hint" style="margin-bottom: 0.5rem;">Ljus/vit logo för mörka bakgrunder (footer)</p>
                         <div class="file-upload" id="upload-light">
                             <input type="file" name="logo_light" accept=".png,.jpg,.jpeg,.svg,.webp"
                                    onchange="previewLogo(this, 'preview-light')">
@@ -1432,6 +1526,20 @@ $saved = $_SESSION['setup_data'] ?? [];
                             </div>
                             <img class="logo-preview" id="preview-light" alt="Logo förhandsgranskning">
                         </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Favicon (valfritt)</label>
+                    <p class="hint" style="margin-bottom: 0.5rem;">Liten ikon som visas i webbläsarfliken. Om ingen laddas upp används logon.</p>
+                    <div class="file-upload" id="upload-favicon">
+                        <input type="file" name="favicon" accept=".png,.ico,.svg"
+                               onchange="previewFavicon(this)">
+                        <div class="file-upload-text">
+                            <strong>Välj fil</strong> eller dra hit
+                            <br><small>PNG, ICO, SVG (32x32 rekommenderat)</small>
+                        </div>
+                        <img class="logo-preview" id="preview-favicon" alt="Favicon förhandsgranskning" style="max-height: 32px;">
                     </div>
                 </div>
 
@@ -1474,29 +1582,61 @@ $saved = $_SESSION['setup_data'] ?? [];
                     </div>
                 </div>
 
+                <?php
+                // Comprehensive Google Fonts list organized by category
+                $fontCategories = [
+                    'System' => ['System UI'],
+                    'Sans-serif (Modern)' => ['Inter', 'Roboto', 'Open Sans', 'Lato', 'Montserrat', 'Poppins', 'Nunito', 'Raleway', 'Ubuntu', 'Rubik', 'Work Sans', 'DM Sans', 'Manrope', 'Plus Jakarta Sans', 'Outfit', 'Figtree', 'Sora', 'Space Grotesk', 'Albert Sans', 'Be Vietnam Pro', 'Lexend'],
+                    'Sans-serif (Classic)' => ['Barlow', 'Mulish', 'Jost', 'Karla', 'Quicksand', 'Cabin', 'Archivo', 'Heebo', 'Fira Sans', 'Source Sans 3', 'Noto Sans', 'PT Sans', 'Asap', 'Exo 2', 'Overpass'],
+                    'Serif (Elegant)' => ['Playfair Display', 'Lora', 'Merriweather', 'Libre Baskerville', 'Crimson Text', 'EB Garamond', 'Cormorant Garamond', 'Spectral', 'Fraunces', 'DM Serif Display'],
+                    'Serif (Classic)' => ['PT Serif', 'Source Serif 4', 'Bitter', 'Libre Caslon Text', 'Bodoni Moda', 'Noto Serif', 'Vollkorn', 'Josefin Slab', 'Cardo', 'Old Standard TT', 'Literata', 'Newsreader'],
+                    'Display' => ['Oswald', 'Bebas Neue', 'Anton', 'Righteous', 'Abril Fatface', 'Alfa Slab One', 'Staatliches', 'Russo One'],
+                    'Handwriting' => ['Pacifico', 'Lobster', 'Permanent Marker', 'Satisfy', 'Dancing Script', 'Great Vibes', 'Caveat', 'Kalam'],
+                    'Monospace' => ['Fira Code', 'JetBrains Mono', 'Source Code Pro', 'IBM Plex Mono', 'Space Mono', 'Roboto Mono', 'Ubuntu Mono', 'Inconsolata'],
+                    'Scandinavian' => ['Rethink Sans', 'Instrument Sans', 'Onest', 'General Sans'],
+                ];
+                $selectedHeading = $saved['font_heading'] ?? 'System UI';
+                $selectedBody = $saved['font_body'] ?? 'System UI';
+                ?>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="font_heading">Rubrik-typsnitt</label>
-                        <select id="font_heading" name="font_heading" onchange="updateFontPreview()">
-                            <?php
-                            $fonts = ['System UI', 'Inter', 'Poppins', 'Playfair Display', 'Roboto', 'DM Sans', 'Montserrat', 'Lora'];
-                            $selectedHeading = $saved['font_heading'] ?? 'System UI';
-                            foreach ($fonts as $f):
-                            ?>
-                            <option value="<?php echo $f; ?>" <?php echo $f === $selectedHeading ? 'selected' : ''; ?>><?php echo $f; ?></option>
+                        <select id="font_heading" name="font_heading" onchange="updateFontPreview()" style="max-height: 300px;">
+                            <?php foreach ($fontCategories as $category => $fonts): ?>
+                            <optgroup label="<?php echo $category; ?>">
+                                <?php foreach ($fonts as $f): ?>
+                                <option value="<?php echo $f; ?>" <?php echo $f === $selectedHeading ? 'selected' : ''; ?>><?php echo $f; ?></option>
+                                <?php endforeach; ?>
+                            </optgroup>
                             <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="font_body">Brödtext-typsnitt</label>
-                        <select id="font_body" name="font_body" onchange="updateFontPreview()">
-                            <?php
-                            $selectedBody = $saved['font_body'] ?? 'System UI';
-                            foreach ($fonts as $f):
-                            ?>
-                            <option value="<?php echo $f; ?>" <?php echo $f === $selectedBody ? 'selected' : ''; ?>><?php echo $f; ?></option>
+                        <select id="font_body" name="font_body" onchange="updateFontPreview()" style="max-height: 300px;">
+                            <?php foreach ($fontCategories as $category => $fonts): ?>
+                            <optgroup label="<?php echo $category; ?>">
+                                <?php foreach ($fonts as $f): ?>
+                                <option value="<?php echo $f; ?>" <?php echo $f === $selectedBody ? 'selected' : ''; ?>><?php echo $f; ?></option>
+                                <?php endforeach; ?>
+                            </optgroup>
                             <?php endforeach; ?>
                         </select>
+                    </div>
+                </div>
+
+                <!-- Custom Font Upload (Optional) -->
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label>Egen font (valfritt)</label>
+                    <p class="hint" style="margin-bottom: 0.5rem;">Ladda upp din egen font-fil (.woff2 eller .woff). Den kommer användas som "Custom" i dropdownen ovan.</p>
+                    <div class="file-upload" id="upload-custom-font">
+                        <input type="file" name="custom_font" accept=".woff2,.woff,.ttf,.otf"
+                               onchange="showFontFileName(this)">
+                        <div class="file-upload-text">
+                            <strong>Välj font-fil</strong> eller dra hit
+                            <br><small>WOFF2, WOFF, TTF, OTF</small>
+                        </div>
+                        <span id="custom-font-name" style="display: none; font-size: 0.8125rem; margin-top: 0.5rem; color: #16a34a;"></span>
                     </div>
                 </div>
 
@@ -1752,6 +1892,30 @@ $saved = $_SESSION['setup_data'] ?? [];
                 preview.style.display = 'block';
             };
             reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Favicon preview
+    function previewFavicon(input) {
+        const preview = document.getElementById('preview-favicon');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Show custom font filename
+    function showFontFileName(input) {
+        const nameSpan = document.getElementById('custom-font-name');
+        if (input.files && input.files[0]) {
+            nameSpan.textContent = '✓ ' + input.files[0].name;
+            nameSpan.style.display = 'block';
+        } else {
+            nameSpan.style.display = 'none';
         }
     }
 

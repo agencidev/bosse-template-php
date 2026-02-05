@@ -12,13 +12,12 @@ if (!is_logged_in()) {
 $uri = $_SERVER['REQUEST_URI'];
 $is_cms = preg_match('#^/(cms/|dashboard|admin)#', $uri);
 $is_frontend = !$is_cms;
-$logo_src = '/assets/images/logo-dark.png';
 ?>
 <div class="admin-bar admin-bar--dark">
     <div class="admin-bar__container">
         <div class="admin-bar__left">
             <a href="/dashboard" class="admin-bar__logo">
-                <img src="<?php echo $logo_src; ?>" alt="<?php echo SITE_NAME; ?>">
+                <span class="admin-bar__logo-text">Bosse</span>
             </a>
             <?php if (is_super_admin()): ?>
                 <span class="admin-bar__sa-badge" title="Super Admin"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M2.5 19.5h19v2h-19v-2Zm19.57-9.36c-.22-.8-1.04-1.27-1.84-1.06L16.5 10.2l-3.12-5.4a1.5 1.5 0 0 0-2.59-.02L7.5 10.2l-3.73-1.12c-.8-.24-1.64.2-1.87 1-.12.4-.05.84.18 1.18L6 16.5h12l3.9-5.24c.25-.35.32-.78.17-1.12Z"/></svg></span>
@@ -109,6 +108,13 @@ $logo_src = '/assets/images/logo-dark.png';
 .admin-bar__logo img {
     height: 1.5rem;
     width: auto;
+}
+
+.admin-bar__logo-text {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.025em;
 }
 
 .admin-bar__divider {

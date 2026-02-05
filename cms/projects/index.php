@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
             padding: 3rem 1.5rem;
         }
         .container {
-            max-width: 64rem;
+            max-width: 36rem;
             margin: 0 auto;
         }
         .back-link {

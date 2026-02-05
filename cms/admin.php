@@ -120,6 +120,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             height: 3rem;
             width: auto;
         }
+        .logo-text {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #18181b;
+            letter-spacing: -0.025em;
+        }
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -172,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <div class="login-container">
         <div class="logo-container">
-            <img src="/assets/images/logo-light.png" alt="<?php echo SITE_NAME; ?>" class="logo">
+            <span class="logo-text">Bosse</span>
         </div>
         
         <form method="POST">
