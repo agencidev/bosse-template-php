@@ -2,7 +2,44 @@
 require_once __DIR__ . '/../../bootstrap.php';
 require_once __DIR__ . '/../../security/session.php';
 require_once __DIR__ . '/../../security/csrf.php';
-require_once __DIR__ . '/../helpers.php';
+
+// Inkludera helpers om den finns, annars definiera inline (bakåtkompatibilitet)
+$helpersFile = __DIR__ . '/../helpers.php';
+if (file_exists($helpersFile)) {
+    require_once $helpersFile;
+}
+if (!function_exists('convertToBytes')) {
+    function convertToBytes(string $value): int {
+        $value = trim($value);
+        $unit = strtolower(substr($value, -1));
+        $bytes = (int) $value;
+        switch ($unit) {
+            case 'g': $bytes *= 1024;
+            case 'm': $bytes *= 1024;
+            case 'k': $bytes *= 1024;
+        }
+        return $bytes;
+    }
+}
+if (!function_exists('checkPostSizeLimit')) {
+    function checkPostSizeLimit(): ?string {
+        $contentLength = $_SERVER['CONTENT_LENGTH'] ?? 0;
+        $postMaxSize = ini_get('post_max_size');
+        $postMaxBytes = convertToBytes($postMaxSize);
+        if ($contentLength > $postMaxBytes || (empty($_POST) && $contentLength > 0)) {
+            return 'Filen är för stor för servern. Max: ' . $postMaxSize;
+        }
+        return null;
+    }
+}
+if (!function_exists('generateSlug')) {
+    function generateSlug(string $title): string {
+        $slug = strtolower($title);
+        $slug = str_replace(['å', 'ä', 'ö'], ['a', 'a', 'o'], $slug);
+        $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
+        return trim($slug, '-');
+    }
+}
 
 if (!is_logged_in()) {
     header('Location: /cms/admin.php');

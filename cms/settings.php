@@ -8,7 +8,52 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../security/session.php';
 require_once __DIR__ . '/../security/csrf.php';
 require_once __DIR__ . '/../version.php';
-require_once __DIR__ . '/helpers.php';
+
+// Inkludera helpers om den finns, annars definiera inline (bakåtkompatibilitet)
+$helpersFile = __DIR__ . '/helpers.php';
+if (file_exists($helpersFile)) {
+    require_once $helpersFile;
+}
+if (!function_exists('convertToBytes')) {
+    function convertToBytes(string $value): int {
+        $value = trim($value);
+        $unit = strtolower(substr($value, -1));
+        $bytes = (int) $value;
+        switch ($unit) {
+            case 'g': $bytes *= 1024;
+            case 'm': $bytes *= 1024;
+            case 'k': $bytes *= 1024;
+        }
+        return $bytes;
+    }
+}
+if (!function_exists('adjustBrightness')) {
+    function adjustBrightness(string $hex, int $percent): string {
+        $hex = ltrim($hex, '#');
+        if (strlen($hex) === 3) {
+            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+        }
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+        if ($percent > 0) {
+            $r = $r + (255 - $r) * $percent / 100;
+            $g = $g + (255 - $g) * $percent / 100;
+            $b = $b + (255 - $b) * $percent / 100;
+        } else {
+            $factor = (100 + $percent) / 100;
+            $r = $r * $factor;
+            $g = $g * $factor;
+            $b = $b * $factor;
+        }
+        $r = max(0, min(255, round($r)));
+        $g = max(0, min(255, round($g)));
+        $b = max(0, min(255, round($b)));
+        return '#' . str_pad(dechex($r), 2, '0', STR_PAD_LEFT)
+                   . str_pad(dechex($g), 2, '0', STR_PAD_LEFT)
+                   . str_pad(dechex($b), 2, '0', STR_PAD_LEFT);
+    }
+}
 
 if (!is_logged_in()) {
     header('Location: /cms/admin.php');
