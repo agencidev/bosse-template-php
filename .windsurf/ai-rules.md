@@ -39,7 +39,6 @@ Inlägg i `projects.json` visas automatiskt på `/projekt` och kan hanteras via 
 
 1. **Brand Guide** (`.windsurf/brand-guide.md`) - Färger, typsnitt, tonalitet
 2. **Tekniska regler** (detta dokument) - Kodstandarder, arkitektur
-3. **Wireframes** (`relume/`) - Layout och struktur
 
 Vid konflikt gäller högre prioritet.
 

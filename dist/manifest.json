@@ -1,9 +1,9 @@
 {
-    "latest_version": "1.5.9",
-    "release_date": "2026-02-05",
+    "latest_version": "1.5.10",
+    "release_date": "2026-02-06",
     "min_php_version": "8.0",
-    "changelog": "Bättre felmeddelande när bilder är för stora för serverns PHP-gräns",
-    "download_url": "https://raw.githubusercontent.com/agencidev/bosse-updates/main/releases/1.5.9.zip",
+    "changelog": "Fixat bilduppladdning i inställningar, borttaget Relume, förbättrad felhantering",
+    "download_url": "https://raw.githubusercontent.com/agencidev/bosse-updates/main/releases/1.5.10.zip",
     "signature": "",
     "migrations": [],
     "critical": false

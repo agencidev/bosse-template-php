@@ -13,6 +13,21 @@ if (!is_logged_in()) {
     exit;
 }
 
+/**
+ * Konvertera PHP-storlek (t.ex. "8M") till bytes
+ */
+function convertToBytes(string $value): int {
+    $value = trim($value);
+    $unit = strtolower(substr($value, -1));
+    $bytes = (int) $value;
+    switch ($unit) {
+        case 'g': $bytes *= 1024;
+        case 'm': $bytes *= 1024;
+        case 'k': $bytes *= 1024;
+    }
+    return $bytes;
+}
+
 $success = '';
 $error = '';
 
@@ -367,21 +382,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
-}
-
-/**
- * Konvertera PHP-storlek (t.ex. "8M") till bytes
- */
-function convertToBytes(string $value): int {
-    $value = trim($value);
-    $unit = strtolower(substr($value, -1));
-    $bytes = (int) $value;
-    switch ($unit) {
-        case 'g': $bytes *= 1024;
-        case 'm': $bytes *= 1024;
-        case 'k': $bytes *= 1024;
-    }
-    return $bytes;
 }
 
 /**
