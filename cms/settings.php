@@ -7,25 +7,12 @@
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../security/session.php';
 require_once __DIR__ . '/../security/csrf.php';
+require_once __DIR__ . '/../version.php';
+require_once __DIR__ . '/helpers.php';
 
 if (!is_logged_in()) {
     header('Location: /cms/admin.php');
     exit;
-}
-
-/**
- * Konvertera PHP-storlek (t.ex. "8M") till bytes
- */
-function convertToBytes(string $value): int {
-    $value = trim($value);
-    $unit = strtolower(substr($value, -1));
-    $bytes = (int) $value;
-    switch ($unit) {
-        case 'g': $bytes *= 1024;
-        case 'm': $bytes *= 1024;
-        case 'k': $bytes *= 1024;
-    }
-    return $bytes;
 }
 
 $success = '';
@@ -382,38 +369,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-/**
- * Justera ljusstyrka på en hex-färg
- */
-function adjustBrightness(string $hex, int $percent): string {
-    $hex = ltrim($hex, '#');
-    if (strlen($hex) === 3) {
-        $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
-    }
-
-    $r = hexdec(substr($hex, 0, 2));
-    $g = hexdec(substr($hex, 2, 2));
-    $b = hexdec(substr($hex, 4, 2));
-
-    if ($percent > 0) {
-        $r = $r + (255 - $r) * $percent / 100;
-        $g = $g + (255 - $g) * $percent / 100;
-        $b = $b + (255 - $b) * $percent / 100;
-    } else {
-        $factor = (100 + $percent) / 100;
-        $r = $r * $factor;
-        $g = $g * $factor;
-        $b = $b * $factor;
-    }
-
-    $r = max(0, min(255, round($r)));
-    $g = max(0, min(255, round($g)));
-    $b = max(0, min(255, round($b)));
-
-    return '#' . str_pad(dechex($r), 2, '0', STR_PAD_LEFT)
-               . str_pad(dechex($g), 2, '0', STR_PAD_LEFT)
-               . str_pad(dechex($b), 2, '0', STR_PAD_LEFT);
-}
 ?>
 <!DOCTYPE html>
 <html lang="sv">
@@ -613,6 +568,71 @@ function adjustBrightness(string $hex, int $percent): string {
             font-size: 0.75rem;
             color: #a3a3a3;
             margin-top: 0.25rem;
+        }
+        .system-info-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .system-info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .system-info-item:last-child {
+            border-bottom: none;
+        }
+        .system-info-label {
+            font-size: 0.875rem;
+            color: #737373;
+        }
+        .system-info-value {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #18181b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .status-badge-ok {
+            background: #dcfce7;
+            color: #166534;
+            font-size: 0.625rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+        .status-badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 0.625rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+        .status-badge-critical {
+            background: #fee2e2;
+            color: #dc2626;
+            font-size: 0.625rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+        .system-info-hint {
+            font-size: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-top: -0.25rem;
+        }
+        .hint-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .hint-critical {
+            background: #fee2e2;
+            color: #dc2626;
         }
         .logo-preview {
             display: none;
@@ -947,6 +967,82 @@ function adjustBrightness(string $hex, int $percent): string {
 
                     <button type="submit" class="btn btn-primary">Spara</button>
                 </form>
+            </div>
+
+            <!-- Systeminformation -->
+            <?php
+            $phpVersion = PHP_VERSION;
+            $phpMajorMinor = (int) PHP_MAJOR_VERSION . '.' . (int) PHP_MINOR_VERSION;
+            $phpStatus = 'ok';
+            $phpMessage = 'Uppdaterad';
+            if (version_compare($phpVersion, '8.1', '<')) {
+                $phpStatus = version_compare($phpVersion, '8.0', '<') ? 'critical' : 'warning';
+                $phpMessage = $phpStatus === 'critical' ? 'Kritiskt föråldrad' : 'Bör uppgraderas';
+            }
+
+            // Diskutrymme
+            $diskFree = @disk_free_space(ROOT_PATH);
+            $diskTotal = @disk_total_space(ROOT_PATH);
+            $diskUsed = $diskTotal - $diskFree;
+            $diskUsedMB = $diskUsed !== false ? round($diskUsed / 1024 / 1024) : 0;
+            $diskTotalGB = $diskTotal !== false ? round($diskTotal / 1024 / 1024 / 1024, 1) : 0;
+
+            // Senaste uppdatering
+            $updateLogFile = DATA_PATH . '/update-log.json';
+            $lastUpdate = null;
+            if (file_exists($updateLogFile)) {
+                $updateLog = json_decode(file_get_contents($updateLogFile), true);
+                if (is_array($updateLog) && !empty($updateLog)) {
+                    $lastUpdate = end($updateLog);
+                }
+            }
+            ?>
+            <div class="card">
+                <h2 class="card-title">Systeminformation</h2>
+                <div class="system-info-grid">
+                    <div class="system-info-item">
+                        <span class="system-info-label">PHP-version</span>
+                        <span class="system-info-value">
+                            <?php echo htmlspecialchars($phpVersion); ?>
+                            <?php if ($phpStatus === 'ok'): ?>
+                                <span class="status-badge-ok">OK</span>
+                            <?php elseif ($phpStatus === 'warning'): ?>
+                                <span class="status-badge-warning">Uppgradera</span>
+                            <?php else: ?>
+                                <span class="status-badge-critical">Kritiskt</span>
+                            <?php endif; ?>
+                        </span>
+                    </div>
+                    <?php if ($phpStatus !== 'ok'): ?>
+                    <div class="system-info-hint <?php echo $phpStatus === 'critical' ? 'hint-critical' : 'hint-warning'; ?>">
+                        PHP <?php echo $phpMajorMinor; ?> <?php echo $phpStatus === 'critical' ? 'stöds inte längre' : 'bör uppgraderas'; ?>.
+                        Rekommenderat: PHP 8.1 eller senare.
+                    </div>
+                    <?php endif; ?>
+                    <div class="system-info-item">
+                        <span class="system-info-label">Bosse-version</span>
+                        <span class="system-info-value"><?php echo htmlspecialchars(BOSSE_VERSION); ?></span>
+                    </div>
+                    <div class="system-info-item">
+                        <span class="system-info-label">Senast uppdaterad</span>
+                        <span class="system-info-value"><?php echo htmlspecialchars(BOSSE_VERSION_DATE); ?></span>
+                    </div>
+                    <?php if ($diskTotal !== false): ?>
+                    <div class="system-info-item">
+                        <span class="system-info-label">Diskutrymme</span>
+                        <span class="system-info-value"><?php echo $diskUsedMB; ?> MB / <?php echo $diskTotalGB; ?> GB</span>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Backup -->
+            <div class="card">
+                <h2 class="card-title">Backup</h2>
+                <p class="hint" style="margin-bottom: 1rem;">Ladda ner en säkerhetskopia av ditt innehåll och uppladdade filer.</p>
+                <a href="/cms/api.php?action=backup" class="btn btn-primary" style="text-decoration: none;">
+                    Ladda ner backup
+                </a>
             </div>
 
         </div>

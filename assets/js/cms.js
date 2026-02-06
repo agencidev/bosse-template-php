@@ -349,46 +349,112 @@ function uploadImage(contentKey, field) {
 }
 
 /**
- * Show notification
+ * Show notification (toast)
+ * @param {string} message - Message to display
+ * @param {string} type - 'success', 'error', or 'info'
+ * @param {object} options - Optional settings: { duration: 5000, details: '' }
  */
-function showNotification(message, type = 'info') {
+function showNotification(message, type = 'info', options = {}) {
+  const duration = options.duration || 5000;
+  const details = options.details || '';
+
   // Inject CSS once
   if (!document.getElementById('cms-notification-styles')) {
     const style = document.createElement('style');
     style.id = 'cms-notification-styles';
     style.textContent = `
-      .cms-notification {
+      .cms-toast-container {
         position: fixed;
         bottom: 1.5rem;
         right: 1.5rem;
-        padding: 0.875rem 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        z-index: 10001;
+        pointer-events: none;
+      }
+      .cms-toast {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem 1.25rem;
         border-radius: 0.75rem;
         font-size: 0.875rem;
-        font-weight: 600;
+        font-weight: 500;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        z-index: 10001;
-        animation: cmsSlideIn 0.3s ease-out;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: cmsToastIn 0.3s ease-out;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15), 0 4px 6px rgba(0,0,0,0.1);
+        max-width: 360px;
+        pointer-events: auto;
       }
-      .cms-notification--success {
+      .cms-toast--success {
         background: #10b981;
         color: white;
       }
-      .cms-notification--error {
+      .cms-toast--error {
         background: #ef4444;
         color: white;
       }
-      .cms-notification--info {
+      .cms-toast--info {
         background: #3b82f6;
         color: white;
       }
-      @keyframes cmsSlideIn {
-        from { transform: translateY(1rem); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
+      .cms-toast-icon {
+        flex-shrink: 0;
+        width: 1.25rem;
+        height: 1.25rem;
       }
-      @keyframes cmsSlideOut {
-        from { transform: translateY(0); opacity: 1; }
-        to { transform: translateY(1rem); opacity: 0; }
+      .cms-toast-content {
+        flex: 1;
+      }
+      .cms-toast-message {
+        font-weight: 600;
+      }
+      .cms-toast-details {
+        font-size: 0.8125rem;
+        opacity: 0.9;
+        margin-top: 0.25rem;
+      }
+      .cms-toast-close {
+        flex-shrink: 0;
+        background: none;
+        border: none;
+        color: inherit;
+        opacity: 0.7;
+        cursor: pointer;
+        padding: 0;
+        font-size: 1.25rem;
+        line-height: 1;
+      }
+      .cms-toast-close:hover {
+        opacity: 1;
+      }
+      .cms-toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: rgba(255,255,255,0.3);
+        border-radius: 0 0 0.75rem 0.75rem;
+        overflow: hidden;
+      }
+      .cms-toast-progress-bar {
+        height: 100%;
+        background: rgba(255,255,255,0.7);
+        animation: cmsToastProgress linear forwards;
+      }
+      @keyframes cmsToastIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes cmsToastOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+      @keyframes cmsToastProgress {
+        from { width: 100%; }
+        to { width: 0%; }
       }
       .cms-editable-active {
         outline: 2px dashed rgba(254, 79, 42, 0.4);
@@ -428,13 +494,81 @@ function showNotification(message, type = 'info') {
     document.head.appendChild(style);
   }
 
-  const notification = document.createElement('div');
-  notification.className = `cms-notification cms-notification--${type}`;
-  notification.textContent = message;
-  document.body.appendChild(notification);
+  // Get or create container
+  let container = document.getElementById('cms-toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'cms-toast-container';
+    container.className = 'cms-toast-container';
+    document.body.appendChild(container);
+  }
 
-  setTimeout(() => {
-    notification.style.animation = 'cmsSlideOut 0.3s ease-out';
-    setTimeout(() => notification.remove(), 300);
-  }, 3000);
+  // Icon based on type
+  const icons = {
+    success: '<svg class="cms-toast-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
+    error: '<svg class="cms-toast-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
+    info: '<svg class="cms-toast-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+  };
+
+  const toast = document.createElement('div');
+  toast.className = `cms-toast cms-toast--${type}`;
+  toast.style.position = 'relative';
+  toast.innerHTML = `
+    ${icons[type] || icons.info}
+    <div class="cms-toast-content">
+      <div class="cms-toast-message">${escapeHtml(message)}</div>
+      ${details ? `<div class="cms-toast-details">${escapeHtml(details)}</div>` : ''}
+    </div>
+    <button class="cms-toast-close" aria-label="Stäng">&times;</button>
+    <div class="cms-toast-progress">
+      <div class="cms-toast-progress-bar" style="animation-duration: ${duration}ms"></div>
+    </div>
+  `;
+
+  // Close button
+  toast.querySelector('.cms-toast-close').addEventListener('click', () => {
+    dismissToast(toast);
+  });
+
+  container.appendChild(toast);
+
+  // Auto-dismiss
+  const timeoutId = setTimeout(() => {
+    dismissToast(toast);
+  }, duration);
+
+  // Pause on hover
+  toast.addEventListener('mouseenter', () => {
+    const progressBar = toast.querySelector('.cms-toast-progress-bar');
+    if (progressBar) progressBar.style.animationPlayState = 'paused';
+  });
+
+  toast.addEventListener('mouseleave', () => {
+    const progressBar = toast.querySelector('.cms-toast-progress-bar');
+    if (progressBar) progressBar.style.animationPlayState = 'running';
+  });
+
+  function dismissToast(el) {
+    clearTimeout(timeoutId);
+    el.style.animation = 'cmsToastOut 0.3s ease-out forwards';
+    setTimeout(() => el.remove(), 300);
+  }
+}
+
+/**
+ * Escape HTML for safe insertion
+ */
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/**
+ * Format file size for display
+ */
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1024 / 1024).toFixed(1) + ' MB';
 }

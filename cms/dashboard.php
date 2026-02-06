@@ -5,6 +5,7 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../security/session.php';
+require_once __DIR__ . '/../version.php';
 
 // Kräv inloggning
 if (!is_logged_in()) {
@@ -26,10 +27,35 @@ if (isset($_GET['_auto_update']) && $_GET['_auto_update'] === '1') {
 
 // Räkna inlägg
 $projectCount = 0;
+$publishedCount = 0;
 $projectsFile = DATA_PATH . '/projects.json';
 if (file_exists($projectsFile)) {
     $projects = json_decode(file_get_contents($projectsFile), true) ?? [];
     $projectCount = count($projects);
+    foreach ($projects as $p) {
+        if (($p['status'] ?? 'draft') === 'published') {
+            $publishedCount++;
+        }
+    }
+}
+
+// PHP-version
+$phpVersion = PHP_VERSION;
+$phpOk = version_compare($phpVersion, '8.1', '>=');
+
+// Diskutrymme
+$diskFree = @disk_free_space(ROOT_PATH);
+$diskTotal = @disk_total_space(ROOT_PATH);
+$diskUsedMB = ($diskTotal && $diskFree) ? round(($diskTotal - $diskFree) / 1024 / 1024) : 0;
+
+// Senaste uppdateringar
+$updateLog = [];
+$updateLogFile = DATA_PATH . '/update-log.json';
+if (file_exists($updateLogFile)) {
+    $logData = json_decode(file_get_contents($updateLogFile), true);
+    if (is_array($logData)) {
+        $updateLog = array_slice(array_reverse($logData), 0, 5);
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -143,6 +169,84 @@ if (file_exists($projectsFile)) {
         .logout button:hover {
             color: #737373;
         }
+        .stats-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e5e5;
+        }
+        .stats-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #18181b;
+            margin-bottom: 1rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 1rem;
+            padding: 1rem;
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            color: #737373;
+            margin-bottom: 0.25rem;
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #18181b;
+        }
+        .stat-value.ok {
+            color: #16a34a;
+        }
+        .stat-value.warning {
+            color: #ca8a04;
+        }
+        .update-log {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 1rem;
+            padding: 1rem;
+        }
+        .update-log-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #18181b;
+            margin-bottom: 0.75rem;
+        }
+        .update-log-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .update-log-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.8125rem;
+            color: #525252;
+        }
+        .update-log-date {
+            color: #a3a3a3;
+            font-size: 0.75rem;
+            min-width: 5rem;
+        }
+        .update-log-version {
+            font-weight: 600;
+            color: #18181b;
+        }
+        .update-log-success {
+            color: #16a34a;
+        }
+        .update-log-error {
+            color: #dc2626;
+        }
     </style>
 </head>
 <body>
@@ -241,6 +345,46 @@ if (file_exists($projectsFile)) {
                 </div>
                 <span class="label" style="color: #92400e;">Super Admin</span>
             </a>
+            <?php endif; ?>
+        </div>
+
+        <!-- Systemstatus -->
+        <div class="stats-section">
+            <h2 class="stats-title">Systemstatus</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">PHP-version</div>
+                    <div class="stat-value <?php echo $phpOk ? 'ok' : 'warning'; ?>"><?php echo htmlspecialchars($phpVersion); ?></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Bosse-version</div>
+                    <div class="stat-value"><?php echo htmlspecialchars(BOSSE_VERSION); ?></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Inlägg</div>
+                    <div class="stat-value"><?php echo $projectCount; ?></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Publicerade</div>
+                    <div class="stat-value"><?php echo $publishedCount; ?></div>
+                </div>
+            </div>
+
+            <?php if (!empty($updateLog)): ?>
+            <div class="update-log">
+                <div class="update-log-title">Senaste ändringar</div>
+                <div class="update-log-list">
+                    <?php foreach ($updateLog as $entry): ?>
+                    <div class="update-log-item">
+                        <span class="update-log-date"><?php echo htmlspecialchars(substr($entry['date'] ?? '', 0, 10)); ?></span>
+                        <span class="update-log-version <?php echo ($entry['type'] ?? '') === 'success' ? 'update-log-success' : (($entry['type'] ?? '') === 'error' ? 'update-log-error' : ''); ?>">
+                            v<?php echo htmlspecialchars($entry['version'] ?? '?'); ?>
+                        </span>
+                        <span><?php echo htmlspecialchars($entry['message'] ?? ''); ?></span>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
             <?php endif; ?>
         </div>
     </div>

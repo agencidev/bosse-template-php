@@ -105,6 +105,169 @@ function get_extension_from_mime($mime_type) {
 }
 
 /**
+ * Optimera bild vid uppladdning
+ * - Auto-resize om bredd > max_width
+ * - Komprimera JPEG till angiven kvalitet
+ * - Returnerar path till optimerad fil (eller original om optimering ej möjlig)
+ *
+ * @param string $path Sökväg till bildfilen
+ * @param int $max_width Max bredd i pixlar (default 2000)
+ * @param int $quality JPEG-kvalitet 0-100 (default 85)
+ * @return array ['success' => bool, 'path' => string, 'optimized' => bool, 'message' => string]
+ */
+function optimize_image(string $path, int $max_width = 2000, int $quality = 85): array {
+    // Kontrollera att GD finns
+    if (!extension_loaded('gd')) {
+        return [
+            'success' => true,
+            'path' => $path,
+            'optimized' => false,
+            'message' => 'GD-biblioteket saknas - ingen optimering'
+        ];
+    }
+
+    // Läs bildinfo
+    $imageInfo = @getimagesize($path);
+    if ($imageInfo === false) {
+        return [
+            'success' => true,
+            'path' => $path,
+            'optimized' => false,
+            'message' => 'Kunde inte läsa bildinfo'
+        ];
+    }
+
+    $width = $imageInfo[0];
+    $height = $imageInfo[1];
+    $mime = $imageInfo['mime'];
+
+    // Hoppa över om redan tillräckligt liten
+    if ($width <= $max_width) {
+        // Fortfarande komprimera JPEG om det är en
+        if ($mime === 'image/jpeg') {
+            $image = @imagecreatefromjpeg($path);
+            if ($image !== false) {
+                imagejpeg($image, $path, $quality);
+                imagedestroy($image);
+                return [
+                    'success' => true,
+                    'path' => $path,
+                    'optimized' => true,
+                    'message' => 'JPEG komprimerad'
+                ];
+            }
+        }
+        return [
+            'success' => true,
+            'path' => $path,
+            'optimized' => false,
+            'message' => 'Bilden behöver inte resizas'
+        ];
+    }
+
+    // Skapa bild från fil baserat på typ
+    switch ($mime) {
+        case 'image/jpeg':
+            $source = @imagecreatefromjpeg($path);
+            break;
+        case 'image/png':
+            $source = @imagecreatefrompng($path);
+            break;
+        case 'image/webp':
+            if (function_exists('imagecreatefromwebp')) {
+                $source = @imagecreatefromwebp($path);
+            } else {
+                return [
+                    'success' => true,
+                    'path' => $path,
+                    'optimized' => false,
+                    'message' => 'WebP-stöd saknas i GD'
+                ];
+            }
+            break;
+        case 'image/gif':
+            $source = @imagecreatefromgif($path);
+            break;
+        default:
+            return [
+                'success' => true,
+                'path' => $path,
+                'optimized' => false,
+                'message' => 'Bildtypen stöds inte för optimering'
+            ];
+    }
+
+    if ($source === false) {
+        return [
+            'success' => true,
+            'path' => $path,
+            'optimized' => false,
+            'message' => 'Kunde inte läsa bilden'
+        ];
+    }
+
+    // Beräkna nya dimensioner
+    $ratio = $max_width / $width;
+    $newWidth = $max_width;
+    $newHeight = (int) round($height * $ratio);
+
+    // Skapa ny bild
+    $resized = imagecreatetruecolor($newWidth, $newHeight);
+
+    // Bevara transparens för PNG
+    if ($mime === 'image/png') {
+        imagealphablending($resized, false);
+        imagesavealpha($resized, true);
+        $transparent = imagecolorallocatealpha($resized, 0, 0, 0, 127);
+        imagefilledrectangle($resized, 0, 0, $newWidth, $newHeight, $transparent);
+    }
+
+    // Resize
+    imagecopyresampled($resized, $source, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+    // Spara
+    $saved = false;
+    switch ($mime) {
+        case 'image/jpeg':
+            $saved = imagejpeg($resized, $path, $quality);
+            break;
+        case 'image/png':
+            // PNG-kvalitet är 0-9 (0 = ingen komprimering)
+            $pngQuality = (int) round((100 - $quality) / 11.11);
+            $saved = imagepng($resized, $path, $pngQuality);
+            break;
+        case 'image/webp':
+            if (function_exists('imagewebp')) {
+                $saved = imagewebp($resized, $path, $quality);
+            }
+            break;
+        case 'image/gif':
+            $saved = imagegif($resized, $path);
+            break;
+    }
+
+    // Frigör minne
+    imagedestroy($source);
+    imagedestroy($resized);
+
+    if ($saved) {
+        return [
+            'success' => true,
+            'path' => $path,
+            'optimized' => true,
+            'message' => "Resizad från {$width}x{$height} till {$newWidth}x{$newHeight}"
+        ];
+    }
+
+    return [
+        'success' => true,
+        'path' => $path,
+        'optimized' => false,
+        'message' => 'Kunde inte spara optimerad bild'
+    ];
+}
+
+/**
  * Generera säkert filnamn baserat på MIME-typ (inte originalnamn)
  */
 function generate_safe_filename($original_filename, $tmp_file = null) {

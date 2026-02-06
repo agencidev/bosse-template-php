@@ -10,6 +10,9 @@ if (file_exists(__DIR__ . '/config.php') || file_exists(__DIR__ . '/data/.setup-
     exit;
 }
 
+// Ladda hjälpfunktioner (adjustBrightness, etc.)
+require_once __DIR__ . '/cms/helpers.php';
+
 // Session (duplicerar bootstrap.php-inställningar)
 ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_secure', 0); // 0 för localhost under setup
@@ -196,9 +199,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             foreach (['logo_dark', 'logo_light'] as $logoField) {
                 if (isset($_FILES[$logoField]) && $_FILES[$logoField]['error'] === UPLOAD_ERR_OK) {
-                    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                    $mime = finfo_file($finfo, $_FILES[$logoField]['tmp_name']);
-                    finfo_close($finfo);
+                    $finfo = new finfo(FILEINFO_MIME_TYPE);
+                    $mime = $finfo->file($_FILES[$logoField]['tmp_name']);
 
                     if (!in_array($mime, $allowedMimes)) {
                         $logoErrors[] = ucfirst(str_replace('_', ' ', $logoField)) . ': Ogiltigt filformat. Tillåtna: PNG, JPG, SVG, WebP.';
@@ -215,9 +217,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Favicon validation
             if (isset($_FILES['favicon']) && $_FILES['favicon']['error'] === UPLOAD_ERR_OK) {
                 $faviconMimes = ['image/png', 'image/x-icon', 'image/vnd.microsoft.icon', 'image/svg+xml'];
-                $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                $faviconMime = finfo_file($finfo, $_FILES['favicon']['tmp_name']);
-                finfo_close($finfo);
+                $finfo = new finfo(FILEINFO_MIME_TYPE);
+                $faviconMime = $finfo->file($_FILES['favicon']['tmp_name']);
 
                 if (!in_array($faviconMime, $faviconMimes)) {
                     $logoErrors[] = 'Favicon: Ogiltigt filformat. Tillåtna: PNG, ICO, SVG.';
@@ -737,41 +738,6 @@ function generateAllFiles(array $data): array {
     }
 
     return $errors;
-}
-
-/**
- * Justera ljusstyrka på en hex-färg
- */
-function adjustBrightness(string $hex, int $percent): string {
-    $hex = ltrim($hex, '#');
-    if (strlen($hex) === 3) {
-        $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
-    }
-
-    $r = hexdec(substr($hex, 0, 2));
-    $g = hexdec(substr($hex, 2, 2));
-    $b = hexdec(substr($hex, 4, 2));
-
-    if ($percent > 0) {
-        // Lighten
-        $r = $r + (255 - $r) * $percent / 100;
-        $g = $g + (255 - $g) * $percent / 100;
-        $b = $b + (255 - $b) * $percent / 100;
-    } else {
-        // Darken
-        $factor = (100 + $percent) / 100;
-        $r = $r * $factor;
-        $g = $g * $factor;
-        $b = $b * $factor;
-    }
-
-    $r = max(0, min(255, round($r)));
-    $g = max(0, min(255, round($g)));
-    $b = max(0, min(255, round($b)));
-
-    return '#' . str_pad(dechex($r), 2, '0', STR_PAD_LEFT)
-               . str_pad(dechex($g), 2, '0', STR_PAD_LEFT)
-               . str_pad(dechex($b), 2, '0', STR_PAD_LEFT);
 }
 
 /**

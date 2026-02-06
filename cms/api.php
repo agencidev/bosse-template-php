@@ -25,15 +25,19 @@ switch ($action) {
     case 'get':
         handleGet();
         break;
-    
+
     case 'update':
         handleUpdate();
         break;
-    
+
     case 'upload':
         handleUpload();
         break;
-    
+
+    case 'backup':
+        handleBackup();
+        break;
+
     default:
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'Invalid action']);
@@ -105,20 +109,20 @@ function handleUpload() {
         echo json_encode(['success' => false, 'error' => 'CSRF validation failed']);
         exit;
     }
-    
+
     if (!isset($_FILES['image'])) {
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'No file uploaded']);
         exit;
     }
-    
+
     $key = $_POST['key'] ?? '';
     if (empty($key)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'Key is required']);
         exit;
     }
-    
+
     // Validera fil
     $validation = validate_file_upload($_FILES['image']);
     if (!$validation['valid']) {
@@ -126,21 +130,95 @@ function handleUpload() {
         echo json_encode(['success' => false, 'error' => $validation['error']]);
         exit;
     }
-    
+
     // Generera säkert filnamn baserat på faktisk MIME-typ
     $filename = generate_safe_filename($_FILES['image']['name'], $_FILES['image']['tmp_name']);
     $upload_path = UPLOADS_PATH . '/' . $filename;
-    
+
     // Flytta fil
     if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
         $url = '/uploads/' . $filename;
-        
+
         // Spara URL i content
         save_content($key, $url);
-        
+
         echo json_encode(['success' => true, 'url' => $url]);
     } else {
         http_response_code(500);
         echo json_encode(['success' => false, 'error' => 'Failed to upload file']);
     }
+}
+
+/**
+ * Skapa och ladda ner backup
+ */
+function handleBackup() {
+    // Kontrollera att ZipArchive finns
+    if (!class_exists('ZipArchive')) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'ZipArchive är inte tillgänglig på servern']);
+        exit;
+    }
+
+    $siteName = defined('SITE_NAME') ? preg_replace('/[^a-z0-9]/i', '-', SITE_NAME) : 'bosse';
+    $filename = 'backup-' . strtolower($siteName) . '-' . date('Y-m-d') . '.zip';
+
+    // Skapa temporär ZIP-fil
+    $tmpFile = sys_get_temp_dir() . '/' . $filename;
+
+    $zip = new ZipArchive();
+    if ($zip->open($tmpFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Kunde inte skapa ZIP-fil']);
+        exit;
+    }
+
+    // Lägg till data-filer
+    $dataPath = DATA_PATH;
+    $filesToBackup = ['content.json', 'projects.json'];
+    foreach ($filesToBackup as $file) {
+        $fullPath = $dataPath . '/' . $file;
+        if (file_exists($fullPath)) {
+            $zip->addFile($fullPath, 'data/' . $file);
+        }
+    }
+
+    // Lägg till uploads-mapp (med storleksbegränsning)
+    $uploadsPath = UPLOADS_PATH;
+    if (is_dir($uploadsPath)) {
+        $totalSize = 0;
+        $maxSize = 50 * 1024 * 1024; // 50 MB max för uploads
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($uploadsPath, RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+
+        foreach ($iterator as $file) {
+            if ($file->isFile()) {
+                $fileSize = $file->getSize();
+                if ($totalSize + $fileSize > $maxSize) {
+                    // Stoppa om vi når gränsen
+                    break;
+                }
+                $relativePath = 'uploads/' . substr($file->getPathname(), strlen($uploadsPath) + 1);
+                $zip->addFile($file->getPathname(), $relativePath);
+                $totalSize += $fileSize;
+            }
+        }
+    }
+
+    $zip->close();
+
+    // Skicka filen
+    header('Content-Type: application/zip');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Content-Length: ' . filesize($tmpFile));
+    header('Cache-Control: no-cache, must-revalidate');
+    header('Pragma: no-cache');
+
+    readfile($tmpFile);
+
+    // Rensa upp
+    @unlink($tmpFile);
+    exit;
 }

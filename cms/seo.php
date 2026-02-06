@@ -1,10 +1,53 @@
 <?php
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../security/session.php';
+require_once __DIR__ . '/../security/csrf.php';
 
 if (!is_logged_in()) {
     header('Location: /cms/admin.php');
     exit;
+}
+
+$success = '';
+$error = '';
+
+// Läs innehåll
+$contentFile = DATA_PATH . '/content.json';
+$content = [];
+if (file_exists($contentFile)) {
+    $content = json_decode(file_get_contents($contentFile), true) ?? [];
+}
+
+// Hämta nuvarande meta-värden
+$metaTitle = $content['home']['meta_title'] ?? (defined('SITE_NAME') ? SITE_NAME : '');
+$metaDescription = $content['home']['meta_description'] ?? (defined('SITE_DESCRIPTION') ? SITE_DESCRIPTION : '');
+$siteUrl = defined('SITE_URL') ? SITE_URL : '';
+
+// Hantera formulär
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_require();
+
+    $newTitle = trim($_POST['meta_title'] ?? '');
+    $newDescription = trim($_POST['meta_description'] ?? '');
+
+    if (empty($newTitle)) {
+        $error = 'Meta-titel krävs.';
+    } else {
+        // Uppdatera content
+        if (!isset($content['home'])) {
+            $content['home'] = [];
+        }
+        $content['home']['meta_title'] = $newTitle;
+        $content['home']['meta_description'] = $newDescription;
+
+        if (file_put_contents($contentFile, json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX)) {
+            $success = 'Meta-information uppdaterad!';
+            $metaTitle = $newTitle;
+            $metaDescription = $newDescription;
+        } else {
+            $error = 'Kunde inte spara ändringar.';
+        }
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -227,6 +270,133 @@ if (!is_logged_in()) {
                 grid-template-columns: 1fr;
             }
         }
+        .meta-card {
+            background: white;
+            border-radius: 1.5rem;
+            border: 1px solid #e5e5e5;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .meta-card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #18181b;
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #18181b;
+            margin-bottom: 0.375rem;
+        }
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d4d4d4;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .form-input:focus, .form-textarea:focus {
+            border-color: #fe4f2a;
+            box-shadow: 0 0 0 3px rgba(254, 79, 42, 0.1);
+        }
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .char-count {
+            font-size: 0.75rem;
+            color: #737373;
+            margin-top: 0.25rem;
+            text-align: right;
+        }
+        .char-count.warning {
+            color: #ca8a04;
+        }
+        .char-count.error {
+            color: #dc2626;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #fe4f2a;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #e8461f;
+        }
+        .alert {
+            padding: 0.875rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+        .alert-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+        .alert-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+        }
+        .google-preview {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            margin-top: 1.5rem;
+        }
+        .google-preview-label {
+            font-size: 0.75rem;
+            color: #737373;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+        }
+        .google-preview-title {
+            font-size: 1.25rem;
+            color: #1a0dab;
+            font-weight: 400;
+            margin-bottom: 0.25rem;
+            line-height: 1.3;
+            text-decoration: none;
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .google-preview-url {
+            font-size: 0.875rem;
+            color: #006621;
+            margin-bottom: 0.25rem;
+        }
+        .google-preview-description {
+            font-size: 0.875rem;
+            color: #545454;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
@@ -244,9 +414,84 @@ if (!is_logged_in()) {
         </div>
 
         <p class="description">
-            SEO är ett kompletterande mervärde. Vi arbetar med grundläggande optimering och övervakning 
+            SEO är ett kompletterande mervärde. Vi arbetar med grundläggande optimering och övervakning
             som stöd för webbens kvalitet – inte som en primär tjänst eller med specifika resultatlöften.
         </p>
+
+        <?php if ($success): ?>
+        <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
+        <?php endif; ?>
+
+        <?php if ($error): ?>
+        <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
+
+        <!-- Meta-redigerare -->
+        <div class="meta-card">
+            <h2 class="meta-card-title">Meta-information för startsidan</h2>
+            <form method="POST">
+                <?php echo csrf_field(); ?>
+
+                <div class="form-group">
+                    <label class="form-label" for="meta_title">Meta-titel</label>
+                    <input type="text" id="meta_title" name="meta_title" class="form-input"
+                           value="<?php echo htmlspecialchars($metaTitle); ?>"
+                           placeholder="Företagsnamn - Kort beskrivning"
+                           oninput="updatePreview(); updateCharCount('meta_title', 60)">
+                    <div class="char-count" id="meta_title_count">
+                        <?php echo mb_strlen($metaTitle); ?>/60 tecken
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="meta_description">Meta-beskrivning</label>
+                    <textarea id="meta_description" name="meta_description" class="form-textarea"
+                              placeholder="En kort beskrivning av er verksamhet..."
+                              oninput="updatePreview(); updateCharCount('meta_description', 160)"><?php echo htmlspecialchars($metaDescription); ?></textarea>
+                    <div class="char-count" id="meta_description_count">
+                        <?php echo mb_strlen($metaDescription); ?>/160 tecken
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Spara</button>
+
+                <!-- Google Preview -->
+                <div class="google-preview">
+                    <div class="google-preview-label">Så här kan det se ut i Google:</div>
+                    <a class="google-preview-title" id="preview-title"><?php echo htmlspecialchars($metaTitle ?: 'Din sidtitel'); ?></a>
+                    <div class="google-preview-url"><?php echo htmlspecialchars($siteUrl ?: 'https://dinwebbplats.se'); ?></div>
+                    <div class="google-preview-description" id="preview-description"><?php echo htmlspecialchars($metaDescription ?: 'Din meta-beskrivning kommer visas här...'); ?></div>
+                </div>
+            </form>
+        </div>
+
+        <script>
+        function updatePreview() {
+            const title = document.getElementById('meta_title').value || 'Din sidtitel';
+            const desc = document.getElementById('meta_description').value || 'Din meta-beskrivning kommer visas här...';
+            document.getElementById('preview-title').textContent = title;
+            document.getElementById('preview-description').textContent = desc;
+        }
+
+        function updateCharCount(fieldId, limit) {
+            const field = document.getElementById(fieldId);
+            const countEl = document.getElementById(fieldId + '_count');
+            const len = field.value.length;
+
+            countEl.textContent = len + '/' + limit + ' tecken';
+            countEl.className = 'char-count';
+
+            if (len > limit) {
+                countEl.classList.add('error');
+            } else if (len > limit * 0.9) {
+                countEl.classList.add('warning');
+            }
+        }
+
+        // Initial update
+        updateCharCount('meta_title', 60);
+        updateCharCount('meta_description', 160);
+        </script>
 
         <div class="grid">
             <div class="card">

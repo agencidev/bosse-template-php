@@ -25,9 +25,11 @@ $updatableFiles = [
     'bootstrap.php', 'router.php', 'setup.php', 'version.php',
     '.htaccess', '.user.ini', '403.php', '404.php', '500.php', 'robots.php',
     'site.webmanifest',
+    'projekt.php', 'projekt-single.php', 'CLAUDE.md',
     'cms/admin.php', 'cms/dashboard.php', 'cms/content.php',
     'cms/api.php', 'cms/api-super.php', 'cms/super-admin.php',
     'cms/seo.php', 'cms/support.php', 'cms/ai.php', 'cms/settings.php',
+    'cms/helpers.php',
     'cms/projects/index.php', 'cms/projects/new.php', 'cms/projects/edit.php',
     'security/csrf.php', 'security/session.php', 'security/validation.php',
     'security/super-admin.php', 'security/updater.php',
@@ -39,7 +41,7 @@ $updatableFiles = [
 ];
 
 // Hela mappar som ingar
-$updatableDirs = ['bin', 'templates', 'assets/images/cms'];
+$updatableDirs = ['bin', 'templates', '.github', 'assets/images/cms'];
 
 // --- Argument ---
 

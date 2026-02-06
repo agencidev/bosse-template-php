@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../bootstrap.php';
 require_once __DIR__ . '/../../security/session.php';
 require_once __DIR__ . '/../../security/csrf.php';
+require_once __DIR__ . '/../helpers.php';
 
 if (!is_logged_in()) {
     header('Location: /cms/admin.php');
@@ -11,29 +12,11 @@ if (!is_logged_in()) {
 $error = '';
 $success = false;
 
-/**
- * Konvertera PHP-storlek (t.ex. "8M") till bytes
- */
-function convertToBytes(string $value): int {
-    $value = trim($value);
-    $unit = strtolower(substr($value, -1));
-    $bytes = (int) $value;
-    switch ($unit) {
-        case 'g': $bytes *= 1024;
-        case 'm': $bytes *= 1024;
-        case 'k': $bytes *= 1024;
-    }
-    return $bytes;
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Detektera om POST-data trunkerades pga PHP-gränser
-    $contentLength = $_SERVER['CONTENT_LENGTH'] ?? 0;
-    $postMaxSize = ini_get('post_max_size');
-    $postMaxBytes = convertToBytes($postMaxSize);
-
-    if ($contentLength > $postMaxBytes || (empty($_POST) && $contentLength > 0)) {
-        $error = 'Filen är för stor för servern. Max: ' . $postMaxSize . '. Kontakta din webbhost för att öka gränsen, eller använd en mindre bild.';
+    $postError = checkPostSizeLimit();
+    if ($postError) {
+        $error = $postError;
     } else {
         csrf_require();
     }
@@ -48,10 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (empty($category)) {
         $error = 'Kategori krävs';
     } else {
-        $slug = strtolower($title);
-        $slug = str_replace(['å', 'ä', 'ö'], ['a', 'a', 'o'], $slug);
-        $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
-        $slug = trim($slug, '-');
+        $slug = generateSlug($title);
 
         // Handle cover image upload
         $coverImage = '';
@@ -59,9 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
             $maxSize = 5 * 1024 * 1024; // 5MB
 
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $mime = finfo_file($finfo, $_FILES['cover_image']['tmp_name']);
-            finfo_close($finfo);
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $mime = $finfo->file($_FILES['cover_image']['tmp_name']);
 
             if (in_array($mime, $allowedMimes) && $_FILES['cover_image']['size'] <= $maxSize) {
                 $uploadDir = __DIR__ . '/../../uploads/projects/';
