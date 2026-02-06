@@ -248,6 +248,62 @@ Använd `editable_text()` för innehåll som ska vara redigerbart via CMS:
 
 ---
 
+## Skapa nya sidor — OBLIGATORISKT
+
+När du skapar en ny sida (t.ex. `om-oss.php`, `tjanster.php`) MÅSTE du följa denna mall:
+
+```php
+<?php
+/**
+ * [Sidnamn] Page
+ */
+
+require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/security/session.php';
+require_once __DIR__ . '/cms/content.php';
+require_once __DIR__ . '/seo/meta.php';
+?>
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <?php
+    generateMeta(
+        get_content('sidnamn.meta_title', 'Sidtitel'),
+        get_content('sidnamn.meta_description', 'Beskrivning')
+    );
+    ?>
+
+    <?php if (file_exists(__DIR__ . '/includes/fonts.php')) include __DIR__ . '/includes/fonts.php'; ?>
+    <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+    <?php include __DIR__ . '/includes/admin-bar.php'; ?>
+    <?php include __DIR__ . '/includes/header.php'; ?>
+
+    <main>
+        <!-- Sidinnehåll här -->
+    </main>
+
+    <?php include __DIR__ . '/includes/footer.php'; ?>
+    <?php include __DIR__ . '/includes/cookie-consent.php'; ?>
+</body>
+</html>
+```
+
+**Checklista för nya sidor:**
+- [ ] `bootstrap.php` och `session.php` inkluderade
+- [ ] `generateMeta()` för SEO
+- [ ] `admin-bar.php` FÖRE header
+- [ ] `header.php` inkluderad
+- [ ] `footer.php` inkluderad
+- [ ] `cookie-consent.php` sist i body
+- [ ] Lägg till rutt i `router.php`
+
+---
+
 ## Filstruktur
 
 ```

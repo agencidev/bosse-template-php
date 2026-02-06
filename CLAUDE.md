@@ -24,6 +24,22 @@ Se `.windsurf/brand-guide.md` för varumärkesguide (färger, typsnitt, tonalite
 
 ## Snabbref
 
+### Nya sidor (VIKTIGT!)
+När du skapar nya sidor (om-oss.php, tjanster.php etc.):
+1. **Kopiera** `templates/page-template.php`
+2. **MÅSTE inkludera:** `header.php` och `footer.php`
+3. **Lägg till rutt** i `router.php`
+
+```php
+// Minsta struktur för ny sida:
+<?php include __DIR__ . '/includes/admin-bar.php'; ?>
+<?php include __DIR__ . '/includes/header.php'; ?>
+<main>
+    <!-- Innehåll -->
+</main>
+<?php include __DIR__ . '/includes/footer.php'; ?>
+```
+
 ### CSS-ändringar
 - **Skriv alltid i:** `assets/css/overrides.css`
 - **Ändra ALDRIG:** `variables.css` eller `components.css`

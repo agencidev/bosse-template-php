@@ -212,9 +212,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Validera MIME-typ
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $mime = finfo_file($finfo, $_FILES[$logoField]['tmp_name']);
-            finfo_close($finfo);
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $mime = $finfo->file($_FILES[$logoField]['tmp_name']);
 
             if (in_array($mime, $allowedMimes) && $_FILES[$logoField]['size'] <= $maxSize) {
                 $ext = strtolower(pathinfo($_FILES[$logoField]['name'], PATHINFO_EXTENSION));
@@ -289,9 +288,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 };
             } else {
                 $faviconMimes = ['image/png', 'image/x-icon', 'image/vnd.microsoft.icon', 'image/svg+xml'];
-                $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                $mime = finfo_file($finfo, $_FILES['favicon']['tmp_name']);
-                finfo_close($finfo);
+                $finfo = new finfo(FILEINFO_MIME_TYPE);
+                $mime = $finfo->file($_FILES['favicon']['tmp_name']);
 
                 if (in_array($mime, $faviconMimes) && $_FILES['favicon']['size'] <= 1024 * 1024) {
                     $ext = strtolower(pathinfo($_FILES['favicon']['name'], PATHINFO_EXTENSION));
@@ -616,6 +614,26 @@ function adjustBrightness(string $hex, int $percent): string {
             color: #a3a3a3;
             margin-top: 0.25rem;
         }
+        .logo-preview {
+            display: none;
+            max-height: 60px;
+            max-width: 100%;
+            margin-top: 0.5rem;
+            border-radius: 0.25rem;
+            border: 1px solid #e5e5e5;
+            padding: 0.25rem;
+            background: #f5f5f5;
+        }
+        .logo-preview.dark-bg {
+            background: #333;
+        }
+        .file-selected {
+            border-color: #22c55e !important;
+            background: #f0fdf4 !important;
+        }
+        .file-selected .file-upload-text {
+            color: #166534;
+        }
     </style>
 </head>
 <body>
@@ -753,13 +771,14 @@ function adjustBrightness(string $hex, int $percent): string {
                                 <span>Nuvarande</span>
                             </div>
                             <?php endif; ?>
-                            <div class="file-upload">
-                                <input type="file" name="logo_dark" accept=".png,.jpg,.jpeg,.svg,.webp">
+                            <div class="file-upload" id="upload-dark">
+                                <input type="file" name="logo_dark" accept=".png,.jpg,.jpeg,.svg,.webp" onchange="previewLogo(this, 'preview-dark', 'upload-dark')">
                                 <div class="file-upload-text">
-                                    <strong>Välj fil</strong><br>
+                                    <strong>Välj fil</strong> eller dra hit<br>
                                     <small>PNG, JPG, SVG, WebP</small>
                                 </div>
                             </div>
+                            <img class="logo-preview" id="preview-dark" alt="Förhandsgranskning">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Ljus logotyp</label>
@@ -770,13 +789,14 @@ function adjustBrightness(string $hex, int $percent): string {
                                 <span>Nuvarande</span>
                             </div>
                             <?php endif; ?>
-                            <div class="file-upload">
-                                <input type="file" name="logo_light" accept=".png,.jpg,.jpeg,.svg,.webp">
+                            <div class="file-upload" id="upload-light">
+                                <input type="file" name="logo_light" accept=".png,.jpg,.jpeg,.svg,.webp" onchange="previewLogo(this, 'preview-light', 'upload-light')">
                                 <div class="file-upload-text">
-                                    <strong>Välj fil</strong><br>
+                                    <strong>Välj fil</strong> eller dra hit<br>
                                     <small>PNG, JPG, SVG, WebP</small>
                                 </div>
                             </div>
+                            <img class="logo-preview dark-bg" id="preview-light" alt="Förhandsgranskning">
                         </div>
                     </div>
 
@@ -826,13 +846,14 @@ function adjustBrightness(string $hex, int $percent): string {
                             <span>Nuvarande favicon</span>
                         </div>
                         <?php endif; ?>
-                        <div class="file-upload">
-                            <input type="file" name="favicon" accept=".png,.ico,.svg">
+                        <div class="file-upload" id="upload-favicon">
+                            <input type="file" name="favicon" accept=".png,.ico,.svg" onchange="previewFavicon(this)">
                             <div class="file-upload-text">
-                                <strong>Välj fil</strong><br>
+                                <strong>Välj fil</strong> eller dra hit<br>
                                 <small>PNG, ICO, SVG (max 1MB, rekommenderat 32x32px)</small>
                             </div>
                         </div>
+                        <img class="logo-preview" id="preview-favicon" alt="Förhandsgranskning" style="max-height: 32px;">
                     </div>
 
                     <button type="submit" class="btn btn-primary">Ladda upp</button>
@@ -930,5 +951,45 @@ function adjustBrightness(string $hex, int $percent): string {
 
         </div>
     </div>
+
+    <script>
+    // Förhandsvisning av logotyp
+    function previewLogo(input, previewId, uploadId) {
+        const preview = document.getElementById(previewId);
+        const uploadBox = document.getElementById(uploadId);
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                uploadBox.classList.add('file-selected');
+            };
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.style.display = 'none';
+            uploadBox.classList.remove('file-selected');
+        }
+    }
+
+    // Förhandsvisning av favicon
+    function previewFavicon(input) {
+        const preview = document.getElementById('preview-favicon');
+        const uploadBox = document.getElementById('upload-favicon');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                uploadBox.classList.add('file-selected');
+            };
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.style.display = 'none';
+            uploadBox.classList.remove('file-selected');
+        }
+    }
+    </script>
 </body>
 </html>
