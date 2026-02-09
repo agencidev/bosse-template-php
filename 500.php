@@ -10,7 +10,7 @@ http_response_code(500);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>500 - Serverfel | <?php echo SITE_NAME; ?></title>
     <meta name="robots" content="noindex, nofollow">
-    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="/assets/css/main.css?v=<?php echo BOSSE_VERSION; ?>">
     <style>
         .error-page {
             min-height: 100vh;

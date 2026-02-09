@@ -30,7 +30,7 @@ header('Pragma: no-cache');
     <?php if (file_exists(__DIR__ . '/../assets/images/favicon.png')): ?>
     <link rel="icon" type="image/png" href="/assets/images/favicon.png">
     <?php endif; ?>
-    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="/assets/css/main.css?v=<?php echo BOSSE_VERSION; ?>">
 </head>
 <body>
     <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
@@ -56,7 +56,7 @@ header('Pragma: no-cache');
 
     <?php include __DIR__ . '/../includes/footer.php'; ?>
 
-    <script src="/assets/js/cms.js"></script>
+    <script src="/assets/js/cms.js?v=<?php echo BOSSE_VERSION; ?>"></script>
     <?php include __DIR__ . '/../includes/cookie-consent.php'; ?>
 </body>
 </html>

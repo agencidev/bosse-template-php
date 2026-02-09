@@ -93,7 +93,7 @@ function projectSchema($project) {
     <?php if (file_exists(__DIR__ . '/assets/images/apple-touch-icon.png')): ?>
     <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
     <?php endif; ?>
-    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="/assets/css/main.css?v=<?php echo BOSSE_VERSION; ?>">
 
     <?php echo projectSchema($project); ?>
 
@@ -405,7 +405,7 @@ function projectSchema($project) {
 
     <?php include __DIR__ . '/includes/footer.php'; ?>
 
-    <script src="/assets/js/cms.js"></script>
+    <script src="/assets/js/cms.js?v=<?php echo BOSSE_VERSION; ?>"></script>
 
     <?php if (is_logged_in()): ?>
         <form style="display: none;">
