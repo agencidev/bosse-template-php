@@ -10,8 +10,12 @@ if (file_exists(__DIR__ . '/config.php') || file_exists(__DIR__ . '/data/.setup-
     exit;
 }
 
-// Detektera config-only läge (.installed finns = siten har redan konfigurerats en gång)
-$configOnlyMode = file_exists(__DIR__ . '/.installed');
+// Detektera config-only läge: setup har redan körts om designfiler finns
+// Dessa filer skapas enbart av setup och är INTE gitignored — de följer med vid push/deploy
+$configOnlyMode = file_exists(__DIR__ . '/.installed')
+    || file_exists(__DIR__ . '/.windsurf/brand-guide.md')
+    || file_exists(__DIR__ . '/includes/fonts.php')
+    || file_exists(__DIR__ . '/assets/css/overrides.css');
 
 // Ladda hjälpfunktioner (adjustBrightness, etc.) med fallback
 $helpersFile = __DIR__ . '/cms/helpers.php';
