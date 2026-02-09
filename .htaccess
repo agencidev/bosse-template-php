@@ -110,26 +110,9 @@ RewriteRule ^(.+?)/?$ $1.php [L,QSA]
 # Skydda data/backups och data/tmp
 RewriteRule ^data/(backups|tmp)/ - [F,L]
 
-# Förhindra PHP-exekvering i uploads
-<Directory "uploads">
-    <IfModule mod_php.c>
-        php_flag engine off
-    </IfModule>
-    RemoveHandler .php .phtml .php3
-    RemoveType .php .phtml .php3
-</Directory>
-
-
-############################################
-# PHP-inställningar (SiteGround-kompatibelt)
-############################################
-
-<IfModule mod_php.c>
-    php_value upload_max_filesize 10M
-    php_value post_max_size 10M
-    php_value max_execution_time 300
-    php_value max_input_time 300
-</IfModule>
+# Förhindra PHP-exekvering i uploads (se uploads/.htaccess)
+# OBS: <Directory> och php_value/php_flag är inte tillåtna i .htaccess på PHP-FPM-servrar
+# PHP-inställningar hanteras via .user.ini
 
 
 ############################################

@@ -1,0 +1,6 @@
+# Förhindra PHP-exekvering i uploads
+RemoveHandler .php .phtml .php3
+RemoveType .php .phtml .php3
+<FilesMatch "\.ph(p[345]?|tml)$">
+    Require all denied
+</FilesMatch>
