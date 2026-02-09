@@ -16,6 +16,12 @@ if (!file_exists($configPath)) {
 }
 require_once $configPath;
 
+// Skapa .installed-markör om den saknas (för projekt som installerades före v1.5.14)
+$installedMarker = __DIR__ . '/.installed';
+if (!file_exists($installedMarker)) {
+    @file_put_contents($installedMarker, 'Installed: ' . date('Y-m-d H:i:s') . "\n");
+}
+
 // Ladda version
 require_once __DIR__ . '/version.php';
 
