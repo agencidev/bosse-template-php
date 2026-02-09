@@ -1,0 +1,17 @@
+{
+    "hero": {
+        "title": "Välkommen till Målarkompetens AB",
+        "description": "Måleribolag",
+        "cta_primary": "Kontakta oss",
+        "cta_secondary": "Läs mer"
+    },
+    "home": {
+        "meta_title": "Målarkompetens AB - Måleribolag",
+        "meta_description": "Måleribolag"
+    },
+    "footer": {
+        "company_name": "Målarkompetens AB",
+        "email": "christian@agenci.se",
+        "phone": "073 758 22 65"
+    }
+}
