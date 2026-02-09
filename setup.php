@@ -10,6 +10,9 @@ if (file_exists(__DIR__ . '/config.php') || file_exists(__DIR__ . '/data/.setup-
     exit;
 }
 
+// Detektera config-only läge (.installed finns = siten har redan konfigurerats en gång)
+$configOnlyMode = file_exists(__DIR__ . '/.installed');
+
 // Ladda hjälpfunktioner (adjustBrightness, etc.) med fallback
 $helpersFile = __DIR__ . '/cms/helpers.php';
 if (file_exists($helpersFile)) {
@@ -61,6 +64,11 @@ if (empty($_SESSION['setup_csrf'])) {
 $errors = [];
 $step = isset($_GET['step']) ? (int)$_GET['step'] : 1;
 $step = max(1, min(3, $step));
+
+// I config-only mode: steg 2 (design) hoppas över
+if ($configOnlyMode && $step === 2) {
+    $step = 3;
+}
 
 // Pre-flight: kontrollera skrivbehörigheter
 $writableCheck = [
@@ -160,7 +168,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'hours_weekdays' => $hours_weekdays,
                     'hours_weekends' => $hours_weekends,
                 ]);
-                header('Location: /setup?step=2');
+                if ($configOnlyMode) {
+                    // Hoppa över design-steg — gå direkt till admin-credentials
+                    header('Location: /setup?step=3');
+                } else {
+                    header('Location: /setup?step=2');
+                }
                 exit;
             }
             $step = 1;
@@ -331,8 +344,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $data['admin_username'] = $admin_username;
                 $data['admin_password'] = $admin_password;
 
-                // === GENERERA ALLA FILER ===
-                $genErrors = generateAllFiles($data);
+                if ($configOnlyMode) {
+                    // === ENBART CONFIG.PHP (deploy till ny server) ===
+                    $genErrors = generateConfigOnly($data);
+                } else {
+                    // === GENERERA ALLA FILER (första installation) ===
+                    $genErrors = generateAllFiles($data);
+                }
                 if (!empty($genErrors)) {
                     $errors = $genErrors;
                     $step = 3;
@@ -766,6 +784,88 @@ function generateAllFiles(array $data): array {
         $overridesContent .= " */\n";
         file_put_contents($overridesFile, $overridesContent);
     }
+
+    // 11. .installed marker (committas till git — förhindrar att setup körs igen vid deploy)
+    file_put_contents(__DIR__ . '/.installed', 'Installed: ' . date('Y-m-d H:i:s') . "\n");
+
+    return $errors;
+}
+
+/**
+ * Generera ENBART config.php (vid deploy till ny server)
+ * Rör INTE design, CSS, innehåll eller andra filer.
+ */
+function generateConfigOnly(array $data): array {
+    $errors = [];
+
+    $sessionSecret = bin2hex(random_bytes(32));
+    $csrfSalt = bin2hex(random_bytes(32));
+    $passwordHash = password_hash($data['admin_password'], PASSWORD_BCRYPT);
+
+    $configContent = "<?php\n";
+    $configContent .= "/**\n * Konfiguration - Genererad av Quick Config\n * " . date('Y-m-d H:i:s') . "\n */\n\n";
+    $configContent .= "// Site\n";
+    $configContent .= "define('SITE_URL', " . var_export($data['site_url'], true) . ");\n";
+    $configContent .= "define('SITE_NAME', " . var_export($data['site_name'], true) . ");\n";
+    $configContent .= "define('SITE_DESCRIPTION', " . var_export($data['site_description'], true) . ");\n";
+    $configContent .= "define('CONTACT_EMAIL', " . var_export($data['contact_email'], true) . ");\n";
+    $configContent .= "define('CONTACT_PHONE', " . var_export($data['contact_phone'], true) . ");\n\n";
+    $configContent .= "// Admin\n";
+    $configContent .= "define('ADMIN_USERNAME', " . var_export($data['admin_username'], true) . ");\n";
+    $configContent .= "define('ADMIN_PASSWORD_HASH', " . var_export($passwordHash, true) . ");\n\n";
+    $configContent .= "// Security\n";
+    $configContent .= "define('SESSION_SECRET', " . var_export($sessionSecret, true) . ");\n";
+    $configContent .= "define('CSRF_TOKEN_SALT', " . var_export($csrfSalt, true) . ");\n\n";
+
+    if (!empty($data['smtp_host'])) {
+        $configContent .= "// SMTP\n";
+        $configContent .= "define('SMTP_HOST', " . var_export($data['smtp_host'], true) . ");\n";
+        $configContent .= "define('SMTP_PORT', " . (int)$data['smtp_port'] . ");\n";
+        $configContent .= "define('SMTP_ENCRYPTION', " . var_export($data['smtp_encryption'], true) . ");\n";
+        $configContent .= "define('SMTP_USERNAME', " . var_export($data['smtp_username'], true) . ");\n";
+        $configContent .= "define('SMTP_PASSWORD', " . var_export($data['smtp_password'], true) . ");\n\n";
+    }
+
+    if (!empty($data['ga_id'])) {
+        $configContent .= "// Google Analytics\n";
+        $configContent .= "define('GOOGLE_ANALYTICS_ID', " . var_export($data['ga_id'], true) . ");\n\n";
+    }
+
+    $hasSocial = !empty($data['social_facebook']) || !empty($data['social_instagram']) || !empty($data['social_linkedin']);
+    if ($hasSocial) {
+        $configContent .= "// Sociala medier\n";
+        if (!empty($data['social_facebook'])) $configContent .= "define('SOCIAL_FACEBOOK', " . var_export($data['social_facebook'], true) . ");\n";
+        if (!empty($data['social_instagram'])) $configContent .= "define('SOCIAL_INSTAGRAM', " . var_export($data['social_instagram'], true) . ");\n";
+        if (!empty($data['social_linkedin'])) $configContent .= "define('SOCIAL_LINKEDIN', " . var_export($data['social_linkedin'], true) . ");\n";
+        $configContent .= "\n";
+    }
+
+    if (!empty($data['hours_weekdays'])) {
+        $configContent .= "// Öppettider\n";
+        $configContent .= "define('HOURS_WEEKDAYS', " . var_export($data['hours_weekdays'], true) . ");\n";
+        $configContent .= "define('HOURS_WEEKENDS', " . var_export($data['hours_weekends'] ?? 'Stängt', true) . ");\n\n";
+    }
+
+    $configContent .= "// Environment\n";
+    $configContent .= "define('ENVIRONMENT', 'production');\n\n";
+
+    $saToken = bin2hex(random_bytes(32));
+    $configContent .= "// Agenci\n";
+    $configContent .= "define('AGENCI_SUPER_ADMIN_TOKEN', " . var_export($saToken, true) . ");\n";
+    $configContent .= "define('AGENCI_UPDATE_URL', 'https://raw.githubusercontent.com/agencidev/bosse-updates/main');\n";
+    $configContent .= "define('AGENCI_UPDATE_KEY', '');\n";
+
+    if (file_put_contents(__DIR__ . '/config.php', $configContent) === false) {
+        $errors[] = 'Kunde inte skriva config.php';
+        return $errors;
+    }
+
+    // Skapa data-mapp och .setup-complete om de saknas
+    $dataDir = __DIR__ . '/data';
+    if (!is_dir($dataDir)) {
+        mkdir($dataDir, 0755, true);
+    }
+    file_put_contents($dataDir . '/.setup-complete', 'Setup completed (quick config): ' . date('Y-m-d H:i:s') . "\n");
 
     return $errors;
 }
@@ -1288,8 +1388,13 @@ $saved = $_SESSION['setup_data'] ?? [];
 <body>
     <div class="setup-container">
         <div class="setup-header">
-            <h1>Välkommen! 👋</h1>
-            <p>Konfigurera din webbplats i tre enkla steg</p>
+            <?php if ($configOnlyMode): ?>
+                <h1>Serverkonfiguration</h1>
+                <p>Siten är redan installerad. Fyll i serverinställningar och admin-konto.</p>
+            <?php else: ?>
+                <h1>Välkommen! 👋</h1>
+                <p>Konfigurera din webbplats i tre enkla steg</p>
+            <?php endif; ?>
         </div>
 
         <?php if ($step <= 3): ?>
@@ -1301,6 +1406,7 @@ $saved = $_SESSION['setup_data'] ?? [];
                 </div>
                 <span class="step-label">Företag</span>
             </div>
+            <?php if (!$configOnlyMode): ?>
             <div class="step-line <?php echo $step > 1 ? 'completed' : ''; ?>"></div>
             <div class="progress-step">
                 <div class="step-circle <?php echo $step === 2 ? 'active' : ($step > 2 ? 'completed' : ''); ?>">
@@ -1308,9 +1414,10 @@ $saved = $_SESSION['setup_data'] ?? [];
                 </div>
                 <span class="step-label">Design</span>
             </div>
-            <div class="step-line <?php echo $step > 2 ? 'completed' : ''; ?>"></div>
+            <?php endif; ?>
+            <div class="step-line <?php echo $step > ($configOnlyMode ? 1 : 2) ? 'completed' : ''; ?>"></div>
             <div class="progress-step">
-                <div class="step-circle <?php echo $step === 3 ? 'active' : ''; ?>">3</div>
+                <div class="step-circle <?php echo $step === 3 ? 'active' : ''; ?>"><?php echo $configOnlyMode ? '2' : '3'; ?></div>
                 <span class="step-label">Admin</span>
             </div>
         </div>
@@ -1777,7 +1884,7 @@ $saved = $_SESSION['setup_data'] ?? [];
                 </div>
 
                 <div class="form-actions">
-                    <a href="/setup?step=2" class="btn btn-secondary">&larr; Tillbaka</a>
+                    <a href="/setup?step=<?php echo $configOnlyMode ? '1' : '2'; ?>" class="btn btn-secondary">&larr; Tillbaka</a>
                     <button type="submit" class="btn btn-primary" id="submit-btn">Slutför installation</button>
                 </div>
             </form>
@@ -1785,18 +1892,28 @@ $saved = $_SESSION['setup_data'] ?? [];
 
         <?php elseif ($step === 4):
             // Backend-verifiering
-            $checks = [
-                ['label' => 'config.php', 'desc' => 'Konfiguration', 'ok' => file_exists(__DIR__ . '/config.php')],
-                ['label' => 'variables.css', 'desc' => 'Färger och typsnitt', 'ok' => file_exists(__DIR__ . '/assets/css/variables.css') && strpos(file_get_contents(__DIR__ . '/assets/css/variables.css'), '--color-primary') !== false],
-                ['label' => 'overrides.css', 'desc' => 'Override-system', 'ok' => file_exists(__DIR__ . '/assets/css/overrides.css')],
-                ['label' => 'content.json', 'desc' => 'Innehållsdata', 'ok' => file_exists(__DIR__ . '/data/content.json')],
-                ['label' => 'brand-guide.md', 'desc' => 'Varumärkesguide', 'ok' => file_exists(__DIR__ . '/.windsurf/brand-guide.md')],
-                ['label' => 'ai-rules.md', 'desc' => 'AI-regler', 'ok' => file_exists(__DIR__ . '/.windsurf/ai-rules.md')],
-                ['label' => 'fonts.php', 'desc' => 'Typsnittslänkar', 'ok' => file_exists(__DIR__ . '/includes/fonts.php')],
-                ['label' => 'SMTP', 'desc' => 'E-postkonfiguration', 'ok' => defined('SMTP_HOST') || (file_exists(__DIR__ . '/config.php') && strpos(file_get_contents(__DIR__ . '/config.php'), 'SMTP_HOST') !== false)],
-                ['label' => 'Säkerhet', 'desc' => 'Session & CSRF', 'ok' => file_exists(__DIR__ . '/config.php') && strpos(file_get_contents(__DIR__ . '/config.php'), 'SESSION_SECRET') !== false],
-                ['label' => 'Skrivbar', 'desc' => 'data/-mappen', 'ok' => is_writable(__DIR__ . '/data')],
-            ];
+            if ($configOnlyMode) {
+                // Config-only: kolla bara config.php, säkerhet och skrivbarhet
+                $checks = [
+                    ['label' => 'config.php', 'desc' => 'Konfiguration', 'ok' => file_exists(__DIR__ . '/config.php')],
+                    ['label' => 'SMTP', 'desc' => 'E-postkonfiguration', 'ok' => file_exists(__DIR__ . '/config.php') && strpos(file_get_contents(__DIR__ . '/config.php'), 'SMTP_HOST') !== false],
+                    ['label' => 'Säkerhet', 'desc' => 'Session & CSRF', 'ok' => file_exists(__DIR__ . '/config.php') && strpos(file_get_contents(__DIR__ . '/config.php'), 'SESSION_SECRET') !== false],
+                    ['label' => 'Skrivbar', 'desc' => 'data/-mappen', 'ok' => is_writable(__DIR__ . '/data')],
+                ];
+            } else {
+                $checks = [
+                    ['label' => 'config.php', 'desc' => 'Konfiguration', 'ok' => file_exists(__DIR__ . '/config.php')],
+                    ['label' => 'variables.css', 'desc' => 'Färger och typsnitt', 'ok' => file_exists(__DIR__ . '/assets/css/variables.css') && strpos(file_get_contents(__DIR__ . '/assets/css/variables.css'), '--color-primary') !== false],
+                    ['label' => 'overrides.css', 'desc' => 'Override-system', 'ok' => file_exists(__DIR__ . '/assets/css/overrides.css')],
+                    ['label' => 'content.json', 'desc' => 'Innehållsdata', 'ok' => file_exists(__DIR__ . '/data/content.json')],
+                    ['label' => 'brand-guide.md', 'desc' => 'Varumärkesguide', 'ok' => file_exists(__DIR__ . '/.windsurf/brand-guide.md')],
+                    ['label' => 'ai-rules.md', 'desc' => 'AI-regler', 'ok' => file_exists(__DIR__ . '/.windsurf/ai-rules.md')],
+                    ['label' => 'fonts.php', 'desc' => 'Typsnittslänkar', 'ok' => file_exists(__DIR__ . '/includes/fonts.php')],
+                    ['label' => 'SMTP', 'desc' => 'E-postkonfiguration', 'ok' => defined('SMTP_HOST') || (file_exists(__DIR__ . '/config.php') && strpos(file_get_contents(__DIR__ . '/config.php'), 'SMTP_HOST') !== false)],
+                    ['label' => 'Säkerhet', 'desc' => 'Session & CSRF', 'ok' => file_exists(__DIR__ . '/config.php') && strpos(file_get_contents(__DIR__ . '/config.php'), 'SESSION_SECRET') !== false],
+                    ['label' => 'Skrivbar', 'desc' => 'data/-mappen', 'ok' => is_writable(__DIR__ . '/data')],
+                ];
+            }
             $allOk = !in_array(false, array_column($checks, 'ok'));
         ?>
         <!-- STEG 4: Verifiering + Färdig -->
@@ -1836,9 +1953,12 @@ $saved = $_SESSION['setup_data'] ?? [];
                 if (current >= total) {
                     // Done — show result
                     const allOk = <?php echo $allOk ? 'true' : 'false'; ?>;
-                    document.getElementById('verify-title').textContent = allOk ? 'Installation klar!' : 'Nästan klart';
+                    const configOnly = <?php echo $configOnlyMode ? 'true' : 'false'; ?>;
+                    document.getElementById('verify-title').textContent = allOk
+                        ? (configOnly ? 'Konfiguration klar!' : 'Installation klar!')
+                        : 'Nästan klart';
                     document.getElementById('verify-subtitle').textContent = allOk
-                        ? 'Alla kontroller godkända — din webbplats är redo.'
+                        ? (configOnly ? 'Serverkonfigurationen är sparad — din webbplats är redo.' : 'Alla kontroller godkända — din webbplats är redo.')
                         : 'Vissa kontroller misslyckades. Se markerade rader.';
                     document.getElementById('verify-actions').style.display = 'flex';
                     return;
