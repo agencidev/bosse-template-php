@@ -1,6 +1,5 @@
 # Secrets
 .env
-config.php
 
 # OS
 .DS_Store
