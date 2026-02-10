@@ -39,6 +39,12 @@ $routes = [
     '/projekt' => '/projekt.php',
 ];
 
+// Load custom routes from extensions (survives updates)
+if (file_exists(__DIR__ . '/cms/extensions/routes.php')) {
+    $custom = include __DIR__ . '/cms/extensions/routes.php';
+    if (is_array($custom)) $routes = array_merge($routes, $custom);
+}
+
 // Check if route exists
 if (isset($routes[$uri])) {
     $_SERVER['SCRIPT_NAME'] = $routes[$uri];

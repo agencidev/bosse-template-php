@@ -39,8 +39,14 @@ switch ($action) {
         break;
 
     default:
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Invalid action']);
+        $customHandled = false;
+        if (file_exists(__DIR__ . '/extensions/api-handlers.php')) {
+            $customHandled = include __DIR__ . '/extensions/api-handlers.php';
+        }
+        if (!$customHandled) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Invalid action']);
+        }
 }
 
 /**

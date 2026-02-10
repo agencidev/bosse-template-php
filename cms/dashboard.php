@@ -335,6 +335,8 @@ if (file_exists($updateLogFile)) {
                 <span class="label">Google</span>
             </a>
 
+            <?php if (file_exists(__DIR__ . '/extensions/dashboard-cards.php')) include __DIR__ . '/extensions/dashboard-cards.php'; ?>
+
             <?php if (is_super_admin()): ?>
             <a href="/super-admin" class="card" style="border: 1px solid #f59e0b; background: #fffbeb;">
                 <div class="icon" style="color: #f59e0b;">
