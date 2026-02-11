@@ -11,6 +11,10 @@ if (file_exists(__DIR__ . '/config.php')) {
 }
 
 $configOnlyMode = file_exists(__DIR__ . '/.installed');
+if (!$configOnlyMode && file_exists(__DIR__ . '/data/content.json')) {
+    $configOnlyMode = true;
+    @file_put_contents(__DIR__ . '/.installed', 'installed');
+}
 
 // Ladda hjälpfunktioner (adjustBrightness, etc.) med fallback
 $helpersFile = __DIR__ . '/cms/helpers.php';
