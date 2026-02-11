@@ -10,6 +10,8 @@ if (file_exists(__DIR__ . '/config.php')) {
     exit;
 }
 
+$configOnlyMode = file_exists(__DIR__ . '/.installed');
+
 // Ladda hjälpfunktioner (adjustBrightness, etc.) med fallback
 $helpersFile = __DIR__ . '/cms/helpers.php';
 if (file_exists($helpersFile)) {
@@ -87,6 +89,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['setup_csrf'], $_POST['csrf_token'])) {
         $errors[] = 'Ogiltig CSRF-token. Ladda om sidan.';
     } else {
+        if ($configOnlyMode) {
+            // Config-only mode: bara admin + SMTP
+            $admin_username = trim($_POST['admin_username'] ?? '');
+            $admin_password = $_POST['admin_password'] ?? '';
+            $admin_password_confirm = $_POST['admin_password_confirm'] ?? '';
+
+            $smtp_host = trim($_POST['smtp_host'] ?? '');
+            $smtp_port = (int)($_POST['smtp_port'] ?? 465);
+            $smtp_encryption = $_POST['smtp_encryption'] ?? 'ssl';
+            $smtp_username = trim($_POST['smtp_username'] ?? '');
+            $smtp_password = $_POST['smtp_password'] ?? '';
+
+            if (strlen($admin_username) < 3) $errors[] = 'Användarnamn måste vara minst 3 tecken.';
+            if (strlen($admin_password) < 8) $errors[] = 'Lösenord måste vara minst 8 tecken.';
+            if ($admin_password !== $admin_password_confirm) $errors[] = 'Lösenorden matchar inte.';
+
+            if (!empty($smtp_host)) {
+                if ($smtp_port < 1 || $smtp_port > 65535) $errors[] = 'Ange en giltig SMTP-port (1-65535).';
+                if (empty($smtp_username)) $errors[] = 'SMTP-användarnamn krävs om SMTP-server anges.';
+                if (empty($smtp_password)) $errors[] = 'SMTP-lösenord krävs om SMTP-server anges.';
+                if (!in_array($smtp_encryption, ['ssl', 'tls'])) $smtp_encryption = 'ssl';
+            }
+
+            if (empty($errors)) {
+                $data = [
+                    'admin_username' => $admin_username,
+                    'admin_password' => $admin_password,
+                    'smtp_host' => $smtp_host,
+                    'smtp_port' => $smtp_port,
+                    'smtp_encryption' => $smtp_encryption,
+                    'smtp_username' => $smtp_username,
+                    'smtp_password' => $smtp_password,
+                ];
+                $genErrors = generateConfigOnly($data);
+                if (!empty($genErrors)) {
+                    $errors = $genErrors;
+                } else {
+                    unset($_SESSION['setup_data']);
+                    $step = 4;
+                }
+            }
+        } else {
         $postStep = (int)($_POST['step'] ?? 1);
 
         if ($postStep === 1) {
@@ -345,6 +389,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $step = 3;
             }
+        }
         }
     }
 }
@@ -610,6 +655,9 @@ function generateAllFiles(array $data): array {
     // 6. data/.setup-complete
     file_put_contents($dataDir . '/.setup-complete', 'Setup completed: ' . date('Y-m-d H:i:s') . "\n");
 
+    // 6a. .installed marker (committas till git — triggar config-only mode vid re-klon)
+    file_put_contents(__DIR__ . '/.installed', 'installed');
+
     // 6b. data/projects.json (tom array om den inte finns)
     $projectsFile = $dataDir . '/projects.json';
     if (!file_exists($projectsFile)) {
@@ -766,6 +814,82 @@ function generateAllFiles(array $data): array {
         $overridesContent .= " * .card { box-shadow: none; border: 2px solid #000; }\n";
         $overridesContent .= " */\n";
         file_put_contents($overridesFile, $overridesContent);
+    }
+
+    return $errors;
+}
+
+
+/**
+ * Generera enbart config.php (config-only mode)
+ * Läser befintlig content.json för site-data, tar admin + SMTP från formuläret
+ */
+function generateConfigOnly(array $data): array {
+    $errors = [];
+
+    // Läs befintlig content.json
+    $contentFile = __DIR__ . '/data/content.json';
+    $siteName = 'Min Webbplats';
+    $siteDescription = '';
+    $contactEmail = '';
+    $contactPhone = '';
+
+    if (file_exists($contentFile)) {
+        $content = json_decode(file_get_contents($contentFile), true);
+        if ($content) {
+            $siteName = $content['footer']['company_name'] ?? $siteName;
+            $siteDescription = $content['home']['meta_description'] ?? $siteDescription;
+            $contactEmail = $content['footer']['email'] ?? $contactEmail;
+            $contactPhone = $content['footer']['phone'] ?? $contactPhone;
+        }
+    }
+
+    // Auto-detect SITE_URL
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $siteUrl = $protocol . '://' . $host;
+
+    // Auto-generera secrets
+    $sessionSecret = bin2hex(random_bytes(32));
+    $csrfSalt = bin2hex(random_bytes(32));
+    $saToken = bin2hex(random_bytes(32));
+    $passwordHash = password_hash($data['admin_password'], PASSWORD_BCRYPT);
+
+    // Bygg config.php
+    $configContent = "<?php\n";
+    $configContent .= "/**\n * Konfiguration - Genererad av Setup Wizard (config-only)\n * " . date('Y-m-d H:i:s') . "\n */\n\n";
+    $configContent .= "// Site\n";
+    $configContent .= "define('SITE_URL', " . var_export($siteUrl, true) . ");\n";
+    $configContent .= "define('SITE_NAME', " . var_export($siteName, true) . ");\n";
+    $configContent .= "define('SITE_DESCRIPTION', " . var_export($siteDescription, true) . ");\n";
+    $configContent .= "define('CONTACT_EMAIL', " . var_export($contactEmail, true) . ");\n";
+    $configContent .= "define('CONTACT_PHONE', " . var_export($contactPhone, true) . ");\n\n";
+    $configContent .= "// Admin\n";
+    $configContent .= "define('ADMIN_USERNAME', " . var_export($data['admin_username'], true) . ");\n";
+    $configContent .= "define('ADMIN_PASSWORD_HASH', " . var_export($passwordHash, true) . ");\n\n";
+    $configContent .= "// Security\n";
+    $configContent .= "define('SESSION_SECRET', " . var_export($sessionSecret, true) . ");\n";
+    $configContent .= "define('CSRF_TOKEN_SALT', " . var_export($csrfSalt, true) . ");\n\n";
+
+    if (!empty($data['smtp_host'])) {
+        $configContent .= "// SMTP\n";
+        $configContent .= "define('SMTP_HOST', " . var_export($data['smtp_host'], true) . ");\n";
+        $configContent .= "define('SMTP_PORT', " . (int)$data['smtp_port'] . ");\n";
+        $configContent .= "define('SMTP_ENCRYPTION', " . var_export($data['smtp_encryption'], true) . ");\n";
+        $configContent .= "define('SMTP_USERNAME', " . var_export($data['smtp_username'], true) . ");\n";
+        $configContent .= "define('SMTP_PASSWORD', " . var_export($data['smtp_password'], true) . ");\n\n";
+    }
+
+    $configContent .= "// Environment\n";
+    $configContent .= "define('ENVIRONMENT', 'development');\n\n";
+
+    $configContent .= "// Agenci\n";
+    $configContent .= "define('AGENCI_SUPER_ADMIN_TOKEN', " . var_export($saToken, true) . ");\n";
+    $configContent .= "define('AGENCI_UPDATE_URL', 'https://raw.githubusercontent.com/agencidev/bosse-updates/main');\n";
+    $configContent .= "define('AGENCI_UPDATE_KEY', '');\n";
+
+    if (file_put_contents(__DIR__ . '/config.php', $configContent) === false) {
+        $errors[] = 'Kunde inte skriva config.php';
     }
 
     return $errors;
@@ -1290,11 +1414,16 @@ $saved = $_SESSION['setup_data'] ?? [];
 <body>
     <div class="setup-container">
         <div class="setup-header">
+            <?php if ($configOnlyMode && $step !== 4): ?>
+            <h1>Serverkonfiguration</h1>
+            <p>Design och innehåll finns redan — ange admin-inlogg och SMTP.</p>
+            <?php else: ?>
             <h1>Välkommen! 👋</h1>
             <p>Konfigurera din webbplats i tre enkla steg</p>
+            <?php endif; ?>
         </div>
 
-        <?php if ($step <= 3): ?>
+        <?php if ($step <= 3 && !$configOnlyMode): ?>
         <!-- Progress Steps -->
         <div class="progress-steps">
             <div class="progress-step">
@@ -1336,7 +1465,83 @@ $saved = $_SESSION['setup_data'] ?? [];
         </ul>
         <?php endif; ?>
 
-        <?php if ($step === 1): ?>
+        <?php if ($configOnlyMode && $step !== 4): ?>
+        <!-- CONFIG-ONLY MODE: Bara admin + SMTP -->
+        <div class="setup-card">
+            <h2>Admin-konto</h2>
+            <form method="post" action="/setup" id="config-only-form">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['setup_csrf']); ?>">
+
+                <div class="form-group">
+                    <label for="admin_username">Användarnamn *</label>
+                    <input type="text" id="admin_username" name="admin_username" required minlength="3"
+                           placeholder="admin" autocomplete="username">
+                    <div class="hint">Minst 3 tecken. Undvik "admin" för bättre säkerhet.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="admin_password">Lösenord *</label>
+                    <input type="password" id="admin_password" name="admin_password" required minlength="8"
+                           placeholder="Minst 8 tecken" autocomplete="new-password">
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="strength-bar"></div>
+                    </div>
+                    <div class="password-strength-text" id="strength-text"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="admin_password_confirm">Bekräfta lösenord *</label>
+                    <input type="password" id="admin_password_confirm" name="admin_password_confirm" required minlength="8"
+                           placeholder="Upprepa lösenord" autocomplete="new-password">
+                </div>
+
+                <div class="section-divider">
+                    <h3>E-post &amp; SMTP</h3>
+                    <p>Valfritt — behövs för kontaktformulär och support-mail.</p>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="smtp_host">SMTP-server</label>
+                        <input type="text" id="smtp_host" name="smtp_host"
+                               placeholder="smtp.example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="smtp_port">Port</label>
+                        <input type="number" id="smtp_port" name="smtp_port" min="1" max="65535"
+                               value="465" placeholder="465">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="smtp_encryption">Kryptering</label>
+                        <select id="smtp_encryption" name="smtp_encryption">
+                            <option value="ssl" selected>SSL (port 465)</option>
+                            <option value="tls">STARTTLS (port 587)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="smtp_username">SMTP-användarnamn</label>
+                        <input type="email" id="smtp_username" name="smtp_username"
+                               placeholder="user@example.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="smtp_password">SMTP-lösenord</label>
+                    <input type="password" id="smtp_password" name="smtp_password"
+                           placeholder="SMTP-lösenord" autocomplete="new-password">
+                </div>
+
+                <div class="form-actions">
+                    <span></span>
+                    <button type="submit" class="btn btn-primary">Slutför</button>
+                </div>
+            </form>
+        </div>
+
+        <?php elseif ($step === 1): ?>
         <!-- STEG 1: Företagsinformation -->
         <div class="setup-card">
             <h2>Företagsinformation</h2>
@@ -2034,7 +2239,8 @@ $saved = $_SESSION['setup_data'] ?? [];
     document.querySelectorAll('form').forEach(function(form) {
         form.addEventListener('submit', function(e) {
             const step3 = document.getElementById('step3-form');
-            if (form === step3) {
+            const configOnly = document.getElementById('config-only-form');
+            if (form === step3 || form === configOnly) {
                 const pw = document.getElementById('admin_password').value;
                 const pwc = document.getElementById('admin_password_confirm').value;
                 if (pw !== pwc) {
