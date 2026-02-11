@@ -448,6 +448,11 @@ function apply_update(string $zipPath): array {
 
     if (empty($result['errors'])) {
         $result['success'] = true;
+
+        // Skapa .installed om den saknas (för sites byggda före v1.5.23)
+        if (!file_exists($rootPath . '/.installed')) {
+            @file_put_contents($rootPath . '/.installed', 'installed');
+        }
     }
 
     return $result;
