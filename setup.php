@@ -404,6 +404,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $errors = $genErrors;
                     $step = 3;
                 } else {
+                    // Pusha brand-filer till GitHub om konfigurerat
+                    if (!empty($data['github_repo']) && !empty($data['github_token'])) {
+                        // Ladda config.php som just skapades så konstanterna finns
+                        if (!defined('GITHUB_REPO')) {
+                            require_once __DIR__ . '/config.php';
+                        }
+                        require_once __DIR__ . '/security/updater.php';
+                        $brandFiles = [];
+                        $imgDir = __DIR__ . '/assets/images';
+                        foreach (['logo-dark.png', 'logo-light.png', 'favicon.png', 'favicon.ico', 'apple-touch-icon.png'] as $f) {
+                            if (file_exists($imgDir . '/' . $f)) {
+                                $brandFiles[] = 'assets/images/' . $f;
+                            }
+                        }
+                        // Inkludera CSS-filer och andra setup-genererade filer
+                        foreach (['assets/css/variables.css', 'assets/css/overrides.css', 'assets/css/main.css', 'assets/css/components.css', 'includes/header.php', 'includes/footer.php', 'includes/fonts.php', '.installed'] as $f) {
+                            if (file_exists(__DIR__ . '/' . $f)) {
+                                $brandFiles[] = $f;
+                            }
+                        }
+                        if (!empty($brandFiles)) {
+                            push_to_github($brandFiles, BOSSE_VERSION);
+                        }
+                    }
+
                     // Rensa session-data
                     unset($_SESSION['setup_data']);
                     $step = 4; // Färdig-sida
