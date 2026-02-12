@@ -545,7 +545,7 @@ function format_bytes(float $bytes): string {
                 </div>
             </div>
 
-            <!-- Config -->
+            <!-- Config (read-only overview) -->
             <div class="sa-panel sa-panel--full">
                 <div class="sa-panel__header">
                     <h2>Konfiguration</h2>
@@ -557,6 +557,100 @@ function format_bytes(float $bytes): string {
                         <span class="sa-value"><?php echo htmlspecialchars((string)$value); ?></span>
                     </div>
                     <?php endforeach; ?>
+                </div>
+            </div>
+
+            <!-- Redigera konfiguration -->
+            <div class="sa-panel sa-panel--full">
+                <div class="sa-panel__header">
+                    <h2>Redigera konfiguration</h2>
+                </div>
+                <div class="sa-panel__body">
+                    <p style="font-size: 0.8125rem; color: #a3a3a3; margin-bottom: 1.5rem;">Ändra inställningar som angavs vid setup. Sparar direkt till config.php.</p>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Sajt-URL</label>
+                            <input type="text" id="cfg-site-url" value="<?php echo htmlspecialchars(defined('SITE_URL') ? SITE_URL : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Företagsnamn</label>
+                            <input type="text" id="cfg-site-name" value="<?php echo htmlspecialchars(defined('SITE_NAME') ? SITE_NAME : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Beskrivning</label>
+                            <input type="text" id="cfg-site-desc" value="<?php echo htmlspecialchars(defined('SITE_DESCRIPTION') ? SITE_DESCRIPTION : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Kontakt-email</label>
+                            <input type="email" id="cfg-contact-email" value="<?php echo htmlspecialchars(defined('CONTACT_EMAIL') ? CONTACT_EMAIL : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Kontakt-telefon</label>
+                            <input type="text" id="cfg-contact-phone" value="<?php echo htmlspecialchars(defined('CONTACT_PHONE') ? CONTACT_PHONE : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Admin-användarnamn</label>
+                            <input type="text" id="cfg-admin-username" value="<?php echo htmlspecialchars(defined('ADMIN_USERNAME') ? ADMIN_USERNAME : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #f5f5f5;">
+                        <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: #737373;">SMTP</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">SMTP-server</label>
+                                <input type="text" id="cfg-smtp-host" value="<?php echo htmlspecialchars(defined('SMTP_HOST') ? SMTP_HOST : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Port</label>
+                                <input type="number" id="cfg-smtp-port" value="<?php echo htmlspecialchars(defined('SMTP_PORT') ? SMTP_PORT : '465'); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Kryptering</label>
+                                <select id="cfg-smtp-encryption" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                                    <option value="ssl" <?php echo (defined('SMTP_ENCRYPTION') && SMTP_ENCRYPTION === 'ssl') ? 'selected' : ''; ?>>SSL</option>
+                                    <option value="tls" <?php echo (defined('SMTP_ENCRYPTION') && SMTP_ENCRYPTION === 'tls') ? 'selected' : ''; ?>>TLS</option>
+                                    <option value="" <?php echo (defined('SMTP_ENCRYPTION') && SMTP_ENCRYPTION === '') ? 'selected' : ''; ?>>Ingen</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">SMTP-användare</label>
+                                <input type="text" id="cfg-smtp-username" value="<?php echo htmlspecialchars(defined('SMTP_USERNAME') ? SMTP_USERNAME : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">SMTP-lösenord</label>
+                                <input type="password" id="cfg-smtp-password" placeholder="Lämna tomt för att behålla" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #f5f5f5;">
+                        <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: #737373;">GitHub</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Repo (org/namn)</label>
+                                <input type="text" id="cfg-github-repo" value="<?php echo htmlspecialchars(defined('GITHUB_REPO') ? GITHUB_REPO : ''); ?>" placeholder="peysdev/kundnamn" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Token</label>
+                                <input type="password" id="cfg-github-token" placeholder="Lämna tomt för att behålla" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #f5f5f5;">
+                        <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: #737373;">Google Analytics</h3>
+                        <div>
+                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Mät-ID</label>
+                            <input type="text" id="cfg-ga-id" value="<?php echo htmlspecialchars(defined('GOOGLE_ANALYTICS_ID') ? GOOGLE_ANALYTICS_ID : ''); ?>" placeholder="G-XXXXXXXXXX" style="width:100%;max-width:20rem;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem;">
+                        <button class="sa-btn sa-btn--primary" onclick="saveConfig()" id="btn-save-config">Spara konfiguration</button>
+                        <span id="config-result" style="margin-left: 1rem; font-size: 0.8125rem;"></span>
+                    </div>
                 </div>
             </div>
 
@@ -783,6 +877,41 @@ function format_bytes(float $bytes): string {
                 el.textContent = 'Inga felloggar hittades.';
             }
         }).catch(function() { showToast('Nätverksfel'); });
+    }
+
+    function saveConfig() {
+        var data = {
+            site_url: document.getElementById('cfg-site-url').value.trim(),
+            site_name: document.getElementById('cfg-site-name').value.trim(),
+            site_description: document.getElementById('cfg-site-desc').value.trim(),
+            contact_email: document.getElementById('cfg-contact-email').value.trim(),
+            contact_phone: document.getElementById('cfg-contact-phone').value.trim(),
+            admin_username: document.getElementById('cfg-admin-username').value.trim(),
+            smtp_host: document.getElementById('cfg-smtp-host').value.trim(),
+            smtp_port: document.getElementById('cfg-smtp-port').value.trim(),
+            smtp_encryption: document.getElementById('cfg-smtp-encryption').value,
+            smtp_username: document.getElementById('cfg-smtp-username').value.trim(),
+            smtp_password: document.getElementById('cfg-smtp-password').value,
+            github_repo: document.getElementById('cfg-github-repo').value.trim(),
+            github_token: document.getElementById('cfg-github-token').value,
+            ga_id: document.getElementById('cfg-ga-id').value.trim()
+        };
+        setLoading('btn-save-config', true);
+        apiRequest('save-config', 'POST', data).then(function(res) {
+            setLoading('btn-save-config', false);
+            var el = document.getElementById('config-result');
+            if (res.success) {
+                showToast('Konfiguration sparad!', 3000, 'success');
+                el.innerHTML = '<span style="color:#15803d;">Sparad!</span>';
+                setTimeout(function() { location.reload(); }, 1500);
+            } else {
+                el.innerHTML = '<span style="color:#b91c1c;">Fel: ' + (res.error || 'Okänt') + '</span>';
+                showToast('Fel: ' + (res.error || 'Okänt'), 4000, 'error');
+            }
+        }).catch(function() {
+            setLoading('btn-save-config', false);
+            showToast('Nätverksfel', 4000, 'error');
+        });
     }
 
     function checkIntegrity() {

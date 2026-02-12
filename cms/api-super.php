@@ -69,6 +69,11 @@ switch ($action) {
         handle_change_password();
         break;
 
+    case 'save-config':
+        if ($method !== 'POST') { method_not_allowed(); }
+        handle_save_config();
+        break;
+
     default:
         http_response_code(404);
         echo json_encode(['error' => 'Okänd action']);
@@ -270,6 +275,71 @@ function handle_change_password(): void {
     }
 
     echo json_encode(['success' => true, 'message' => 'Lösenordet har ändrats']);
+}
+
+function handle_save_config(): void {
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (!is_array($input)) {
+        echo json_encode(['success' => false, 'error' => 'Ogiltig data']);
+        return;
+    }
+
+    $configFile = ROOT_PATH . '/config.php';
+    if (!file_exists($configFile) || !is_writable($configFile)) {
+        echo json_encode(['success' => false, 'error' => 'config.php är inte skrivbar']);
+        return;
+    }
+
+    $config = file_get_contents($configFile);
+
+    // Fält som kan uppdateras direkt
+    $directFields = [
+        'site_url' => 'SITE_URL',
+        'site_name' => 'SITE_NAME',
+        'site_description' => 'SITE_DESCRIPTION',
+        'contact_email' => 'CONTACT_EMAIL',
+        'contact_phone' => 'CONTACT_PHONE',
+        'admin_username' => 'ADMIN_USERNAME',
+        'smtp_host' => 'SMTP_HOST',
+        'smtp_port' => 'SMTP_PORT',
+        'smtp_encryption' => 'SMTP_ENCRYPTION',
+        'smtp_username' => 'SMTP_USERNAME',
+        'github_repo' => 'GITHUB_REPO',
+        'ga_id' => 'GOOGLE_ANALYTICS_ID',
+    ];
+
+    foreach ($directFields as $inputKey => $constant) {
+        if (!isset($input[$inputKey])) continue;
+        $newValue = $input[$inputKey];
+        // Byt ut define-raden
+        $pattern = "/define\('" . preg_quote($constant, '/') . "',\s*'[^']*'\)/";
+        $replacement = "define('" . $constant . "', " . var_export($newValue, true) . ")";
+        $config = preg_replace($pattern, $replacement, $config);
+    }
+
+    // Lösenordsfält — bara uppdatera om icke-tomma
+    if (!empty($input['smtp_password'])) {
+        $config = preg_replace(
+            "/define\('SMTP_PASSWORD',\s*'[^']*'\)/",
+            "define('SMTP_PASSWORD', " . var_export($input['smtp_password'], true) . ")",
+            $config
+        );
+    }
+
+    if (!empty($input['github_token'])) {
+        $config = preg_replace(
+            "/define\('GITHUB_TOKEN',\s*'[^']*'\)/",
+            "define('GITHUB_TOKEN', " . var_export($input['github_token'], true) . ")",
+            $config
+        );
+    }
+
+    if (file_put_contents($configFile, $config, LOCK_EX) === false) {
+        echo json_encode(['success' => false, 'error' => 'Kunde inte skriva till config.php']);
+        return;
+    }
+
+    echo json_encode(['success' => true]);
 }
 
 function handle_check_integrity(): void {

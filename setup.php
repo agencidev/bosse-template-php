@@ -1600,7 +1600,7 @@ $saved = $_SESSION['setup_data'] ?? [];
                     <label for="github_token">Personal Access Token</label>
                     <input type="password" id="github_token" name="github_token"
                            placeholder="ghp_xxxx" autocomplete="new-password">
-                    <div class="hint">Behöver "Contents: write"-behörighet. Skapa via GitHub &rarr; Settings &rarr; Developer settings &rarr; Fine-grained tokens.</div>
+                    <div class="hint">Samma token kan användas för alla projekt. Skapa en klassisk PAT med "repo"-scope via GitHub &rarr; Settings &rarr; Developer settings &rarr; Personal access tokens (classic).</div>
                 </div>
 
                 <div class="form-actions">
@@ -1715,7 +1715,7 @@ $saved = $_SESSION['setup_data'] ?? [];
                     <input type="password" id="github_token" name="github_token"
                            value="<?php echo htmlspecialchars($saved['github_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                            placeholder="ghp_xxxx" autocomplete="new-password">
-                    <div class="hint">Behöver "Contents: write"-behörighet. Skapa via GitHub &rarr; Settings &rarr; Developer settings &rarr; Fine-grained tokens.</div>
+                    <div class="hint">Samma token kan användas för alla projekt. Skapa en klassisk PAT med "repo"-scope via GitHub &rarr; Settings &rarr; Developer settings &rarr; Personal access tokens (classic).</div>
                 </div>
 
                 <div class="section-divider">

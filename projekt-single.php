@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/security/session.php';
+require_once __DIR__ . '/security/validation.php';
 require_once __DIR__ . '/cms/content.php';
 require_once __DIR__ . '/seo/meta.php';
 require_once __DIR__ . '/seo/schema.php';
@@ -378,7 +379,7 @@ function projectSchema($project) {
 
                     <?php if (!empty($project['content'])): ?>
                         <div class="projekt-single__body">
-                            <?php echo nl2br(htmlspecialchars($project['content'], ENT_QUOTES, 'UTF-8')); ?>
+                            <?php echo sanitize_rich_content($project['content']); ?>
                         </div>
                     <?php endif; ?>
 

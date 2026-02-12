@@ -55,6 +55,106 @@ function sanitize_html($html, $allowed_tags = '<p><br><strong><em><a>') {
 }
 
 /**
+ * Sanitera rik HTML-innehåll (för contenteditable-editor)
+ * Tillåter säkra taggar, validerar href på länkar, tar bort allt annat
+ */
+function sanitize_rich_content(string $html): string {
+    if (empty(trim($html))) return '';
+
+    $allowed = ['p','br','strong','em','u','a','ul','ol','li','h2','h3','h4','blockquote'];
+
+    $dom = new DOMDocument();
+    @$dom->loadHTML(
+        '<!DOCTYPE html><html><body><div>' . mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8') . '</div></body></html>',
+        LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+    );
+
+    $wrapper = $dom->getElementsByTagName('div')->item(0);
+    if (!$wrapper) return '';
+
+    sanitize_node($wrapper, $allowed, $dom);
+
+    $output = '';
+    foreach ($wrapper->childNodes as $child) {
+        $output .= $dom->saveHTML($child);
+    }
+
+    return trim($output);
+}
+
+/**
+ * Rekursiv hjälpfunktion för sanitize_rich_content
+ */
+function sanitize_node(DOMNode $node, array $allowed, DOMDocument $dom): void {
+    $children = [];
+    foreach ($node->childNodes as $child) {
+        $children[] = $child;
+    }
+
+    foreach ($children as $child) {
+        if ($child->nodeType === XML_TEXT_NODE) {
+            continue;
+        }
+
+        if ($child->nodeType === XML_ELEMENT_NODE) {
+            $tagName = strtolower($child->nodeName);
+
+            if (!in_array($tagName, $allowed)) {
+                // Ta bort taggen men behåll textinnehåll
+                sanitize_node($child, $allowed, $dom);
+                while ($child->firstChild) {
+                    $node->insertBefore($child->firstChild, $child);
+                }
+                $node->removeChild($child);
+                continue;
+            }
+
+            // Ta bort alla attribut från icke-länk-taggar
+            if ($tagName === 'a') {
+                $href = $child->getAttribute('href');
+                // Validera href - måste börja med http://, https:// eller /
+                if (!preg_match('#^(https?://|/)#', $href)) {
+                    // Ogiltig href — ersätt med textinnehåll
+                    sanitize_node($child, $allowed, $dom);
+                    while ($child->firstChild) {
+                        $node->insertBefore($child->firstChild, $child);
+                    }
+                    $node->removeChild($child);
+                    continue;
+                }
+                // Ta bort alla attribut
+                $attrs = [];
+                foreach ($child->attributes as $attr) {
+                    $attrs[] = $attr->nodeName;
+                }
+                foreach ($attrs as $attrName) {
+                    $child->removeAttribute($attrName);
+                }
+                // Sätt tillåtna attribut
+                $child->setAttribute('href', $href);
+                $child->setAttribute('target', '_blank');
+                $child->setAttribute('rel', 'noopener noreferrer');
+            } else {
+                // Ta bort alla attribut från övriga taggar
+                $attrs = [];
+                foreach ($child->attributes as $attr) {
+                    $attrs[] = $attr->nodeName;
+                }
+                foreach ($attrs as $attrName) {
+                    $child->removeAttribute($attrName);
+                }
+            }
+
+            // Rekursera in i barn
+            sanitize_node($child, $allowed, $dom);
+        } else {
+            // Ta bort kommentarer och andra nodtyper
+            $node->removeChild($child);
+        }
+    }
+}
+
+/**
  * Validera filuppladdning
  */
 function validate_file_upload($file, $allowed_types = ['image/jpeg', 'image/png', 'image/webp'], $max_size = 5242880) {
