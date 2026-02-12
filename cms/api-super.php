@@ -64,6 +64,11 @@ switch ($action) {
         handle_check_integrity();
         break;
 
+    case 'change-password':
+        if ($method !== 'POST') { method_not_allowed(); }
+        handle_change_password();
+        break;
+
     default:
         http_response_code(404);
         echo json_encode(['error' => 'Okänd action']);
@@ -234,6 +239,37 @@ function handle_error_log(): void {
     }
 
     echo json_encode(['log' => $log]);
+}
+
+function handle_change_password(): void {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $newPassword = $input['password'] ?? '';
+
+    if (strlen($newPassword) < 8) {
+        echo json_encode(['success' => false, 'error' => 'Lösenordet måste vara minst 8 tecken']);
+        return;
+    }
+
+    $configFile = ROOT_PATH . '/config.php';
+    if (!file_exists($configFile)) {
+        echo json_encode(['success' => false, 'error' => 'config.php hittades inte']);
+        return;
+    }
+
+    $config = file_get_contents($configFile);
+    $newHash = password_hash($newPassword, PASSWORD_BCRYPT);
+    $config = preg_replace(
+        "/define\('ADMIN_PASSWORD_HASH',\s*'[^']*'\)/",
+        "define('ADMIN_PASSWORD_HASH', " . var_export($newHash, true) . ")",
+        $config
+    );
+
+    if (file_put_contents($configFile, $config, LOCK_EX) === false) {
+        echo json_encode(['success' => false, 'error' => 'Kunde inte skriva till config.php']);
+        return;
+    }
+
+    echo json_encode(['success' => true, 'message' => 'Lösenordet har ändrats']);
 }
 
 function handle_check_integrity(): void {

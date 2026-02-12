@@ -53,12 +53,13 @@ if ($errorLogPath && file_exists($errorLogPath) && is_readable($errorLogPath)) {
 
 // Config-konstanter (maskera kansliga)
 $configConstants = [];
-$sensitiveKeys = ['ADMIN_PASSWORD_HASH', 'SESSION_SECRET', 'CSRF_TOKEN_SALT', 'SMTP_PASSWORD', 'AGENCI_SUPER_ADMIN_TOKEN', 'AGENCI_UPDATE_KEY'];
+$sensitiveKeys = ['ADMIN_PASSWORD_HASH', 'SESSION_SECRET', 'CSRF_TOKEN_SALT', 'SMTP_PASSWORD', 'AGENCI_SUPER_ADMIN_TOKEN', 'AGENCI_UPDATE_KEY', 'GITHUB_TOKEN'];
 $relevantConstants = [
     'SITE_URL', 'SITE_NAME', 'SITE_DESCRIPTION', 'CONTACT_EMAIL', 'CONTACT_PHONE',
-    'ADMIN_USERNAME', 'ADMIN_PASSWORD_HASH',
+    'ADMIN_USERNAME', 'ADMIN_PASSWORD_HASH', 'ADMIN_EMAIL',
     'SESSION_SECRET', 'CSRF_TOKEN_SALT',
     'SMTP_HOST', 'SMTP_PORT', 'SMTP_ENCRYPTION', 'SMTP_USERNAME', 'SMTP_PASSWORD',
+    'GITHUB_REPO', 'GITHUB_TOKEN',
     'GOOGLE_ANALYTICS_ID',
     'ENVIRONMENT',
     'AGENCI_SUPER_ADMIN_TOKEN', 'AGENCI_UPDATE_URL', 'AGENCI_UPDATE_KEY',
@@ -487,6 +488,31 @@ function format_bytes(float $bytes): string {
                 </div>
             </div>
 
+            <!-- Ändra kundlösenord -->
+            <div class="sa-panel">
+                <div class="sa-panel__header">
+                    <h2>Kundkonto</h2>
+                </div>
+                <div class="sa-panel__body">
+                    <div class="sa-info-row">
+                        <span class="sa-label">Användarnamn</span>
+                        <span class="sa-value"><?php echo htmlspecialchars(defined('ADMIN_USERNAME') ? ADMIN_USERNAME : 'N/A'); ?></span>
+                    </div>
+                    <div class="sa-info-row">
+                        <span class="sa-label">E-post</span>
+                        <span class="sa-value"><?php echo htmlspecialchars(defined('ADMIN_EMAIL') ? ADMIN_EMAIL : 'Ej angiven'); ?></span>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#a3a3a3;">Nytt lösenord</label>
+                        <div style="display:flex;gap:0.5rem;">
+                            <input type="password" id="new-customer-password" placeholder="Minst 8 tecken" style="flex:1;padding:0.5rem 0.75rem;background:#27272a;border:1px solid #3f3f46;border-radius:0.375rem;color:white;font-size:0.875rem;">
+                            <button class="sa-btn sa-btn--success" onclick="changeCustomerPassword()">Ändra</button>
+                        </div>
+                    </div>
+                    <div id="password-result" style="margin-top: 0.75rem; font-size: 0.8125rem;"></div>
+                </div>
+            </div>
+
             <!-- SMTP Test -->
             <div class="sa-panel">
                 <div class="sa-panel__header">
@@ -707,6 +733,25 @@ function format_bytes(float $bytes): string {
                 setTimeout(function() { location.reload(); }, 1000);
             } else {
                 showToast('Fel: ' + (data.error || 'Okänt fel'));
+            }
+        }).catch(function() { showToast('Nätverksfel'); });
+    }
+
+    function changeCustomerPassword() {
+        var input = document.getElementById('new-customer-password');
+        var password = input.value.trim();
+        if (password.length < 8) {
+            document.getElementById('password-result').innerHTML = '<span style="color:#b91c1c;">Lösenordet måste vara minst 8 tecken</span>';
+            return;
+        }
+        apiRequest('change-password', 'POST', { password: password }).then(function(data) {
+            var el = document.getElementById('password-result');
+            if (data.success) {
+                el.innerHTML = '<span style="color:#15803d;">Lösenordet har ändrats!</span>';
+                input.value = '';
+                showToast('Lösenord ändrat!');
+            } else {
+                el.innerHTML = '<span style="color:#b91c1c;">Fel: ' + (data.error || 'Okänt') + '</span>';
             }
         }).catch(function() { showToast('Nätverksfel'); });
     }

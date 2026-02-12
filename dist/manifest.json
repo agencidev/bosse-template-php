@@ -1,9 +1,9 @@
 {
-    "latest_version": "1.5.27",
+    "latest_version": "1.5.28",
     "release_date": "2026-02-12",
     "min_php_version": "8.0",
-    "changelog": "GitHub-push vid uppdatering, säker deploy utan config-wipe",
-    "download_url": "https://raw.githubusercontent.com/agencidev/bosse-updates/main/releases/1.5.27.zip",
+    "changelog": "Lösenordsåterställning, Agenci-inlogg, kundlösenord via Super Admin, säker deploy",
+    "download_url": "https://raw.githubusercontent.com/agencidev/bosse-updates/main/releases/1.5.28.zip",
     "signature": "",
     "migrations": [],
     "critical": false

@@ -33,17 +33,3 @@ jobs:
             **/.DS_Store
             **/.env*
             config.php
-            data/**
-            uploads/**
-            assets/css/variables.css
-            assets/css/overrides.css
-            assets/css/main.css
-            assets/css/components.css
-            assets/images/**
-            includes/header.php
-            includes/footer.php
-            includes/fonts.php
-            index.php
-            kontakt.php
-            cookies.php
-            integritetspolicy.php

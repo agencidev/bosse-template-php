@@ -98,6 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $admin_username = trim($_POST['admin_username'] ?? '');
             $admin_password = $_POST['admin_password'] ?? '';
             $admin_password_confirm = $_POST['admin_password_confirm'] ?? '';
+            $admin_email = trim($_POST['admin_email'] ?? '');
 
             $smtp_host = trim($_POST['smtp_host'] ?? '');
             $smtp_port = (int)($_POST['smtp_port'] ?? 465);
@@ -112,6 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (strlen($admin_username) < 3) $errors[] = 'Användarnamn måste vara minst 3 tecken.';
             if (strlen($admin_password) < 8) $errors[] = 'Lösenord måste vara minst 8 tecken.';
             if ($admin_password !== $admin_password_confirm) $errors[] = 'Lösenorden matchar inte.';
+            if (!empty($admin_email) && !filter_var($admin_email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Ange en giltig e-postadress.';
 
             if (!empty($smtp_host)) {
                 if ($smtp_port < 1 || $smtp_port > 65535) $errors[] = 'Ange en giltig SMTP-port (1-65535).';
@@ -124,6 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $data = [
                     'admin_username' => $admin_username,
                     'admin_password' => $admin_password,
+                    'admin_email' => $admin_email,
                     'smtp_host' => $smtp_host,
                     'smtp_port' => $smtp_port,
                     'smtp_encryption' => $smtp_encryption,
@@ -382,15 +385,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $admin_username = trim($_POST['admin_username'] ?? '');
             $admin_password = $_POST['admin_password'] ?? '';
             $admin_password_confirm = $_POST['admin_password_confirm'] ?? '';
+            $admin_email = trim($_POST['admin_email'] ?? '');
 
             if (strlen($admin_username) < 3) $errors[] = 'Användarnamn måste vara minst 3 tecken.';
             if (strlen($admin_password) < 8) $errors[] = 'Lösenord måste vara minst 8 tecken.';
             if ($admin_password !== $admin_password_confirm) $errors[] = 'Lösenorden matchar inte.';
+            if (!empty($admin_email) && !filter_var($admin_email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Ange en giltig e-postadress.';
 
             if (empty($errors)) {
                 $data = $_SESSION['setup_data'] ?? [];
                 $data['admin_username'] = $admin_username;
                 $data['admin_password'] = $admin_password;
+                $data['admin_email'] = $admin_email;
 
                 // === GENERERA ALLA FILER ===
                 $genErrors = generateAllFiles($data);
@@ -431,7 +437,11 @@ function generateAllFiles(array $data): array {
     $configContent .= "define('CONTACT_PHONE', " . var_export($data['contact_phone'], true) . ");\n\n";
     $configContent .= "// Admin\n";
     $configContent .= "define('ADMIN_USERNAME', " . var_export($data['admin_username'], true) . ");\n";
-    $configContent .= "define('ADMIN_PASSWORD_HASH', " . var_export($passwordHash, true) . ");\n\n";
+    $configContent .= "define('ADMIN_PASSWORD_HASH', " . var_export($passwordHash, true) . ");\n";
+    if (!empty($data['admin_email'])) {
+        $configContent .= "define('ADMIN_EMAIL', " . var_export($data['admin_email'], true) . ");\n";
+    }
+    $configContent .= "\n";
     $configContent .= "// Security\n";
     $configContent .= "define('SESSION_SECRET', " . var_export($sessionSecret, true) . ");\n";
     $configContent .= "define('CSRF_TOKEN_SALT', " . var_export($csrfSalt, true) . ");\n\n";
@@ -889,7 +899,11 @@ function generateConfigOnly(array $data): array {
     $configContent .= "define('CONTACT_PHONE', " . var_export($contactPhone, true) . ");\n\n";
     $configContent .= "// Admin\n";
     $configContent .= "define('ADMIN_USERNAME', " . var_export($data['admin_username'], true) . ");\n";
-    $configContent .= "define('ADMIN_PASSWORD_HASH', " . var_export($passwordHash, true) . ");\n\n";
+    $configContent .= "define('ADMIN_PASSWORD_HASH', " . var_export($passwordHash, true) . ");\n";
+    if (!empty($data['admin_email'])) {
+        $configContent .= "define('ADMIN_EMAIL', " . var_export($data['admin_email'], true) . ");\n";
+    }
+    $configContent .= "\n";
     $configContent .= "// Security\n";
     $configContent .= "define('SESSION_SECRET', " . var_export($sessionSecret, true) . ");\n";
     $configContent .= "define('CSRF_TOKEN_SALT', " . var_export($csrfSalt, true) . ");\n\n";
@@ -1510,6 +1524,13 @@ $saved = $_SESSION['setup_data'] ?? [];
                 </div>
 
                 <div class="form-group">
+                    <label for="admin_email">E-postadress (för lösenordsåterställning)</label>
+                    <input type="email" id="admin_email" name="admin_email"
+                           placeholder="kund@foretag.se">
+                    <div class="hint">Används för att återställa lösenordet via e-post.</div>
+                </div>
+
+                <div class="form-group">
                     <label for="admin_password">Lösenord *</label>
                     <input type="password" id="admin_password" name="admin_password" required minlength="8"
                            placeholder="Minst 8 tecken" autocomplete="new-password">
@@ -2033,6 +2054,13 @@ $saved = $_SESSION['setup_data'] ?? [];
                     <input type="text" id="admin_username" name="admin_username" required minlength="3"
                            placeholder="admin" autocomplete="username">
                     <div class="hint">Minst 3 tecken. Undvik "admin" för bättre säkerhet.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="admin_email">E-postadress (för lösenordsåterställning)</label>
+                    <input type="email" id="admin_email" name="admin_email"
+                           placeholder="kund@foretag.se">
+                    <div class="hint">Används för att återställa lösenordet via e-post.</div>
                 </div>
 
                 <div class="form-group">
