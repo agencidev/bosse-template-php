@@ -453,6 +453,11 @@ function apply_update(string $zipPath): array {
         if (!file_exists($rootPath . '/.installed')) {
             @file_put_contents($rootPath . '/.installed', 'installed');
         }
+
+        // Pusha till GitHub om konfigurerat
+        $state = get_update_state();
+        $githubResult = push_to_github($result['updated_files'], $state['latest_version'] ?? BOSSE_VERSION);
+        $result['github_push'] = $githubResult;
     }
 
     return $result;
@@ -805,6 +810,205 @@ function cleanup_old_data(): void {
             }
         }
     }
+}
+
+/**
+ * HTTP-anrop till GitHub API
+ */
+function github_api(string $method, string $endpoint, array $data = []): array {
+    $token = defined('GITHUB_TOKEN') ? GITHUB_TOKEN : '';
+    $url = 'https://api.github.com' . $endpoint;
+
+    $headers = [
+        "Authorization: Bearer " . $token,
+        "Accept: application/vnd.github+json",
+        "User-Agent: BosseTemplate/" . BOSSE_VERSION,
+        "X-GitHub-Api-Version: 2022-11-28",
+    ];
+
+    $options = [
+        'http' => [
+            'method' => $method,
+            'header' => implode("\r\n", $headers) . "\r\n",
+            'timeout' => 15,
+            'ignore_errors' => true,
+        ],
+        'ssl' => [
+            'verify_peer' => true,
+            'verify_peer_name' => true,
+        ],
+    ];
+
+    if (!empty($data)) {
+        $json = json_encode($data);
+        $options['http']['content'] = $json;
+        $options['http']['header'] .= "Content-Type: application/json\r\n";
+        $options['http']['header'] .= "Content-Length: " . strlen($json) . "\r\n";
+    }
+
+    $context = stream_context_create($options);
+    $response = @file_get_contents($url, false, $context);
+
+    if ($response === false) {
+        return ['error' => 'Kunde inte nå GitHub API'];
+    }
+
+    $decoded = json_decode($response, true);
+    if (!is_array($decoded)) {
+        return ['error' => 'Ogiltigt svar från GitHub API'];
+    }
+
+    // Kolla HTTP-statuskod från $http_response_header
+    $statusCode = 0;
+    if (!empty($http_response_header) && is_array($http_response_header)) {
+        if (preg_match('/HTTP\/[\d.]+ (\d+)/', $http_response_header[0], $matches)) {
+            $statusCode = (int)$matches[1];
+        }
+    }
+
+    if ($statusCode >= 400) {
+        $msg = $decoded['message'] ?? 'HTTP ' . $statusCode;
+        return ['error' => 'GitHub API-fel: ' . $msg, 'status' => $statusCode];
+    }
+
+    return $decoded;
+}
+
+/**
+ * Pusha uppdaterade filer till GitHub via Git Data API (atomisk commit)
+ */
+function push_to_github(array $updatedFiles, string $version): array {
+    if (!defined('GITHUB_REPO') || !defined('GITHUB_TOKEN') || GITHUB_REPO === '' || GITHUB_TOKEN === '') {
+        return ['success' => false, 'message' => 'GitHub ej konfigurerat — hoppar över push'];
+    }
+
+    $repo = GITHUB_REPO;
+    $rootPath = defined('ROOT_PATH') ? ROOT_PATH : dirname(__DIR__);
+
+    // Filtrera bort filer som inte finns på disk
+    $filesToPush = [];
+    foreach ($updatedFiles as $file) {
+        $fullPath = $rootPath . '/' . $file;
+        if (file_exists($fullPath) && is_file($fullPath)) {
+            $filesToPush[] = $file;
+        }
+    }
+
+    if (empty($filesToPush)) {
+        return ['success' => false, 'message' => 'Inga filer att pusha'];
+    }
+
+    // 1. Hämta current commit SHA för main
+    $ref = github_api('GET', "/repos/{$repo}/git/ref/heads/main");
+    if (isset($ref['error'])) {
+        return ['success' => false, 'message' => 'Kunde inte hämta branch-ref: ' . $ref['error']];
+    }
+    $commitSha = $ref['object']['sha'] ?? '';
+    if (empty($commitSha)) {
+        return ['success' => false, 'message' => 'Kunde inte läsa commit SHA'];
+    }
+
+    // 2. Hämta tree SHA från commit
+    $commit = github_api('GET', "/repos/{$repo}/git/commits/{$commitSha}");
+    if (isset($commit['error'])) {
+        return ['success' => false, 'message' => 'Kunde inte hämta commit: ' . $commit['error']];
+    }
+    $treeSha = $commit['tree']['sha'] ?? '';
+    if (empty($treeSha)) {
+        return ['success' => false, 'message' => 'Kunde inte läsa tree SHA'];
+    }
+
+    // 3. Bygg ny tree med alla uppdaterade filer
+    $treeItems = [];
+    foreach ($filesToPush as $file) {
+        $fullPath = $rootPath . '/' . $file;
+        $content = file_get_contents($fullPath);
+
+        // Kolla om binärfil (bilder etc.)
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->file($fullPath);
+        $isBinary = !str_starts_with($mime, 'text/') && !in_array($mime, ['application/json', 'application/javascript', 'application/xml', 'application/x-httpd-php']);
+
+        if ($isBinary) {
+            $treeItems[] = [
+                'path' => $file,
+                'mode' => '100644',
+                'type' => 'blob',
+                'content' => base64_encode($content),
+                'encoding' => 'base64',
+            ];
+        } else {
+            $treeItems[] = [
+                'path' => $file,
+                'mode' => '100644',
+                'type' => 'blob',
+                'content' => $content,
+            ];
+        }
+    }
+
+    // Skapa blobs för binärfiler separat (tree API stödjer inte encoding)
+    $finalTreeItems = [];
+    foreach ($treeItems as $item) {
+        if (isset($item['encoding']) && $item['encoding'] === 'base64') {
+            // Skapa blob via API
+            $blob = github_api('POST', "/repos/{$repo}/git/blobs", [
+                'content' => $item['content'],
+                'encoding' => 'base64',
+            ]);
+            if (isset($blob['error'])) {
+                return ['success' => false, 'message' => 'Kunde inte skapa blob för ' . $item['path'] . ': ' . $blob['error']];
+            }
+            $finalTreeItems[] = [
+                'path' => $item['path'],
+                'mode' => '100644',
+                'type' => 'blob',
+                'sha' => $blob['sha'],
+            ];
+        } else {
+            $finalTreeItems[] = [
+                'path' => $item['path'],
+                'mode' => '100644',
+                'type' => 'blob',
+                'content' => $item['content'],
+            ];
+        }
+    }
+
+    $newTree = github_api('POST', "/repos/{$repo}/git/trees", [
+        'base_tree' => $treeSha,
+        'tree' => $finalTreeItems,
+    ]);
+    if (isset($newTree['error'])) {
+        return ['success' => false, 'message' => 'Kunde inte skapa tree: ' . $newTree['error']];
+    }
+    $newTreeSha = $newTree['sha'] ?? '';
+
+    // 4. Skapa ny commit
+    $newCommit = github_api('POST', "/repos/{$repo}/git/commits", [
+        'message' => "chore: Uppdatera Bosse core-filer till v{$version}",
+        'tree' => $newTreeSha,
+        'parents' => [$commitSha],
+    ]);
+    if (isset($newCommit['error'])) {
+        return ['success' => false, 'message' => 'Kunde inte skapa commit: ' . $newCommit['error']];
+    }
+    $newCommitSha = $newCommit['sha'] ?? '';
+
+    // 5. Uppdatera branch-referensen
+    $updateRef = github_api('PATCH', "/repos/{$repo}/git/refs/heads/main", [
+        'sha' => $newCommitSha,
+    ]);
+    if (isset($updateRef['error'])) {
+        return ['success' => false, 'message' => 'Kunde inte uppdatera branch: ' . $updateRef['error']];
+    }
+
+    return [
+        'success' => true,
+        'message' => count($filesToPush) . ' filer pushade till GitHub',
+        'commit_sha' => $newCommitSha,
+        'files_pushed' => $filesToPush,
+    ];
 }
 
 /**

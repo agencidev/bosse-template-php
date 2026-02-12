@@ -105,6 +105,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $smtp_username = trim($_POST['smtp_username'] ?? '');
             $smtp_password = $_POST['smtp_password'] ?? '';
 
+            // GitHub (valfritt)
+            $github_repo = trim($_POST['github_repo'] ?? '');
+            $github_token = trim($_POST['github_token'] ?? '');
+
             if (strlen($admin_username) < 3) $errors[] = 'Användarnamn måste vara minst 3 tecken.';
             if (strlen($admin_password) < 8) $errors[] = 'Lösenord måste vara minst 8 tecken.';
             if ($admin_password !== $admin_password_confirm) $errors[] = 'Lösenorden matchar inte.';
@@ -125,6 +129,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'smtp_encryption' => $smtp_encryption,
                     'smtp_username' => $smtp_username,
                     'smtp_password' => $smtp_password,
+                    'github_repo' => $github_repo,
+                    'github_token' => $github_token,
                 ];
                 $genErrors = generateConfigOnly($data);
                 if (!empty($genErrors)) {
@@ -151,6 +157,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $smtp_encryption = $_POST['smtp_encryption'] ?? 'ssl';
             $smtp_username = trim($_POST['smtp_username'] ?? '');
             $smtp_password = $_POST['smtp_password'] ?? '';
+
+            // GitHub (valfritt)
+            $github_repo = trim($_POST['github_repo'] ?? '');
+            $github_token = trim($_POST['github_token'] ?? '');
 
             // Google Analytics
             $ga_id = trim($_POST['ga_id'] ?? '');
@@ -202,6 +212,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'smtp_encryption' => $smtp_encryption,
                     'smtp_username' => $smtp_username,
                     'smtp_password' => $smtp_password,
+                    'github_repo' => $github_repo,
+                    'github_token' => $github_token,
                     'ga_id' => $ga_id,
                     'social_facebook' => $social_facebook,
                     'social_instagram' => $social_instagram,
@@ -431,6 +443,13 @@ function generateAllFiles(array $data): array {
         $configContent .= "define('SMTP_ENCRYPTION', " . var_export($data['smtp_encryption'], true) . ");\n";
         $configContent .= "define('SMTP_USERNAME', " . var_export($data['smtp_username'], true) . ");\n";
         $configContent .= "define('SMTP_PASSWORD', " . var_export($data['smtp_password'], true) . ");\n\n";
+    }
+
+    // GitHub (om konfigurerat)
+    if (!empty($data['github_repo']) && !empty($data['github_token'])) {
+        $configContent .= "// GitHub (för automatisk push vid uppdatering)\n";
+        $configContent .= "define('GITHUB_REPO', " . var_export($data['github_repo'], true) . ");\n";
+        $configContent .= "define('GITHUB_TOKEN', " . var_export($data['github_token'], true) . ");\n\n";
     }
 
     // Google Analytics (om konfigurerat)
@@ -882,6 +901,13 @@ function generateConfigOnly(array $data): array {
         $configContent .= "define('SMTP_ENCRYPTION', " . var_export($data['smtp_encryption'], true) . ");\n";
         $configContent .= "define('SMTP_USERNAME', " . var_export($data['smtp_username'], true) . ");\n";
         $configContent .= "define('SMTP_PASSWORD', " . var_export($data['smtp_password'], true) . ");\n\n";
+    }
+
+    // GitHub (om konfigurerat)
+    if (!empty($data['github_repo']) && !empty($data['github_token'])) {
+        $configContent .= "// GitHub (för automatisk push vid uppdatering)\n";
+        $configContent .= "define('GITHUB_REPO', " . var_export($data['github_repo'], true) . ");\n";
+        $configContent .= "define('GITHUB_TOKEN', " . var_export($data['github_token'], true) . ");\n\n";
     }
 
     $configContent .= "// Environment\n";
@@ -1538,6 +1564,24 @@ $saved = $_SESSION['setup_data'] ?? [];
                            placeholder="SMTP-lösenord" autocomplete="new-password">
                 </div>
 
+                <div class="section-divider">
+                    <h3>GitHub</h3>
+                    <p>Valfritt — behövs för att uppdateringar ska pushas tillbaka till repot.</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="github_repo">Repository (owner/repo)</label>
+                    <input type="text" id="github_repo" name="github_repo"
+                           placeholder="peysdev/strandmarkmedical">
+                </div>
+
+                <div class="form-group">
+                    <label for="github_token">Personal Access Token</label>
+                    <input type="password" id="github_token" name="github_token"
+                           placeholder="ghp_xxxx" autocomplete="new-password">
+                    <div class="hint">Behöver "Contents: write"-behörighet. Skapa via GitHub &rarr; Settings &rarr; Developer settings &rarr; Fine-grained tokens.</div>
+                </div>
+
                 <div class="form-actions">
                     <span></span>
                     <button type="submit" class="btn btn-primary">Slutför</button>
@@ -1631,6 +1675,26 @@ $saved = $_SESSION['setup_data'] ?? [];
                            value="<?php echo htmlspecialchars($saved['smtp_password'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                            placeholder="SMTP-lösenord" autocomplete="new-password">
                     <div class="hint">Ange lösenord för SMTP-servern. Lämna tomt om du inte vill använda SMTP-mail.</div>
+                </div>
+
+                <div class="section-divider">
+                    <h3>GitHub</h3>
+                    <p>Valfritt — behövs för att uppdateringar ska pushas tillbaka till repot.</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="github_repo">Repository (owner/repo)</label>
+                    <input type="text" id="github_repo" name="github_repo"
+                           value="<?php echo htmlspecialchars($saved['github_repo'] ?? ''); ?>"
+                           placeholder="peysdev/strandmarkmedical">
+                </div>
+
+                <div class="form-group">
+                    <label for="github_token">Personal Access Token</label>
+                    <input type="password" id="github_token" name="github_token"
+                           value="<?php echo htmlspecialchars($saved['github_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                           placeholder="ghp_xxxx" autocomplete="new-password">
+                    <div class="hint">Behöver "Contents: write"-behörighet. Skapa via GitHub &rarr; Settings &rarr; Developer settings &rarr; Fine-grained tokens.</div>
                 </div>
 
                 <div class="section-divider">
