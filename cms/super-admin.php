@@ -345,7 +345,10 @@ function format_bytes(float $bytes): string {
                 <p>Version <?php echo htmlspecialchars($updateState['latest_version'] ?? ''); ?> tillgänglig<?php echo !empty($updateState['critical']) ? ' (kritisk)' : ''; ?></p>
                 <small><?php echo htmlspecialchars($updateState['changelog'] ?? ''); ?></small>
             </div>
-            <button class="sa-btn sa-btn--primary" onclick="applyUpdate()" id="btn-apply-update">Uppdatera nu</button>
+            <button class="sa-btn sa-btn--success" onclick="applyUpdate()" id="btn-apply-update" style="background: #10b981; color: white;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="vertical-align: middle; margin-right: 0.25rem;"><path d="M2 8L6 12L14 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Uppdatera nu
+            </button>
         </div>
         <?php endif; ?>
 

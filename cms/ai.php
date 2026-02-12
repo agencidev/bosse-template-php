@@ -283,11 +283,6 @@ if (!is_logged_in()) {
                         placeholder="Fråga mig vad som helst..."
                     >
                     <div class="chat-input-actions">
-                        <button class="icon-button" type="button" title="Röstinmatning">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                            </svg>
-                        </button>
                         <button class="icon-button" type="button" id="sendButton" title="Skicka">
                             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
