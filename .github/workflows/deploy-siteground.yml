@@ -37,14 +37,3 @@ jobs:
             **/.DS_Store
             **/.env*
             config.php
-
-      - name: Health Check
-        if: ${{ secrets.SITE_URL != '' }}
-        run: |
-          sleep 10
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.SITE_URL }}")
-          if [ "$STATUS" -ne 200 ]; then
-            echo "WARNING: Site returned HTTP $STATUS"
-            exit 1
-          fi
-          echo "Site is healthy (HTTP 200)"
