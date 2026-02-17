@@ -4,5 +4,5 @@
  * CORE-fil - skrivs över vid uppdatering
  */
 
-define('BOSSE_VERSION', '1.5.33');
+define('BOSSE_VERSION', '1.5.34');
 define('BOSSE_VERSION_DATE', '2026-02-17');

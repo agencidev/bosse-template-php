@@ -87,6 +87,9 @@ Dessa filer är avsedda för site-specifik design och innehåll:
 - Lägg ALLTID i `data/projects.json` — hårdkoda ALDRIG i PHP-filer
 - Se `.rules/ai-rules.md` för fullständigt format
 
+### Heading-hierarki (SEO)
+- EN `h1` per sida (sidans huvudrubrik), sedan h2, h3 — hoppa aldrig nivåer
+
 ### Redigerbara sektioner
 Använd `editable_text()` och `editable_image()` — aldrig hårdkodad text:
 ```php

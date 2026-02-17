@@ -187,6 +187,10 @@ Snabbguide:
 - Bilder ska ha `alt`-attribut
 - Semantisk HTML: `<header>`, `<main>`, `<section>`, `<footer>`
 - Lazy loading på bilder under fold: `loading="lazy"`
+- Exakt EN `<h1>` per sida — sidans huvudrubrik
+- Heading-hierarki: h1 → h2 → h3 — hoppa aldrig över nivåer (t.ex. h1 → h3)
+- Använd `editable_text('sektion', 'titel', 'Rubrik', 'h1')` för sidans h1
+- Underrubriker ska vara h2, underavsnitt h3
 
 ---
 
