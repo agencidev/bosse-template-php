@@ -24,7 +24,6 @@ $templateRoot = dirname(__DIR__); // apps/template/php/
 $updatableFiles = [
     'bootstrap.php', 'router.php', 'setup.php', 'includes/version.php',
     '.htaccess', '.user.ini',
-    'pages/errors/403.php', 'pages/errors/404.php', 'pages/errors/500.php',
     'seo/robots.php', 'public/site.webmanifest',
     'pages/projekt.php', 'pages/projekt-single.php', 'CLAUDE.md',
     'cms/admin.php', 'cms/dashboard.php', 'cms/content.php',
@@ -39,6 +38,7 @@ $updatableFiles = [
     'includes/mailer.php', 'includes/agenci-badge.php',
     'assets/css/reset.css', 'assets/css/cms.css',
     'assets/js/cms.js',
+    '.windsurfrules',
 ];
 
 // Hela mappar som ingar

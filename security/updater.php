@@ -8,7 +8,6 @@
 const UPDATABLE_FILES = [
     'bootstrap.php', 'router.php', 'setup.php', 'includes/version.php',
     '.htaccess', '.user.ini',
-    'pages/errors/403.php', 'pages/errors/404.php', 'pages/errors/500.php',
     'seo/robots.php', 'public/site.webmanifest',
     'pages/projekt.php', 'pages/projekt-single.php', 'CLAUDE.md',
     // CMS-logotyper (explicit för bakåtkompatibilitet med äldre updaters)
@@ -26,6 +25,7 @@ const UPDATABLE_FILES = [
     'includes/mailer.php', 'includes/agenci-badge.php',
     'assets/css/reset.css', 'assets/css/cms.css',
     'assets/js/cms.js',
+    '.windsurfrules',
 ];
 
 // Wildcard-matchade uppdateringsbara mappar
@@ -39,6 +39,7 @@ const PROTECTED_FILES = [
     'assets/css/main.css', 'assets/css/components.css',
     'includes/header.php', 'includes/footer.php', 'includes/fonts.php',
     'index.php', 'pages/kontakt.php', 'pages/cookies.php', 'pages/integritetspolicy.php',
+    'pages/errors/403.php', 'pages/errors/404.php', 'pages/errors/500.php',
 ];
 
 // Wildcard-skyddade mappar

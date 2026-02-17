@@ -35,6 +35,39 @@ Inlägg i `projects.json` visas automatiskt på `/projekt` och kan hanteras via 
 
 ---
 
+## ⛔ CORE vs ✅ SAFE — Filskydd
+
+Bosse-ramverket har **CORE-filer** som uppdateras automatiskt. Ändra ALDRIG dessa — dina ändringar skrivs över vid nästa uppdatering.
+
+### CORE-filer (ÄNDRA ALDRIG)
+| Kategori | Filer |
+|----------|-------|
+| **Ramverk** | `bootstrap.php`, `router.php`, `setup.php`, `.htaccess`, `.user.ini` |
+| **CMS** | Alla filer i `cms/` (undantag: `cms/extensions/`) |
+| **Säkerhet** | Alla filer i `security/` |
+| **Build** | Alla filer i `bin/` |
+| **System-includes** | `includes/version.php`, `includes/admin-bar.php`, `includes/cookie-consent.php`, `includes/mailer.php`, `includes/agenci-badge.php` |
+| **System-CSS/JS** | `assets/css/reset.css`, `assets/css/cms.css`, `assets/css/variables.css`, `assets/css/components.css`, `assets/css/main.css`, `assets/js/cms.js` |
+| **CMS-styrda sidor** | `pages/projekt.php`, `pages/projekt-single.php` |
+| **SEO** | `seo/meta.php`, `seo/schema.php`, `seo/sitemap.php`, `seo/robots.php` |
+
+### SAFE-filer (fritt att ändra)
+| Kategori | Filer |
+|----------|-------|
+| **Startsida** | `index.php` (sektioner, layout, design — hela sidans uppbyggnad) |
+| **Felsidor** | `pages/errors/` (403.php, 404.php, 500.php — varumärkesanpassa fritt) |
+| **Design** | `assets/css/overrides.css` (ALLA CSS-ändringar här) |
+| **Layout** | `includes/header.php`, `includes/footer.php`, `includes/fonts.php`, `includes/top-banner.php` |
+| **Sidor** | `pages/kontakt.php`, `pages/cookies.php`, `pages/integritetspolicy.php`, nya sidor i `pages/` |
+| **Innehåll** | `data/content.json`, `data/projects.json` |
+| **Media** | `uploads/` |
+| **Routes** | `cms/extensions/routes.php` (custom routes för nya sidor) |
+| **Varumärke** | `.rules/brand-guide.md` |
+
+> **Tumregel:** Om filen finns i tabellen ovan under CORE — rör den inte. Om du är osäker, fråga innan du ändrar.
+
+---
+
 ## Prioritetsordning
 
 1. **Brand Guide** (`.rules/brand-guide.md`) - Färger, typsnitt, tonalitet
@@ -301,7 +334,7 @@ require_once __DIR__ . '/../seo/meta.php';
 - [ ] `header.php` inkluderad
 - [ ] `footer.php` inkluderad
 - [ ] `cookie-consent.php` sist i body
-- [ ] Lägg till rutt i `router.php`
+- [ ] Lägg till rutt i `cms/extensions/routes.php`
 
 ---
 

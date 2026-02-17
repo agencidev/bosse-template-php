@@ -3,6 +3,15 @@
 Se `.rules/ai-rules.md` för fullständiga AI-regler och kodstandarder.
 Se `.rules/brand-guide.md` för varumärkesguide (färger, typsnitt, tonalitet).
 
+## ⛔ CORE-FILER — RÖR INTE!
+
+Dessa filer/mappar tillhör Bosse-ramverket och skrivs över vid uppdatering:
+`bootstrap.php`, `router.php`, `setup.php`, `cms/`, `security/`, `bin/`, `assets/css/variables.css`, `assets/css/components.css`, `assets/js/cms.js`
+
+**Du får ändra:** `index.php` (startsidan), `pages/errors/` (felsidor), `assets/css/overrides.css`, `includes/header.php`, `includes/footer.php`, sidor i `pages/`, `cms/extensions/routes.php`, `data/content.json`, `data/projects.json`, `uploads/`
+
+Se `.rules/ai-rules.md` → "CORE vs SAFE" för komplett lista.
+
 ## ⚠️ KRITISKT — Läs först!
 
 **När du skapar inlägg/nyheter/event:**
@@ -29,7 +38,7 @@ När du skapar nya sidor (om-oss.php, tjanster.php etc.):
 1. **Skapa filen i `pages/`-mappen** (t.ex. `pages/om-oss.php`)
 2. **Kopiera** `templates/page-template.php` som bas
 3. **MÅSTE inkludera:** `header.php` och `footer.php` med `__DIR__ . '/../'`-prefix
-4. **Lägg till rutt** i `router.php`
+4. **Lägg till rutt** i `cms/extensions/routes.php`
 
 ```php
 // Minsta struktur för ny sida i pages/:

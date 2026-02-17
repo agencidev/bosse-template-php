@@ -1,0 +1,101 @@
+# Windsurf Rules — Bosse Template
+
+## ⛔ CORE-FILER — RÖR INTE!
+
+Följande filer och mappar tillhör Bosse-ramverket och uppdateras automatiskt.
+**ÄNDRA ALDRIG dessa filer.** Om du gör det kommer nästa uppdatering att skriva över dina ändringar.
+
+### Filer du ALDRIG får ändra:
+- `bootstrap.php` — Miljösetup
+- `router.php` — URL-routing (lägg till custom routes i `cms/extensions/routes.php`)
+- `setup.php` — Installationswizard
+- `.htaccess` — Apache-regler
+- `.user.ini` — PHP-inställningar
+- `includes/version.php` — Versionshantering
+- `includes/admin-bar.php` — Admin-toolbar
+- `includes/cookie-consent.php` — Cookie-samtycke
+- `includes/mailer.php` — E-postsystem
+- `includes/agenci-badge.php` — Powered by-badge
+
+### Mappar du ALDRIG får ändra:
+- `cms/` — Hela CMS-systemet (admin, dashboard, API, projects) — undantag: `cms/extensions/`
+- `security/` — Säkerhetsmoduler (session, CSRF, validering, updater)
+- `bin/` — Build-scripts
+- `templates/` — Systemmallar
+- `.github/` — CI/CD workflows
+- `assets/js/cms.js` — CMS JavaScript
+- `assets/css/reset.css` — CSS reset
+- `assets/css/cms.css` — CMS-styling
+- `assets/css/variables.css` — Design tokens (genereras av setup-wizarden)
+- `assets/css/components.css` — Baskomponenter
+- `assets/css/main.css` — CSS import-fil
+- `pages/projekt.php` — Projektlista (styrs av CMS)
+- `pages/projekt-single.php` — Enskilt projekt (styrs av CMS)
+- `seo/meta.php` — Meta-taggar (ramverkslogik)
+- `seo/schema.php` — Schema.org markup (ramverkslogik)
+- `seo/sitemap.php` — Sitemap-generering (ramverkslogik)
+- `seo/robots.php` — Robots.txt-regler (ramverkslogik)
+
+---
+
+## ✅ FILER DU FÅR ÄNDRA
+
+Dessa filer är avsedda för site-specifik design och innehåll:
+
+### Startsida & Felsidor
+- `index.php` — Startsidan (sektioner, layout, design)
+- `pages/errors/` — Felsidor (403.php, 404.php, 500.php) — varumärkesanpassa fritt
+
+### Design
+- `assets/css/overrides.css` — **ALLA CSS-ändringar skrivs här** (vinner via cascade)
+- `includes/header.php` — Header/navigation (design + menystruktur)
+- `includes/footer.php` — Footer (design + innehåll)
+- `includes/fonts.php` — Font-laddning
+- `includes/top-banner.php` — Toppbanner
+
+### Sidor
+- `pages/kontakt.php` — Kontaktformulär
+- `pages/cookies.php` — Cookie-policy
+- `pages/integritetspolicy.php` — Integritetspolicy
+- Nya sidor i `pages/` (t.ex. `pages/om-oss.php`, `pages/tjanster.php`)
+
+### Innehåll & Data
+- `data/content.json` — Sidinnehåll (redigeras via CMS eller manuellt)
+- `data/projects.json` — Inlägg/projekt/event
+- `uploads/` — Bilder och media
+- `cms/extensions/routes.php` — Custom routes för nya sidor
+
+### Konfiguration
+- `.rules/brand-guide.md` — Varumärkesguide
+
+---
+
+## Regler
+
+### CSS
+- **ALLA designändringar → `assets/css/overrides.css`**. Inga undantag.
+- Använd CSS-variabler: `var(--color-primary)`, `var(--font-heading)` etc.
+- Hårdkoda ALDRIG färger eller typsnitt.
+
+### Nya sidor
+1. Skapa filen i `pages/`
+2. Använd `templates/page-template.php` som bas
+3. Inkludera `header.php` och `footer.php`
+4. Lägg till en route i `cms/extensions/routes.php` (SAFE-fil, överlever uppdateringar)
+
+### Inlägg/Event
+- Lägg ALLTID i `data/projects.json` — hårdkoda ALDRIG i PHP-filer
+- Se `.rules/ai-rules.md` för fullständigt format
+
+### Redigerbara sektioner
+Använd `editable_text()` och `editable_image()` — aldrig hårdkodad text:
+```php
+<?php editable_text('sektion', 'titel', 'Standardrubrik', 'h2', 'css-klass'); ?>
+<?php editable_image('sektion', 'bild', '/placeholder.jpg', 'Alt-text', 'css-klass'); ?>
+```
+
+---
+
+## Läs mer
+- `.rules/ai-rules.md` — Fullständiga kodstandarder
+- `.rules/brand-guide.md` — Varumärkesguide (färger, typsnitt, tonalitet)
