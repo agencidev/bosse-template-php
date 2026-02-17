@@ -7,7 +7,7 @@
 $configPath = __DIR__ . '/config.php';
 if (!file_exists($configPath)) {
     $currentUri = $_SERVER['REQUEST_URI'] ?? '';
-    if (strpos($currentUri, '/setup') === false
+    if (!str_contains($currentUri, '/setup')
         && basename($_SERVER['SCRIPT_FILENAME'] ?? '') !== 'setup.php') {
         header('Location: /setup');
         exit;
@@ -17,7 +17,7 @@ if (!file_exists($configPath)) {
 require_once $configPath;
 
 // Ladda version
-require_once __DIR__ . '/version.php';
+require_once __DIR__ . '/includes/version.php';
 
 // Sätt paths
 define('ROOT_PATH', __DIR__);

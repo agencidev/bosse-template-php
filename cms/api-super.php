@@ -261,6 +261,7 @@ function handle_change_password(): void {
         return;
     }
 
+    if (function_exists('backup_config')) backup_config();
     $config = file_get_contents($configFile);
     $newHash = password_hash($newPassword, PASSWORD_BCRYPT);
     $config = preg_replace(
@@ -290,6 +291,7 @@ function handle_save_config(): void {
         return;
     }
 
+    if (function_exists('backup_config')) backup_config();
     $config = file_get_contents($configFile);
 
     // Fält som kan uppdateras direkt

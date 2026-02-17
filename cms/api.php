@@ -65,7 +65,7 @@ function handleGet() {
 function handleUpdate() {
     // Validera Content-Type
     $content_type = $_SERVER['CONTENT_TYPE'] ?? '';
-    if (strpos($content_type, 'application/json') === false) {
+    if (!str_contains($content_type, 'application/json')) {
         http_response_code(415);
         echo json_encode(['success' => false, 'error' => 'Content-Type must be application/json']);
         exit;

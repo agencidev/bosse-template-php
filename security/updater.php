@@ -6,10 +6,11 @@
 
 // Filer som far skrivas over vid uppdatering
 const UPDATABLE_FILES = [
-    'bootstrap.php', 'router.php', 'setup.php', 'version.php',
-    '.htaccess', '.user.ini', '403.php', '404.php', '500.php', 'robots.php',
-    'site.webmanifest',
-    'projekt.php', 'projekt-single.php', 'CLAUDE.md',
+    'bootstrap.php', 'router.php', 'setup.php', 'includes/version.php',
+    '.htaccess', '.user.ini',
+    'pages/errors/403.php', 'pages/errors/404.php', 'pages/errors/500.php',
+    'seo/robots.php', 'public/site.webmanifest',
+    'pages/projekt.php', 'pages/projekt-single.php', 'CLAUDE.md',
     // CMS-logotyper (explicit för bakåtkompatibilitet med äldre updaters)
     'assets/images/cms/agenci-logo-dark.png',
     'assets/images/cms/agenci-logo-light.png',
@@ -37,7 +38,7 @@ const PROTECTED_FILES = [
     'assets/css/variables.css', 'assets/css/overrides.css',
     'assets/css/main.css', 'assets/css/components.css',
     'includes/header.php', 'includes/footer.php', 'includes/fonts.php',
-    'index.php', 'kontakt.php', 'cookies.php', 'integritetspolicy.php',
+    'index.php', 'pages/kontakt.php', 'pages/cookies.php', 'pages/integritetspolicy.php',
 ];
 
 // Wildcard-skyddade mappar
@@ -48,7 +49,7 @@ const PROTECTED_DIRS = ['assets/images', 'uploads'];
  */
 function is_updatable_file(string $relativePath): bool {
     // Blocka path traversal
-    if (strpos($relativePath, '..') !== false || $relativePath[0] === '/') {
+    if (str_contains($relativePath, '..') || $relativePath[0] === '/') {
         return false;
     }
 
@@ -59,7 +60,7 @@ function is_updatable_file(string $relativePath): bool {
 
     // Kolla wildcard-mappar
     foreach (UPDATABLE_DIRS as $dir) {
-        if (strpos($relativePath, $dir . '/') === 0) {
+        if (str_starts_with($relativePath, $dir . '/')) {
             return true;
         }
     }
@@ -78,13 +79,13 @@ function is_protected_file(string $relativePath): bool {
 
     // Kolla forst om filen ar i en uppdateringsbar mapp (de har prioritet)
     foreach (UPDATABLE_DIRS as $dir) {
-        if (strpos($relativePath, $dir . '/') === 0) {
+        if (str_starts_with($relativePath, $dir . '/')) {
             return false; // Inte skyddad - uppdateringsbar mapp har prioritet
         }
     }
 
     foreach (PROTECTED_DIRS as $dir) {
-        if (strpos($relativePath, $dir . '/') === 0) {
+        if (str_starts_with($relativePath, $dir . '/')) {
             return true;
         }
     }
@@ -384,18 +385,18 @@ function apply_update(string $zipPath): array {
         $filename = $zip->getNameIndex($i);
 
         // Hoppa över mappar
-        if (substr($filename, -1) === '/') {
+        if (str_ends_with($filename, '/')) {
             continue;
         }
 
         // Path traversal-skydd
-        if (strpos($filename, '..') !== false || $filename[0] === '/') {
+        if (str_contains($filename, '..') || $filename[0] === '/') {
             $result['skipped_files'][] = $filename . ' (path traversal)';
             continue;
         }
 
         // Migreringsfiler (hanteras separat)
-        if (strpos($filename, '_migrations/') === 0) {
+        if (str_starts_with($filename, '_migrations/')) {
             continue;
         }
 
@@ -630,7 +631,7 @@ function delete_backup(string $backupDir): bool {
         return false;
     }
 
-    if (strpos($realBackup, $realBackupsDir) !== 0) {
+    if (!str_starts_with($realBackup, $realBackupsDir)) {
         return false;
     }
 
@@ -858,10 +859,13 @@ function github_api(string $method, string $endpoint, array $data = []): array {
         return ['error' => 'Ogiltigt svar från GitHub API'];
     }
 
-    // Kolla HTTP-statuskod från $http_response_header
+    // Kolla HTTP-statuskod
     $statusCode = 0;
-    if (!empty($http_response_header) && is_array($http_response_header)) {
-        if (preg_match('/HTTP\/[\d.]+ (\d+)/', $http_response_header[0], $matches)) {
+    $responseHeaders = function_exists('http_get_last_response_headers')
+        ? http_get_last_response_headers()
+        : ($http_response_header ?? []);
+    if (!empty($responseHeaders) && is_array($responseHeaders)) {
+        if (preg_match('/HTTP\/[\d.]+ (\d+)/', $responseHeaders[0], $matches)) {
             $statusCode = (int)$matches[1];
         }
     }

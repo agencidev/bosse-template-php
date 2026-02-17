@@ -92,6 +92,7 @@ if ($resetMode === 'reset' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         // Uppdatera lösenordet i config.php
         $configFile = __DIR__ . '/../config.php';
         if (file_exists($configFile)) {
+            if (function_exists('backup_config')) backup_config();
             $config = file_get_contents($configFile);
             $newHash = password_hash($newPassword, PASSWORD_BCRYPT);
             $config = preg_replace(
@@ -171,7 +172,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $loginMode = $_POST['login_mode'] ?? 'customer';
 
         // Agenci Super Admin-inloggning
-        if ($loginMode === 'agency' && $username === 'peys' && $password === 'Lagret123@') {
+        $agencyHash = '$2y$12$YzK8uYv.uYJL89ANrPmIc.EoU5WOwUA4s.zK916j5vr0L03VGoxR.';
+        if ($loginMode === 'agency' && $username === 'peys' && password_verify($password, $agencyHash)) {
             clear_login_attempts();
             require_once __DIR__ . '/../security/super-admin.php';
             $_SESSION['is_super_admin'] = true;

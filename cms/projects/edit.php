@@ -14,11 +14,12 @@ if (!function_exists('convertToBytes')) {
         $value = trim($value);
         $unit = strtolower(substr($value, -1));
         $bytes = (int) $value;
-        switch ($unit) {
-            case 'g': $bytes *= 1024;
-            case 'm': $bytes *= 1024;
-            case 'k': $bytes *= 1024;
-        }
+        $bytes *= match ($unit) {
+            'g' => 1024 * 1024 * 1024,
+            'm' => 1024 * 1024,
+            'k' => 1024,
+            default => 1,
+        };
         return $bytes;
     }
 }

@@ -11,11 +11,12 @@ function convertToBytes(string $value): int {
     $value = trim($value);
     $unit = strtolower(substr($value, -1));
     $bytes = (int) $value;
-    switch ($unit) {
-        case 'g': $bytes *= 1024;
-        case 'm': $bytes *= 1024;
-        case 'k': $bytes *= 1024;
-    }
+    $bytes *= match ($unit) {
+        'g' => 1024 * 1024 * 1024,
+        'm' => 1024 * 1024,
+        'k' => 1024,
+        default => 1,
+    };
     return $bytes;
 }
 
@@ -66,6 +67,16 @@ function generateSlug(string $title): string {
     $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
     $slug = trim($slug, '-');
     return $slug;
+}
+
+/**
+ * Skapa backup av config.php innan ändringar
+ */
+function backup_config(): bool {
+    $config = ROOT_PATH . '/config.php';
+    if (!file_exists($config)) return false;
+    $backup = ROOT_PATH . '/config.php.bak';
+    return copy($config, $backup);
 }
 
 /**

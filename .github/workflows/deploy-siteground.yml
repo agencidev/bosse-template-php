@@ -15,6 +15,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: PHP Syntax Check
+        run: |
+          find . -name "*.php" -not -path "./vendor/*" | xargs -n 1 php -l
+
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -33,3 +37,14 @@ jobs:
             **/.DS_Store
             **/.env*
             config.php
+
+      - name: Health Check
+        if: ${{ secrets.SITE_URL != '' }}
+        run: |
+          sleep 10
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.SITE_URL }}")
+          if [ "$STATUS" -ne 200 ]; then
+            echo "WARNING: Site returned HTTP $STATUS"
+            exit 1
+          fi
+          echo "Site is healthy (HTTP 200)"

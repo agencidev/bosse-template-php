@@ -80,12 +80,20 @@ function require_login() {
 }
 
 /**
- * Rate Limiting - Hämta IP-adress
+ * Rate Limiting - Hämta IP-adress (rå, för loggning)
  */
 function get_client_ip() {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-    // Rensa IP för säker fillagring
     return preg_replace('/[^0-9a-fA-F:.]/', '', $ip);
+}
+
+/**
+ * Rate Limiting - Hämta hashad IP (GDPR-säker, för lagring)
+ */
+function get_client_ip_hash(): string {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $salt = defined('SESSION_SECRET') ? SESSION_SECRET : 'bosse-default-salt';
+    return hash_hmac('sha256', $ip, $salt);
 }
 
 /**
@@ -114,7 +122,7 @@ function save_login_attempts($attempts) {
  * Rate Limiting - Registrera misslyckat försök
  */
 function record_login_attempt() {
-    $ip = get_client_ip();
+    $ip = get_client_ip_hash();
     $attempts = get_login_attempts();
 
     if (!isset($attempts[$ip])) {
@@ -131,7 +139,7 @@ function record_login_attempt() {
  * Rate Limiting - Kontrollera om inloggning är tillåten
  */
 function check_login_rate_limit() {
-    $ip = get_client_ip();
+    $ip = get_client_ip_hash();
     $attempts = get_login_attempts();
 
     // Rensa gamla poster (äldre än lockout-tid)
@@ -181,7 +189,7 @@ function check_login_rate_limit() {
  * Rate Limiting - Rensa försök efter lyckad inloggning
  */
 function clear_login_attempts() {
-    $ip = get_client_ip();
+    $ip = get_client_ip_hash();
     $attempts = get_login_attempts();
 
     if (isset($attempts[$ip])) {

@@ -23,8 +23,8 @@ function is_super_admin(): bool {
 function require_super_admin(): void {
     if (!is_super_admin()) {
         http_response_code(403);
-        if (file_exists(__DIR__ . '/../403.php')) {
-            require __DIR__ . '/../403.php';
+        if (file_exists(ROOT_PATH . '/pages/errors/403.php')) {
+            require ROOT_PATH . '/pages/errors/403.php';
         } else {
             echo '403 - Forbidden';
         }

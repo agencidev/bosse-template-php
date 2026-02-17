@@ -1,7 +1,7 @@
 # CLAUDE.md
 
-Se `.windsurf/ai-rules.md` för fullständiga AI-regler och kodstandarder.
-Se `.windsurf/brand-guide.md` för varumärkesguide (färger, typsnitt, tonalitet).
+Se `.rules/ai-rules.md` för fullständiga AI-regler och kodstandarder.
+Se `.rules/brand-guide.md` för varumärkesguide (färger, typsnitt, tonalitet).
 
 ## ⚠️ KRITISKT — Läs först!
 
@@ -26,18 +26,19 @@ Se `.windsurf/brand-guide.md` för varumärkesguide (färger, typsnitt, tonalite
 
 ### Nya sidor (VIKTIGT!)
 När du skapar nya sidor (om-oss.php, tjanster.php etc.):
-1. **Kopiera** `templates/page-template.php`
-2. **MÅSTE inkludera:** `header.php` och `footer.php`
-3. **Lägg till rutt** i `router.php`
+1. **Skapa filen i `pages/`-mappen** (t.ex. `pages/om-oss.php`)
+2. **Kopiera** `templates/page-template.php` som bas
+3. **MÅSTE inkludera:** `header.php` och `footer.php` med `__DIR__ . '/../'`-prefix
+4. **Lägg till rutt** i `router.php`
 
 ```php
-// Minsta struktur för ny sida:
-<?php include __DIR__ . '/includes/admin-bar.php'; ?>
-<?php include __DIR__ . '/includes/header.php'; ?>
+// Minsta struktur för ny sida i pages/:
+<?php include __DIR__ . '/../includes/admin-bar.php'; ?>
+<?php include __DIR__ . '/../includes/header.php'; ?>
 <main>
     <!-- Innehåll -->
 </main>
-<?php include __DIR__ . '/includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
 ```
 
 ### CSS-ändringar
@@ -73,10 +74,10 @@ Använd ALLTID `editable_text()` och `editable_image()` för redigerbart innehå
 ```
 
 ### Publika sidor
-- `/` — Huvudsida (index.php)
-- `/kontakt` — Kontaktformulär
-- `/projekt` — Projekt-lista
-- `/projekt/{slug}` — Enskilt projekt
+- `/` — Huvudsida (`index.php` i rot)
+- `/kontakt` — Kontaktformulär (`pages/kontakt.php`)
+- `/projekt` — Projekt-lista (`pages/projekt.php`)
+- `/projekt/{slug}` — Enskilt projekt (`pages/projekt-single.php`)
 
 ### CMS-admin (kräver inloggning)
 - `/admin` — Logga in

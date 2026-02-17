@@ -4,10 +4,10 @@
  * Fristående cookie-policy-sida
  */
 
-require_once __DIR__ . '/bootstrap.php';
-require_once __DIR__ . '/security/session.php';
-require_once __DIR__ . '/cms/content.php';
-require_once __DIR__ . '/seo/meta.php';
+require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../security/session.php';
+require_once __DIR__ . '/../cms/content.php';
+require_once __DIR__ . '/../seo/meta.php';
 
 // Prevent caching
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
@@ -33,19 +33,19 @@ $site_url = defined('SITE_URL') ? SITE_URL : 'https://example.com';
     );
     ?>
 
-    <?php if (file_exists(__DIR__ . '/includes/fonts.php')) include __DIR__ . '/includes/fonts.php'; ?>
-    <?php if (file_exists(__DIR__ . '/includes/analytics.php')) include __DIR__ . '/includes/analytics.php'; ?>
-    <?php if (file_exists(__DIR__ . '/assets/images/favicon.png')): ?>
+    <?php if (file_exists(__DIR__ . '/../includes/fonts.php')) include __DIR__ . '/../includes/fonts.php'; ?>
+    <?php if (file_exists(__DIR__ . '/../includes/analytics.php')) include __DIR__ . '/../includes/analytics.php'; ?>
+    <?php if (file_exists(__DIR__ . '/../assets/images/favicon.png')): ?>
     <link rel="icon" type="image/png" href="/assets/images/favicon.png">
     <?php endif; ?>
-    <?php if (file_exists(__DIR__ . '/assets/images/apple-touch-icon.png')): ?>
+    <?php if (file_exists(__DIR__ . '/../assets/images/apple-touch-icon.png')): ?>
     <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
     <?php endif; ?>
     <link rel="stylesheet" href="/assets/css/main.css?v=<?php echo BOSSE_VERSION; ?>">
 </head>
 <body>
-    <?php include __DIR__ . '/includes/admin-bar.php'; ?>
-    <?php include __DIR__ . '/includes/header.php'; ?>
+    <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
+    <?php include __DIR__ . '/../includes/header.php'; ?>
 
     <main>
         <section class="section section--white">
@@ -165,7 +165,7 @@ $site_url = defined('SITE_URL') ? SITE_URL : 'https://example.com';
         </section>
     </main>
 
-    <?php include __DIR__ . '/includes/footer.php'; ?>
+    <?php include __DIR__ . '/../includes/footer.php'; ?>
 
     <script src="/assets/js/cms.js?v=<?php echo BOSSE_VERSION; ?>"></script>
 
@@ -175,7 +175,7 @@ $site_url = defined('SITE_URL') ? SITE_URL : 'https://example.com';
         </form>
     <?php endif; ?>
 
-    <?php include __DIR__ . '/includes/cookie-consent.php'; ?>
+    <?php include __DIR__ . '/../includes/cookie-consent.php'; ?>
 
     <style>
     .policy-content h2 {

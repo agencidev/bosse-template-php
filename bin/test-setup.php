@@ -105,8 +105,12 @@ test("includes/mailer.php finns", function() {
     return file_exists(__DIR__ . '/../includes/mailer.php');
 });
 
-test("kontakt.php finns", function() {
-    return file_exists(__DIR__ . '/../kontakt.php');
+test("pages/ mapp finns", function() {
+    return is_dir(__DIR__ . '/../pages');
+});
+
+test("pages/kontakt.php finns", function() {
+    return file_exists(__DIR__ . '/../pages/kontakt.php');
 });
 
 test("data/ mapp finns", function() {
@@ -209,12 +213,12 @@ if ($setupComplete) {
     echo BLUE . "\n🔧 Setup-genererade filer\n" . RESET;
     echo str_repeat("-", 60) . "\n";
 
-    test(".windsurf/brand-guide.md finns", function() {
-        return file_exists(__DIR__ . '/../.windsurf/brand-guide.md');
+    test(".rules/brand-guide.md finns", function() {
+        return file_exists(__DIR__ . '/../.rules/brand-guide.md');
     });
 
-    test(".windsurf/ai-rules.md finns", function() {
-        return file_exists(__DIR__ . '/../.windsurf/ai-rules.md');
+    test(".rules/ai-rules.md finns", function() {
+        return file_exists(__DIR__ . '/../.rules/ai-rules.md');
     });
 
     test("includes/fonts.php finns", function() {
@@ -236,7 +240,7 @@ test(".gitignore finns", function() {
 
 test(".env är i .gitignore", function() {
     $gitignore = file_get_contents(__DIR__ . '/../.gitignore');
-    return strpos($gitignore, '.env') !== false;
+    return str_contains($gitignore, '.env');
 });
 
 test("data/content.json är skrivbar", function() {
@@ -252,12 +256,12 @@ test("public/uploads/ är skrivbar", function() {
 });
 
 test("PHP-exekvering är blockerad i uploads", function() {
-    $htaccess = __DIR__ . '/../.htaccess';
+    $htaccess = __DIR__ . '/../uploads/.htaccess';
     if (!file_exists($htaccess)) {
-        return "htaccess saknas";
+        return "uploads/.htaccess saknas";
     }
     $content = file_get_contents($htaccess);
-    return strpos($content, 'php_flag engine off') !== false;
+    return str_contains($content, 'Require all denied');
 });
 
 // 4. Assets
@@ -346,18 +350,18 @@ echo str_repeat("-", 60) . "\n";
 
 test("router.php är giltig", function() {
     $router = file_get_contents(__DIR__ . '/../router.php');
-    return strpos($router, '/admin') !== false &&
-           strpos($router, '/dashboard') !== false;
+    return str_contains($router, '/admin') &&
+           str_contains($router, '/dashboard');
 });
 
 test("router.php har /kontakt-route", function() {
     $router = file_get_contents(__DIR__ . '/../router.php');
-    return strpos($router, "'/kontakt'") !== false;
+    return str_contains($router, "'/kontakt'");
 });
 
 test(".htaccess har rewrite-regler", function() {
     $htaccess = file_get_contents(__DIR__ . '/../.htaccess');
-    return strpos($htaccess, 'RewriteEngine On') !== false;
+    return str_contains($htaccess, 'RewriteEngine On');
 });
 
 // Sammanfattning

@@ -7,7 +7,7 @@
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../security/session.php';
 require_once __DIR__ . '/../security/csrf.php';
-require_once __DIR__ . '/../version.php';
+require_once __DIR__ . '/../includes/version.php';
 
 // Inkludera helpers om den finns, annars definiera inline (bakåtkompatibilitet)
 $helpersFile = __DIR__ . '/helpers.php';
@@ -19,11 +19,12 @@ if (!function_exists('convertToBytes')) {
         $value = trim($value);
         $unit = strtolower(substr($value, -1));
         $bytes = (int) $value;
-        switch ($unit) {
-            case 'g': $bytes *= 1024;
-            case 'm': $bytes *= 1024;
-            case 'k': $bytes *= 1024;
-        }
+        $bytes *= match ($unit) {
+            'g' => 1024 * 1024 * 1024,
+            'm' => 1024 * 1024,
+            'k' => 1024,
+            default => 1,
+        };
         return $bytes;
     }
 }
@@ -131,6 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Update config.php
             $configPath = ROOT_PATH . '/config.php';
             if (file_exists($configPath)) {
+                if (function_exists('backup_config')) backup_config();
                 $config = file_get_contents($configPath);
                 $config = preg_replace("/define\('SITE_NAME',\s*'[^']*'\);/", "define('SITE_NAME', " . var_export($newName, true) . ");", $config);
                 $config = preg_replace("/define\('SITE_DESCRIPTION',\s*'[^']*'\);/", "define('SITE_DESCRIPTION', " . var_export($newDesc, true) . ");", $config);
@@ -180,6 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $configPath = ROOT_PATH . '/config.php';
         if (file_exists($configPath)) {
+            if (function_exists('backup_config')) backup_config();
             $config = file_get_contents($configPath);
 
             // Handle Facebook
@@ -380,6 +383,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($error)) {
             $configPath = ROOT_PATH . '/config.php';
             if (file_exists($configPath)) {
+                if (function_exists('backup_config')) backup_config();
                 $config = file_get_contents($configPath);
 
                 // Check if SMTP section exists

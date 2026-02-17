@@ -1,9 +1,9 @@
 {
-    "latest_version": "1.5.31",
-    "release_date": "2026-02-12",
+    "latest_version": "1.5.32",
+    "release_date": "2026-02-17",
     "min_php_version": "8.0",
-    "changelog": "Grön uppdateringsknapp, borttagen mic-ikon i AI-chat, config.php i .gitignore",
-    "download_url": "https://raw.githubusercontent.com/agencidev/bosse-updates/main/releases/1.5.31.zip",
+    "changelog": "",
+    "download_url": "https://raw.githubusercontent.com/agencidev/bosse-updates/main/releases/1.5.32.zip",
     "signature": "",
     "migrations": [],
     "critical": false

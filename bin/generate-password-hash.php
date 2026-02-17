@@ -29,8 +29,8 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo $hash . "\n";
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
 
-echo "Lägg till i din .env fil:\n";
-echo "ADMIN_PASSWORD_HASH=" . $hash . "\n\n";
+echo "Lägg till i din config.php:\n";
+echo "'admin_password_hash' => '" . $hash . "'\n\n";
 
 echo "VIKTIGT:\n";
 echo "- Spara aldrig lösenordet i klartext\n";

@@ -19,6 +19,9 @@ Options +FollowSymLinks
 # URL Rewriting - Rena URLer
 ############################################
 
+# /robots.txt -> /seo/robots.php
+RewriteRule ^robots\.txt$ seo/robots.php [L]
+
 # /admin -> /cms/admin.php
 RewriteRule ^admin/?$ cms/admin.php [L]
 
@@ -34,20 +37,20 @@ RewriteRule ^super-admin/?$ cms/super-admin.php [L]
 # /api/super -> /cms/api-super.php
 RewriteRule ^api/super/?$ cms/api-super.php [QSA,L]
 
-# /kontakt -> /kontakt.php
-RewriteRule ^kontakt/?$ kontakt.php [L]
+# /kontakt -> /pages/kontakt.php
+RewriteRule ^kontakt/?$ pages/kontakt.php [L]
 
-# /cookies -> /cookies.php
-RewriteRule ^cookies/?$ cookies.php [L]
+# /cookies -> /pages/cookies.php
+RewriteRule ^cookies/?$ pages/cookies.php [L]
 
-# /integritetspolicy -> /integritetspolicy.php
-RewriteRule ^integritetspolicy/?$ integritetspolicy.php [L]
+# /integritetspolicy -> /pages/integritetspolicy.php
+RewriteRule ^integritetspolicy/?$ pages/integritetspolicy.php [L]
 
-# /projekt -> /projekt.php
-RewriteRule ^projekt/?$ projekt.php [L]
+# /projekt -> /pages/projekt.php
+RewriteRule ^projekt/?$ pages/projekt.php [L]
 
-# /projekt/{slug} -> /projekt-single.php?slug={slug}
-RewriteRule ^projekt/([a-z0-9-]+)/?$ projekt-single.php?slug=$1 [QSA,L]
+# /projekt/{slug} -> /pages/projekt-single.php?slug={slug}
+RewriteRule ^projekt/([a-z0-9-]+)/?$ pages/projekt-single.php?slug=$1 [QSA,L]
 
 # Ta bort .php från alla URLer (endast om filen finns)
 RewriteCond %{REQUEST_FILENAME} !-d
@@ -89,6 +92,8 @@ RewriteRule ^(.+?)/?$ $1.php [L,QSA]
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set X-XSS-Protection "1; mode=block"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
 
     # Content Security Policy
     Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://www.google-analytics.com https://raw.githubusercontent.com;"
@@ -103,7 +108,7 @@ RewriteRule ^(.+?)/?$ $1.php [L,QSA]
 # Skydda känsliga filer
 ############################################
 
-<FilesMatch "^(\.env|\.git|\.htaccess|config\.php|composer\.(json|lock)|update-state\.json|backup-meta\.json)">
+<FilesMatch "^(\.env|\.git|\.htaccess|config\.php|config\.php\.bak|composer\.(json|lock)|update-state\.json|backup-meta\.json)">
     Require all denied
 </FilesMatch>
 
@@ -125,17 +130,17 @@ RewriteRule ^data/(backups|tmp)/ - [F,L]
 
 
 ############################################
-# HTTPS Redirect (aktivera i produktion)
+# HTTPS Redirect
 ############################################
 
-# RewriteCond %{HTTPS} off
-# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 
 ############################################
 # Custom Error Pages
 ############################################
 
-ErrorDocument 404 /404.php
-ErrorDocument 403 /403.php
-ErrorDocument 500 /500.php
+ErrorDocument 404 /pages/errors/404.php
+ErrorDocument 403 /pages/errors/403.php
+ErrorDocument 500 /pages/errors/500.php

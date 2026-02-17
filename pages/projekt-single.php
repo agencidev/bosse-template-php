@@ -4,18 +4,18 @@
  * Visar ett projekt baserat på slug
  */
 
-require_once __DIR__ . '/bootstrap.php';
-require_once __DIR__ . '/security/session.php';
-require_once __DIR__ . '/security/validation.php';
-require_once __DIR__ . '/cms/content.php';
-require_once __DIR__ . '/seo/meta.php';
-require_once __DIR__ . '/seo/schema.php';
+require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../security/session.php';
+require_once __DIR__ . '/../security/validation.php';
+require_once __DIR__ . '/../cms/content.php';
+require_once __DIR__ . '/../seo/meta.php';
+require_once __DIR__ . '/../seo/schema.php';
 
 // Hämta slug från URL
-$slug = isset($_GET['slug']) ? trim($_GET['slug']) : '';
+$slug = trim($_GET['slug'] ?? '');
 
 // Hämta projekt
-$projects_file = __DIR__ . '/data/projects.json';
+$projects_file = __DIR__ . '/../data/projects.json';
 $projects = [];
 $project = null;
 
@@ -43,8 +43,8 @@ foreach ($projects as $p) {
 // 404 om projektet inte finns
 if (!$project) {
     http_response_code(404);
-    if (file_exists(__DIR__ . '/404.php')) {
-        include __DIR__ . '/404.php';
+    if (file_exists(__DIR__ . '/errors/404.php')) {
+        include __DIR__ . '/errors/404.php';
         exit;
     }
     echo '<h1>404 - Projektet kunde inte hittas</h1>';
@@ -86,12 +86,12 @@ function projectSchema($project) {
     );
     ?>
 
-    <?php if (file_exists(__DIR__ . '/includes/fonts.php')) include __DIR__ . '/includes/fonts.php'; ?>
-    <?php if (file_exists(__DIR__ . '/includes/analytics.php')) include __DIR__ . '/includes/analytics.php'; ?>
-    <?php if (file_exists(__DIR__ . '/assets/images/favicon.png')): ?>
+    <?php if (file_exists(__DIR__ . '/../includes/fonts.php')) include __DIR__ . '/../includes/fonts.php'; ?>
+    <?php if (file_exists(__DIR__ . '/../includes/analytics.php')) include __DIR__ . '/../includes/analytics.php'; ?>
+    <?php if (file_exists(__DIR__ . '/../assets/images/favicon.png')): ?>
     <link rel="icon" type="image/png" href="/assets/images/favicon.png">
     <?php endif; ?>
-    <?php if (file_exists(__DIR__ . '/assets/images/apple-touch-icon.png')): ?>
+    <?php if (file_exists(__DIR__ . '/../assets/images/apple-touch-icon.png')): ?>
     <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
     <?php endif; ?>
     <link rel="stylesheet" href="/assets/css/main.css?v=<?php echo BOSSE_VERSION; ?>">
@@ -314,8 +314,8 @@ function projectSchema($project) {
     </style>
 </head>
 <body>
-    <?php include __DIR__ . '/includes/admin-bar.php'; ?>
-    <?php include __DIR__ . '/includes/header.php'; ?>
+    <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
+    <?php include __DIR__ . '/../includes/header.php'; ?>
 
     <main>
         <article class="projekt-single">
@@ -404,7 +404,7 @@ function projectSchema($project) {
         </article>
     </main>
 
-    <?php include __DIR__ . '/includes/footer.php'; ?>
+    <?php include __DIR__ . '/../includes/footer.php'; ?>
 
     <script src="/assets/js/cms.js?v=<?php echo BOSSE_VERSION; ?>"></script>
 
@@ -414,6 +414,6 @@ function projectSchema($project) {
         </form>
     <?php endif; ?>
 
-    <?php include __DIR__ . '/includes/cookie-consent.php'; ?>
+    <?php include __DIR__ . '/../includes/cookie-consent.php'; ?>
 </body>
 </html>

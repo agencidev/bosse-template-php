@@ -22,10 +22,11 @@ $templateRoot = dirname(__DIR__); // apps/template/php/
 
 // Core-filer som ingar i uppdateringen (samma lista som UPDATABLE_FILES i updater.php)
 $updatableFiles = [
-    'bootstrap.php', 'router.php', 'setup.php', 'version.php',
-    '.htaccess', '.user.ini', '403.php', '404.php', '500.php', 'robots.php',
-    'site.webmanifest',
-    'projekt.php', 'projekt-single.php', 'CLAUDE.md',
+    'bootstrap.php', 'router.php', 'setup.php', 'includes/version.php',
+    '.htaccess', '.user.ini',
+    'pages/errors/403.php', 'pages/errors/404.php', 'pages/errors/500.php',
+    'seo/robots.php', 'public/site.webmanifest',
+    'pages/projekt.php', 'pages/projekt-single.php', 'CLAUDE.md',
     'cms/admin.php', 'cms/dashboard.php', 'cms/content.php',
     'cms/api.php', 'cms/api-super.php', 'cms/super-admin.php',
     'cms/seo.php', 'cms/support.php', 'cms/ai.php', 'cms/settings.php',
@@ -50,7 +51,7 @@ $hmacKey = $argv[2] ?? '';
 
 if (!$version) {
     // Las version fran version.php
-    $versionFile = $templateRoot . '/version.php';
+    $versionFile = $templateRoot . '/includes/version.php';
     if (file_exists($versionFile)) {
         $content = file_get_contents($versionFile);
         if (preg_match("/BOSSE_VERSION',\s*'([^']+)'/", $content, $m)) {

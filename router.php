@@ -20,6 +20,12 @@ if (!file_exists(__DIR__ . '/config.php')) {
     exit;
 }
 
+// Serve robots.txt via PHP
+if ($uri === '/robots.txt') {
+    require __DIR__ . '/seo/robots.php';
+    return true;
+}
+
 // URL routing
 $routes = [
     '/admin' => '/cms/admin.php',
@@ -30,13 +36,13 @@ $routes = [
     '/projects' => '/cms/projects/index.php',
     '/projects/new' => '/cms/projects/new.php',
     '/projects/edit' => '/cms/projects/edit.php',
-    '/kontakt' => '/kontakt.php',
-    '/cookies' => '/cookies.php',
-    '/integritetspolicy' => '/integritetspolicy.php',
+    '/kontakt' => '/pages/kontakt.php',
+    '/cookies' => '/pages/cookies.php',
+    '/integritetspolicy' => '/pages/integritetspolicy.php',
     '/setup' => '/setup.php',
     '/super-admin' => '/cms/super-admin.php',
     '/api/super' => '/cms/api-super.php',
-    '/projekt' => '/projekt.php',
+    '/projekt' => '/pages/projekt.php',
 ];
 
 // Load custom routes from extensions (survives updates)
@@ -63,8 +69,8 @@ if (isset($routes[$uri])) {
 // Dynamic route: /projekt/{slug}
 if (preg_match('#^/projekt/([a-z0-9-]+)/?$#', $uri, $matches)) {
     $_GET['slug'] = $matches[1];
-    $_SERVER['SCRIPT_NAME'] = '/projekt-single.php';
-    $_SERVER['PHP_SELF'] = '/projekt-single.php';
+    $_SERVER['SCRIPT_NAME'] = '/pages/projekt-single.php';
+    $_SERVER['PHP_SELF'] = '/pages/projekt-single.php';
 
     // Preserve additional query string
     if ($query) {
@@ -72,7 +78,7 @@ if (preg_match('#^/projekt/([a-z0-9-]+)/?$#', $uri, $matches)) {
         $_GET = array_merge($_GET, $extraParams);
     }
 
-    require __DIR__ . '/projekt-single.php';
+    require __DIR__ . '/pages/projekt-single.php';
     return true;
 }
 
@@ -118,8 +124,8 @@ if (file_exists($file) && !is_dir($file)) {
 
 // 404
 http_response_code(404);
-if (file_exists(__DIR__ . '/404.php')) {
-    require __DIR__ . '/404.php';
+if (file_exists(__DIR__ . '/pages/errors/404.php')) {
+    require __DIR__ . '/pages/errors/404.php';
 } else {
     echo '404 - Sidan kunde inte hittas';
 }

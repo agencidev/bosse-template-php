@@ -37,7 +37,7 @@ Inlägg i `projects.json` visas automatiskt på `/projekt` och kan hanteras via 
 
 ## Prioritetsordning
 
-1. **Brand Guide** (`.windsurf/brand-guide.md`) - Färger, typsnitt, tonalitet
+1. **Brand Guide** (`.rules/brand-guide.md`) - Färger, typsnitt, tonalitet
 2. **Tekniska regler** (detta dokument) - Kodstandarder, arkitektur
 3. **Wireframes** (`relume/`) - Layout och struktur
 
@@ -47,7 +47,7 @@ Vid konflikt gäller högre prioritet.
 
 ## Referensfiler
 
-- `.windsurf/brand-guide.md` - Varumärkesguide
+- `.rules/brand-guide.md` - Varumärkesguide
 - `assets/css/variables.css` - CSS-variabler (design tokens) — **ÄNDRA ALDRIG DIREKT**
 - `assets/css/overrides.css` - Visuella overrides — **SKRIV ALLTID HÄR**
 - `config.php` - Konfiguration (skapa aldrig ny, redigera befintlig)
@@ -325,7 +325,7 @@ När du skapar nya sektioner, använd ALLTID `editable_text()` och `editable_ima
 
 | Typ | Filer | Beskrivning |
 |-----|-------|-------------|
-| **Publika sidor** | `index.php`, `kontakt.php`, `projekt.php`, `projekt-single.php`, `cookies.php`, `integritetspolicy.php` | Synliga för besökare |
+| **Publika sidor** | `index.php`, `pages/kontakt.php`, `pages/projekt.php`, `pages/projekt-single.php`, `pages/cookies.php`, `pages/integritetspolicy.php` | Synliga för besökare |
 | **CMS-admin** | `cms/*.php`, `cms/projects/*.php` | Kräver inloggning |
 | **Data** | `data/content.json`, `data/projects.json` | JSON-lagring |
 | **Uploads** | `uploads/` | Uppladdade bilder (max 5MB per fil) |
@@ -337,12 +337,15 @@ När du skapar nya sektioner, använd ALLTID `editable_text()` och `editable_ima
 ```
 /
 ├── index.php              # Huvudsida
-├── kontakt.php            # Kontaktformulär
-├── projekt.php            # Publika projekt-lista
-├── projekt-single.php     # Enskilt projekt
 ├── router.php             # URL-routing
 ├── bootstrap.php          # Miljösetup
 ├── config.php             # Konfiguration (gitignored)
+├── pages/                 # Publika undersidor
+│   ├── kontakt.php        # Kontaktformulär
+│   ├── projekt.php        # Publika projekt-lista
+│   ├── projekt-single.php # Enskilt projekt
+│   ├── integritetspolicy.php # Integritetspolicy
+│   └── cookies.php        # Cookie-policy
 ├── assets/
 │   ├── css/
 │   │   ├── variables.css  # Design tokens (ÄNDRA EJ)

@@ -5,7 +5,7 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../security/session.php';
-require_once __DIR__ . '/../version.php';
+require_once __DIR__ . '/../includes/version.php';
 
 // Kräv inloggning
 if (!is_logged_in()) {

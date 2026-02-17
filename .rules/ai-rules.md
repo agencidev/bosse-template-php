@@ -37,7 +37,7 @@ Inlägg i `projects.json` visas automatiskt på `/projekt` och kan hanteras via 
 
 ## Prioritetsordning
 
-1. **Brand Guide** (`.windsurf/brand-guide.md`) - Färger, typsnitt, tonalitet
+1. **Brand Guide** (`.rules/brand-guide.md`) - Färger, typsnitt, tonalitet
 2. **Tekniska regler** (detta dokument) - Kodstandarder, arkitektur
 
 Vid konflikt gäller högre prioritet.
@@ -46,7 +46,7 @@ Vid konflikt gäller högre prioritet.
 
 ## Referensfiler
 
-- `.windsurf/brand-guide.md` - Varumärkesguide
+- `.rules/brand-guide.md` - Varumärkesguide
 - `assets/css/variables.css` - CSS-variabler (design tokens) — **ÄNDRA ALDRIG DIREKT**
 - `assets/css/overrides.css` - Visuella overrides — **SKRIV ALLTID HÄR**
 - `config.php` - Konfiguration (skapa aldrig ny, redigera befintlig)
@@ -250,7 +250,7 @@ Använd `editable_text()` för innehåll som ska vara redigerbart via CMS:
 
 ## Skapa nya sidor — OBLIGATORISKT
 
-När du skapar en ny sida (t.ex. `om-oss.php`, `tjanster.php`) MÅSTE du följa denna mall:
+Alla sidfiler ligger i `pages/`-mappen. När du skapar en ny sida (t.ex. `pages/om-oss.php`, `pages/tjanster.php`) MÅSTE du följa denna mall:
 
 ```php
 <?php
@@ -258,10 +258,10 @@ När du skapar en ny sida (t.ex. `om-oss.php`, `tjanster.php`) MÅSTE du följa 
  * [Sidnamn] Page
  */
 
-require_once __DIR__ . '/bootstrap.php';
-require_once __DIR__ . '/security/session.php';
-require_once __DIR__ . '/cms/content.php';
-require_once __DIR__ . '/seo/meta.php';
+require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../security/session.php';
+require_once __DIR__ . '/../cms/content.php';
+require_once __DIR__ . '/../seo/meta.php';
 ?>
 <!DOCTYPE html>
 <html lang="sv">
@@ -276,25 +276,26 @@ require_once __DIR__ . '/seo/meta.php';
     );
     ?>
 
-    <?php if (file_exists(__DIR__ . '/includes/fonts.php')) include __DIR__ . '/includes/fonts.php'; ?>
+    <?php if (file_exists(__DIR__ . '/../includes/fonts.php')) include __DIR__ . '/../includes/fonts.php'; ?>
     <link rel="stylesheet" href="/assets/css/main.css">
 </head>
 <body>
-    <?php include __DIR__ . '/includes/admin-bar.php'; ?>
-    <?php include __DIR__ . '/includes/header.php'; ?>
+    <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
+    <?php include __DIR__ . '/../includes/header.php'; ?>
 
     <main>
         <!-- Sidinnehåll här -->
     </main>
 
-    <?php include __DIR__ . '/includes/footer.php'; ?>
-    <?php include __DIR__ . '/includes/cookie-consent.php'; ?>
+    <?php include __DIR__ . '/../includes/footer.php'; ?>
+    <?php include __DIR__ . '/../includes/cookie-consent.php'; ?>
 </body>
 </html>
 ```
 
 **Checklista för nya sidor:**
-- [ ] `bootstrap.php` och `session.php` inkluderade
+- [ ] Filen skapas i `pages/`-mappen
+- [ ] `bootstrap.php` och `session.php` inkluderade (med `__DIR__ . '/../'` prefix)
 - [ ] `generateMeta()` för SEO
 - [ ] `admin-bar.php` FÖRE header
 - [ ] `header.php` inkluderad
@@ -309,12 +310,15 @@ require_once __DIR__ . '/seo/meta.php';
 ```
 /
 ├── index.php              # Huvudsida
-├── kontakt.php            # Kontaktformulär
-├── projekt.php            # Publika projekt-lista
-├── projekt-single.php     # Enskilt projekt
 ├── router.php             # URL-routing
 ├── bootstrap.php          # Miljösetup
 ├── config.php             # Konfiguration (gitignored)
+├── pages/                 # Publika undersidor
+│   ├── kontakt.php        # Kontaktformulär
+│   ├── projekt.php        # Publika projekt-lista
+│   ├── projekt-single.php # Enskilt projekt
+│   ├── integritetspolicy.php # Integritetspolicy
+│   └── cookies.php        # Cookie-policy
 ├── assets/
 │   ├── css/
 │   │   ├── variables.css  # Design tokens (ÄNDRA EJ)

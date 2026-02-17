@@ -4,14 +4,14 @@
  * Visar alla publicerade projekt från data/projects.json
  */
 
-require_once __DIR__ . '/bootstrap.php';
-require_once __DIR__ . '/security/session.php';
-require_once __DIR__ . '/cms/content.php';
-require_once __DIR__ . '/seo/meta.php';
-require_once __DIR__ . '/seo/schema.php';
+require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../security/session.php';
+require_once __DIR__ . '/../cms/content.php';
+require_once __DIR__ . '/../seo/meta.php';
+require_once __DIR__ . '/../seo/schema.php';
 
 // Hämta projekt
-$projects_file = __DIR__ . '/data/projects.json';
+$projects_file = __DIR__ . '/../data/projects.json';
 $all_projects = [];
 
 if (file_exists($projects_file)) {
@@ -20,9 +20,7 @@ if (file_exists($projects_file)) {
 }
 
 // Filtrera till endast publicerade
-$projects = array_filter($all_projects, function($p) {
-    return isset($p['status']) && $p['status'] === 'published';
-});
+$projects = array_filter($all_projects, fn($p) => isset($p['status']) && $p['status'] === 'published');
 
 // Sortera efter datum (nyast först)
 usort($projects, function($a, $b) {
@@ -34,15 +32,11 @@ usort($projects, function($a, $b) {
 // Kategorifil­trering (valfri GET-parameter)
 $category_filter = isset($_GET['kategori']) ? trim($_GET['kategori']) : '';
 if (!empty($category_filter)) {
-    $projects = array_filter($projects, function($p) use ($category_filter) {
-        return isset($p['category']) && strtolower($p['category']) === strtolower($category_filter);
-    });
+    $projects = array_filter($projects, fn($p) => isset($p['category']) && strtolower($p['category']) === strtolower($category_filter));
 }
 
 // Hämta unika kategorier för filtrering
-$categories = array_unique(array_filter(array_map(function($p) {
-    return $p['category'] ?? '';
-}, $all_projects)));
+$categories = array_unique(array_filter(array_map(fn($p) => $p['category'] ?? '', $all_projects)));
 sort($categories);
 ?>
 <!DOCTYPE html>
@@ -59,12 +53,12 @@ sort($categories);
     );
     ?>
 
-    <?php if (file_exists(__DIR__ . '/includes/fonts.php')) include __DIR__ . '/includes/fonts.php'; ?>
-    <?php if (file_exists(__DIR__ . '/includes/analytics.php')) include __DIR__ . '/includes/analytics.php'; ?>
-    <?php if (file_exists(__DIR__ . '/assets/images/favicon.png')): ?>
+    <?php if (file_exists(__DIR__ . '/../includes/fonts.php')) include __DIR__ . '/../includes/fonts.php'; ?>
+    <?php if (file_exists(__DIR__ . '/../includes/analytics.php')) include __DIR__ . '/../includes/analytics.php'; ?>
+    <?php if (file_exists(__DIR__ . '/../assets/images/favicon.png')): ?>
     <link rel="icon" type="image/png" href="/assets/images/favicon.png">
     <?php endif; ?>
-    <?php if (file_exists(__DIR__ . '/assets/images/apple-touch-icon.png')): ?>
+    <?php if (file_exists(__DIR__ . '/../assets/images/apple-touch-icon.png')): ?>
     <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
     <?php endif; ?>
     <link rel="stylesheet" href="/assets/css/main.css?v=<?php echo BOSSE_VERSION; ?>">
@@ -209,8 +203,8 @@ sort($categories);
     </style>
 </head>
 <body>
-    <?php include __DIR__ . '/includes/admin-bar.php'; ?>
-    <?php include __DIR__ . '/includes/header.php'; ?>
+    <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
+    <?php include __DIR__ . '/../includes/header.php'; ?>
 
     <main>
         <!-- Hero Section -->
@@ -284,7 +278,7 @@ sort($categories);
         </section>
     </main>
 
-    <?php include __DIR__ . '/includes/footer.php'; ?>
+    <?php include __DIR__ . '/../includes/footer.php'; ?>
 
     <script src="/assets/js/cms.js?v=<?php echo BOSSE_VERSION; ?>"></script>
 
@@ -294,7 +288,7 @@ sort($categories);
         </form>
     <?php endif; ?>
 
-    <?php include __DIR__ . '/includes/cookie-consent.php'; ?>
+    <?php include __DIR__ . '/../includes/cookie-consent.php'; ?>
 </body>
 </html>
 <?php

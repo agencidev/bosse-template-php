@@ -145,7 +145,7 @@ Exempel: Om en specifik knapp ska ha en annan stil än brand guiden:
 
 ## CMS-integration
 
-För fullständig dokumentation av CMS-systemet, se `.windsurf/ai-rules.md` under sektionen **"CMS-användning"**.
+För fullständig dokumentation av CMS-systemet, se `.rules/ai-rules.md` under sektionen **"CMS-användning"**.
 
 ### Snabbref
 

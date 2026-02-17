@@ -75,7 +75,7 @@ $writableCheck = [
     __DIR__ . '/assets/css/variables.css' => __DIR__ . '/assets/css',
     __DIR__ . '/assets/images/' => __DIR__ . '/assets/images',
     __DIR__ . '/data/' => __DIR__ . '/data',
-    __DIR__ . '/.windsurf/' => __DIR__ . '/.windsurf',
+    __DIR__ . '/.rules/' => __DIR__ . '/.rules',
     __DIR__ . '/includes/' => __DIR__ . '/includes',
 ];
 $writableErrors = [];
@@ -559,7 +559,7 @@ function generateAllFiles(array $data): array {
         $btnRadiusMap = ['sharp' => '0.25rem', 'rounded' => '0.5rem', 'soft' => '1rem', 'pill' => '9999px'];
         $btnRadius = $btnRadiusMap[$data['border_radius'] ?? 'rounded'] ?? '0.5rem';
         $buttonStyle = $data['button_style'] ?? 'filled';
-        if (strpos($css, '--button-radius') === false) {
+        if (!str_contains($css, '--button-radius')) {
             $css = str_replace('--radius-full: 9999px;', "--radius-full: 9999px;\n  --button-radius: {$btnRadius};\n  --button-style: {$buttonStyle};", $css);
         } else {
             $css = preg_replace('/(--button-radius:\s*)[^;]+;/', '${1}' . $btnRadius . ';', $css);
@@ -573,7 +573,7 @@ function generateAllFiles(array $data): array {
 
         // Accent color
         if (!empty($data['accent_color'])) {
-            if (strpos($css, '--color-accent') === false) {
+            if (!str_contains($css, '--color-accent')) {
                 $css = str_replace('--color-secondary-dark:', "--color-accent: " . $data['accent_color'] . ";\n\n  /* Secondary Colors */\n  --color-secondary-dark:", $css);
                 // Remove the duplicate "Secondary Colors" comment if it exists
                 $css = str_replace("/* Secondary Colors */\n  /* Secondary Colors */", "/* Secondary Colors */", $css);
@@ -585,7 +585,7 @@ function generateAllFiles(array $data): array {
         // Section padding (spacing feel)
         $sectionPaddingMap = ['compact' => '3rem', 'normal' => '4rem', 'airy' => '6rem'];
         $sectionPadding = $sectionPaddingMap[$data['spacing_feel'] ?? 'normal'] ?? '4rem';
-        if (strpos($css, '--section-padding') === false) {
+        if (!str_contains($css, '--section-padding')) {
             $css = str_replace('--container-padding:', "--section-padding: {$sectionPadding};\n  --container-padding:", $css);
         } else {
             $css = preg_replace('/(--section-padding:\s*)[^;]+;/', '${1}' . $sectionPadding . ';', $css);
@@ -620,10 +620,10 @@ function generateAllFiles(array $data): array {
     }
     file_put_contents($dataDir . '/content.json', json_encode($contentJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
-    // 4. .windsurf/brand-guide.md
-    $windsurfDir = __DIR__ . '/.windsurf';
-    if (!is_dir($windsurfDir)) {
-        mkdir($windsurfDir, 0755, true);
+    // 4. .rules/brand-guide.md
+    $rulesDir = __DIR__ . '/.rules';
+    if (!is_dir($rulesDir)) {
+        mkdir($rulesDir, 0755, true);
     }
 
     $brandTemplate = file_get_contents(__DIR__ . '/templates/brand-guide-template.md');
@@ -700,14 +700,14 @@ function generateAllFiles(array $data): array {
             ],
             $brandTemplate
         );
-        file_put_contents($windsurfDir . '/brand-guide.md', $brandGuide);
+        file_put_contents($rulesDir . '/brand-guide.md', $brandGuide);
     }
 
-    // 5. .windsurf/ai-rules.md
+    // 5. .rules/ai-rules.md
     $aiTemplate = file_get_contents(__DIR__ . '/templates/ai-rules-template.md');
     if ($aiTemplate) {
         $aiRules = str_replace('{{COMPANY_NAME}}', $data['site_name'], $aiTemplate);
-        file_put_contents($windsurfDir . '/ai-rules.md', $aiRules);
+        file_put_contents($rulesDir . '/ai-rules.md', $aiRules);
     }
 
     // 6. data/.setup-complete
@@ -724,8 +724,8 @@ function generateAllFiles(array $data): array {
 
     // 6c. CLAUDE.md (referens-fil för Claude Code)
     $claudeMdContent = "# CLAUDE.md\n\n";
-    $claudeMdContent .= "Se `.windsurf/ai-rules.md` för fullständiga AI-regler och kodstandarder.\n";
-    $claudeMdContent .= "Se `.windsurf/brand-guide.md` för varumärkesguide (färger, typsnitt, tonalitet).\n\n";
+    $claudeMdContent .= "Se `.rules/ai-rules.md` för fullständiga AI-regler och kodstandarder.\n";
+    $claudeMdContent .= "Se `.rules/brand-guide.md` för varumärkesguide (färger, typsnitt, tonalitet).\n\n";
     $claudeMdContent .= "## Snabbref\n\n";
     $claudeMdContent .= "### CSS-ändringar\n";
     $claudeMdContent .= "- **Skriv alltid i:** `assets/css/overrides.css`\n";
@@ -740,11 +740,26 @@ function generateAllFiles(array $data): array {
     $claudeMdContent .= "<?php editable_text('sektion', 'text', 'Standardtext', 'p', 'css-klass'); ?>\n";
     $claudeMdContent .= "<?php editable_image('sektion', 'bild', '/assets/images/placeholder.jpg', 'Alt-text', 'css-klass'); ?>\n";
     $claudeMdContent .= "```\n\n";
+    $claudeMdContent .= "### Nya sidor (VIKTIGT!)\n";
+    $claudeMdContent .= "När du skapar nya sidor (om-oss.php, tjanster.php etc.):\n";
+    $claudeMdContent .= "1. **Skapa filen i `pages/`-mappen** (t.ex. `pages/om-oss.php`)\n";
+    $claudeMdContent .= "2. **Kopiera** `templates/page-template.php` som bas\n";
+    $claudeMdContent .= "3. **MÅSTE inkludera:** `header.php` och `footer.php` med `__DIR__ . '/../'`-prefix\n";
+    $claudeMdContent .= "4. **Lägg till rutt** i `router.php`\n\n";
+    $claudeMdContent .= "```php\n";
+    $claudeMdContent .= "// Minsta struktur för ny sida i pages/:\n";
+    $claudeMdContent .= "<?php include __DIR__ . '/../includes/admin-bar.php'; ?>\n";
+    $claudeMdContent .= "<?php include __DIR__ . '/../includes/header.php'; ?>\n";
+    $claudeMdContent .= "<main>\n";
+    $claudeMdContent .= "    <!-- Innehåll -->\n";
+    $claudeMdContent .= "</main>\n";
+    $claudeMdContent .= "<?php include __DIR__ . '/../includes/footer.php'; ?>\n";
+    $claudeMdContent .= "```\n\n";
     $claudeMdContent .= "### Publika sidor\n";
-    $claudeMdContent .= "- `/` — Huvudsida (index.php)\n";
-    $claudeMdContent .= "- `/kontakt` — Kontaktformulär\n";
-    $claudeMdContent .= "- `/projekt` — Projekt-lista\n";
-    $claudeMdContent .= "- `/projekt/{slug}` — Enskilt projekt\n\n";
+    $claudeMdContent .= "- `/` — Huvudsida (`index.php` i rot)\n";
+    $claudeMdContent .= "- `/kontakt` — Kontaktformulär (`pages/kontakt.php`)\n";
+    $claudeMdContent .= "- `/projekt` — Projekt-lista (`pages/projekt.php`)\n";
+    $claudeMdContent .= "- `/projekt/{slug}` — Enskilt projekt (`pages/projekt-single.php`)\n\n";
     $claudeMdContent .= "### CMS-admin (kräver inloggning)\n";
     $claudeMdContent .= "- `/admin` — Logga in\n";
     $claudeMdContent .= "- `/dashboard` — Översikt\n";
@@ -2115,14 +2130,14 @@ $saved = $_SESSION['setup_data'] ?? [];
             // Backend-verifiering
             $checks = [
                 ['label' => 'config.php', 'desc' => 'Konfiguration', 'ok' => file_exists(__DIR__ . '/config.php')],
-                ['label' => 'variables.css', 'desc' => 'Färger och typsnitt', 'ok' => file_exists(__DIR__ . '/assets/css/variables.css') && strpos(file_get_contents(__DIR__ . '/assets/css/variables.css'), '--color-primary') !== false],
+                ['label' => 'variables.css', 'desc' => 'Färger och typsnitt', 'ok' => file_exists(__DIR__ . '/assets/css/variables.css') && str_contains(file_get_contents(__DIR__ . '/assets/css/variables.css'), '--color-primary')],
                 ['label' => 'overrides.css', 'desc' => 'Override-system', 'ok' => file_exists(__DIR__ . '/assets/css/overrides.css')],
                 ['label' => 'content.json', 'desc' => 'Innehållsdata', 'ok' => file_exists(__DIR__ . '/data/content.json')],
-                ['label' => 'brand-guide.md', 'desc' => 'Varumärkesguide', 'ok' => file_exists(__DIR__ . '/.windsurf/brand-guide.md')],
-                ['label' => 'ai-rules.md', 'desc' => 'AI-regler', 'ok' => file_exists(__DIR__ . '/.windsurf/ai-rules.md')],
+                ['label' => 'brand-guide.md', 'desc' => 'Varumärkesguide', 'ok' => file_exists(__DIR__ . '/.rules/brand-guide.md')],
+                ['label' => 'ai-rules.md', 'desc' => 'AI-regler', 'ok' => file_exists(__DIR__ . '/.rules/ai-rules.md')],
                 ['label' => 'fonts.php', 'desc' => 'Typsnittslänkar', 'ok' => file_exists(__DIR__ . '/includes/fonts.php')],
-                ['label' => 'SMTP', 'desc' => 'E-postkonfiguration', 'ok' => defined('SMTP_HOST') || (file_exists(__DIR__ . '/config.php') && strpos(file_get_contents(__DIR__ . '/config.php'), 'SMTP_HOST') !== false)],
-                ['label' => 'Säkerhet', 'desc' => 'Session & CSRF', 'ok' => file_exists(__DIR__ . '/config.php') && strpos(file_get_contents(__DIR__ . '/config.php'), 'SESSION_SECRET') !== false],
+                ['label' => 'SMTP', 'desc' => 'E-postkonfiguration', 'ok' => defined('SMTP_HOST') || (file_exists(__DIR__ . '/config.php') && str_contains(file_get_contents(__DIR__ . '/config.php'), 'SMTP_HOST'))],
+                ['label' => 'Säkerhet', 'desc' => 'Session & CSRF', 'ok' => file_exists(__DIR__ . '/config.php') && str_contains(file_get_contents(__DIR__ . '/config.php'), 'SESSION_SECRET')],
                 ['label' => 'Skrivbar', 'desc' => 'data/-mappen', 'ok' => is_writable(__DIR__ . '/data')],
             ];
             $allOk = !in_array(false, array_column($checks, 'ok'));
