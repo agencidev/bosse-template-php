@@ -424,7 +424,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- VANLIG INLOGGNING -->
         <div class="login-tabs">
             <button type="button" class="login-tab active" onclick="switchTab('customer')">Kund</button>
-            <button type="button" class="login-tab" onclick="switchTab('agency')">Agenci</button>
+            <button type="button" class="login-tab" onclick="switchTab('agency')">PEYS</button>
         </div>
 
         <form method="POST">

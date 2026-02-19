@@ -1518,14 +1518,14 @@ $saved = $_SESSION['setup_data'] ?? [];
         <div class="progress-steps">
             <div class="progress-step">
                 <div class="step-circle <?php echo $step === 1 ? 'active' : ($step > 1 ? 'completed' : ''); ?>">
-                    <?php echo $step > 1 ? '&#10003;' : '1'; ?>
+                    <?php echo $step > 1 ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : '1'; ?>
                 </div>
                 <span class="step-label">Företag</span>
             </div>
             <div class="step-line <?php echo $step > 1 ? 'completed' : ''; ?>"></div>
             <div class="progress-step">
                 <div class="step-circle <?php echo $step === 2 ? 'active' : ($step > 2 ? 'completed' : ''); ?>">
-                    <?php echo $step > 2 ? '&#10003;' : '2'; ?>
+                    <?php echo $step > 2 ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : '2'; ?>
                 </div>
                 <span class="step-label">Design</span>
             </div>
@@ -2258,7 +2258,7 @@ $saved = $_SESSION['setup_data'] ?? [];
     function showFontFileName(input) {
         const nameSpan = document.getElementById('custom-font-name');
         if (input.files && input.files[0]) {
-            nameSpan.textContent = '✓ ' + input.files[0].name;
+            nameSpan.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><polyline points="20 6 9 17 4 12"/></svg>' + input.files[0].name;
             nameSpan.style.display = 'block';
         } else {
             nameSpan.style.display = 'none';

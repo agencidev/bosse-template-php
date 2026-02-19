@@ -74,9 +74,17 @@ function setupEditableText(element) {
     
     const isMultiline = tag === 'p' || tag === 'div' || tag === 'textarea';
     
+    // Save element width before hiding
+    const savedWidth = element.offsetWidth;
+
     // Create wrapper
     const wrapper = document.createElement('div');
     wrapper.className = 'relative';
+    wrapper.style.width = savedWidth + 'px';
+    wrapper.style.maxWidth = '100%';
+    wrapper.style.borderRadius = '1rem';
+    wrapper.style.overflow = 'hidden';
+    wrapper.style.boxShadow = '0 10px 25px rgba(0,0,0,0.25)';
     
     // Create input element
     const inputElement = isMultiline 
@@ -88,8 +96,10 @@ function setupEditableText(element) {
     }
     
     inputElement.value = element.textContent.trim();
-    inputElement.className = 'bg-white text-woodsmoke rounded-b-lg p-4 w-full resize-none font-inherit text-inherit';
-    inputElement.style.border = '2px solid #e5e7eb';
+    inputElement.className = 'rounded-b-2xl p-4 w-full resize-none font-inherit text-inherit';
+    inputElement.style.background = 'rgba(255,255,255,0.05)';
+    inputElement.style.color = 'white';
+    inputElement.style.border = '1px solid rgba(255,255,255,0.15)';
     inputElement.style.borderTop = 'none';
     inputElement.style.outline = 'none';
     inputElement.style.boxShadow = 'none';
@@ -99,13 +109,14 @@ function setupEditableText(element) {
     inputElement.style.fontWeight = 'inherit';
     inputElement.style.width = '100%';
     inputElement.style.boxSizing = 'border-box';
-    
+    inputElement.style.fontFamily = "'DM Sans', sans-serif";
+
     // Focus state
     inputElement.addEventListener('focus', function() {
-      inputElement.style.borderColor = '#ff5722';
+      inputElement.style.borderColor = '#379b83';
     });
     inputElement.addEventListener('blur', function() {
-      inputElement.style.borderColor = '#e5e7eb';
+      inputElement.style.borderColor = 'rgba(255,255,255,0.15)';
     });
     
     if (isMultiline) {
@@ -131,16 +142,23 @@ function setupEditableText(element) {
     
     // Create buttons container (above input)
     const buttonsDiv = document.createElement('div');
-    buttonsDiv.className = 'flex gap-2 items-center justify-end bg-white rounded-t-lg p-2 z-50';
-    buttonsDiv.style.borderBottom = '1px solid #e5e7eb';
+    buttonsDiv.className = 'flex gap-2 items-center justify-end p-2 z-50';
+    buttonsDiv.style.background = '#054547';
+    buttonsDiv.style.color = 'white';
+    buttonsDiv.style.border = '1px solid rgba(255,255,255,0.10)';
+    buttonsDiv.style.borderBottom = 'none';
+    buttonsDiv.style.borderRadius = '1rem 1rem 0 0';
     buttonsDiv.style.marginBottom = '0';
     buttonsDiv.style.boxShadow = 'none';
     
     // Save button
     const saveBtn = document.createElement('button');
-    saveBtn.textContent = '✓ Spara';
-    saveBtn.className = 'px-4 py-2 bg-persimmon text-white text-xs font-semibold rounded-md hover:bg-persimmon/90 disabled:opacity-50 transition';
-    saveBtn.style.boxShadow = '0 1px 2px 0 rgb(0 0 0 / 0.05)';
+    saveBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><polyline points="20 6 9 17 4 12"/></svg>Spara';
+    saveBtn.className = 'px-4 py-2 text-white text-xs font-semibold disabled:opacity-50 transition';
+    saveBtn.style.background = '#379b83';
+    saveBtn.style.borderRadius = '9999px';
+    saveBtn.style.border = 'none';
+    saveBtn.style.cursor = 'pointer';
     saveBtn.onclick = async function() {
       saveBtn.disabled = true;
       saveBtn.textContent = 'Sparar...';
@@ -150,10 +168,14 @@ function setupEditableText(element) {
     // Cancel button
     const cancelBtn = document.createElement('button');
     cancelBtn.textContent = '✕';
-    cancelBtn.className = 'px-3 py-2 text-gray-700 font-semibold rounded-md hover:bg-gray-100 transition';
+    cancelBtn.className = 'px-3 py-2 font-semibold transition';
     cancelBtn.style.fontSize = '18px';
     cancelBtn.style.lineHeight = '1';
     cancelBtn.style.backgroundColor = 'transparent';
+    cancelBtn.style.color = 'rgba(255,255,255,0.65)';
+    cancelBtn.style.border = 'none';
+    cancelBtn.style.cursor = 'pointer';
+    cancelBtn.style.borderRadius = '9999px';
     cancelBtn.title = 'Avbryt';
     cancelBtn.onclick = function() {
       handleCancel();
@@ -272,7 +294,7 @@ function setupEditableImage(element) {
     
     const overlay = document.createElement('div');
     overlay.className = 'cms-image-overlay';
-    overlay.innerHTML = '<button class="cms-image-btn" onclick="uploadImage(\'' + contentKey + '\', \'' + field + '\')">🖼️ Ändra bild</button>';
+    overlay.innerHTML = '<button class="cms-image-btn" onclick="uploadImage(\'' + contentKey + '\', \'' + field + '\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>Ändra bild</button>';
     newWrapper.appendChild(overlay);
   }
 }
@@ -381,7 +403,7 @@ function showNotification(message, type = 'info', options = {}) {
         border-radius: 0.75rem;
         font-size: 0.875rem;
         font-weight: 500;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         animation: cmsToastIn 0.3s ease-out;
         box-shadow: 0 10px 25px rgba(0,0,0,0.15), 0 4px 6px rgba(0,0,0,0.1);
         max-width: 360px;
@@ -457,13 +479,13 @@ function showNotification(message, type = 'info', options = {}) {
         to { width: 0%; }
       }
       .cms-editable-active {
-        outline: 2px dashed rgba(254, 79, 42, 0.4);
+        outline: 2px dashed rgba(55, 155, 131, 0.3);
         outline-offset: 4px;
         cursor: pointer;
         transition: outline-color 0.2s;
       }
       .cms-editable-active:hover {
-        outline-color: rgba(254, 79, 42, 0.8);
+        outline-color: rgba(55, 155, 131, 0.7);
       }
       .cms-image-wrapper {
         position: relative;
@@ -483,12 +505,20 @@ function showNotification(message, type = 'info', options = {}) {
       }
       .cms-image-btn {
         padding: 0.5rem 1rem;
-        background: white;
+        background: #379b83;
+        color: white;
         border: none;
-        border-radius: 0.5rem;
+        border-radius: 9999px;
         font-size: 0.875rem;
         font-weight: 600;
         cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        transition: background 0.2s;
+      }
+      .cms-image-btn:hover {
+        background: #2e8570;
       }
     `;
     document.head.appendChild(style);

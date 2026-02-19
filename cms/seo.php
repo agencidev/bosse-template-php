@@ -364,45 +364,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border: 1px solid #fecaca;
             color: #dc2626;
         }
-        .google-preview {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.10);
-            border-radius: 1rem;
-            padding: 1.25rem;
-            margin-top: 1.5rem;
-        }
-        .google-preview-label {
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.50);
-            margin-bottom: 0.75rem;
-            font-weight: 500;
-        }
-        .google-preview-title {
-            font-size: 1.25rem;
-            color: #1a0dab;
-            font-weight: 400;
-            margin-bottom: 0.25rem;
-            line-height: 1.3;
-            text-decoration: none;
-            display: block;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .google-preview-url {
-            font-size: 0.875rem;
-            color: #006621;
-            margin-bottom: 0.25rem;
-        }
-        .google-preview-description {
-            font-size: 0.875rem;
-            color: #545454;
-            line-height: 1.5;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
     </style>
 </head>
 <body>
@@ -443,7 +404,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="text" id="meta_title" name="meta_title" class="form-input"
                            value="<?php echo htmlspecialchars($metaTitle); ?>"
                            placeholder="Företagsnamn - Kort beskrivning"
-                           oninput="updatePreview(); updateCharCount('meta_title', 60)">
+                           oninput="updateCharCount('meta_title', 60)">
                     <div class="char-count" id="meta_title_count">
                         <?php echo mb_strlen($metaTitle); ?>/60 tecken
                     </div>
@@ -453,7 +414,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label class="form-label" for="meta_description">Meta-beskrivning</label>
                     <textarea id="meta_description" name="meta_description" class="form-textarea"
                               placeholder="En kort beskrivning av er verksamhet..."
-                              oninput="updatePreview(); updateCharCount('meta_description', 160)"><?php echo htmlspecialchars($metaDescription); ?></textarea>
+                              oninput="updateCharCount('meta_description', 160)"><?php echo htmlspecialchars($metaDescription); ?></textarea>
                     <div class="char-count" id="meta_description_count">
                         <?php echo mb_strlen($metaDescription); ?>/160 tecken
                     </div>
@@ -461,24 +422,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <button type="submit" class="btn btn-primary">Spara</button>
 
-                <!-- Google Preview -->
-                <div class="google-preview">
-                    <div class="google-preview-label">Så här kan det se ut i Google:</div>
-                    <a class="google-preview-title" id="preview-title"><?php echo htmlspecialchars($metaTitle ?: 'Din sidtitel'); ?></a>
-                    <div class="google-preview-url"><?php echo htmlspecialchars($siteUrl ?: 'https://dinwebbplats.se'); ?></div>
-                    <div class="google-preview-description" id="preview-description"><?php echo htmlspecialchars($metaDescription ?: 'Din meta-beskrivning kommer visas här...'); ?></div>
-                </div>
             </form>
         </div>
 
         <script>
-        function updatePreview() {
-            const title = document.getElementById('meta_title').value || 'Din sidtitel';
-            const desc = document.getElementById('meta_description').value || 'Din meta-beskrivning kommer visas här...';
-            document.getElementById('preview-title').textContent = title;
-            document.getElementById('preview-description').textContent = desc;
-        }
-
         function updateCharCount(fieldId, limit) {
             const field = document.getElementById(fieldId);
             const countEl = document.getElementById(fieldId + '_count');

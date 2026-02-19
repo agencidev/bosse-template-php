@@ -33,11 +33,11 @@
 .transition { transition: all 0.2s; }
 .hover\:opacity-80:hover { opacity: 0.8; }
 .hover\:bg-white\/20:hover { background-color: rgba(255, 255, 255, 0.2); }
-.hover\:bg-gray-100:hover { background-color: #f3f4f6; }
-.hover\:bg-gray-200:hover { background-color: #e5e7eb; }
-.bg-gray-100 { background-color: #f3f4f6; }
-.text-gray-600 { color: #4b5563; }
-.text-gray-700 { color: #374151; }
+.hover\:bg-gray-100:hover { background-color: rgba(255,255,255,0.08); }
+.hover\:bg-gray-200:hover { background-color: rgba(255,255,255,0.15); }
+.bg-gray-100 { background-color: rgba(255,255,255,0.08); }
+.text-gray-600 { color: rgba(255,255,255,0.65); }
+.text-gray-700 { color: rgba(255,255,255,0.80); }
 .items-center { align-items: center; }
 .justify-end { justify-content: flex-end; }
 .rounded-t-lg { border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem; }
@@ -76,14 +76,14 @@ body.cms-edit-mode [data-editable-text].cms-editable-active {
 }
 
 body.cms-edit-mode [data-editable-text].cms-editable-active:hover {
-  background-color: rgba(254, 240, 138, 0.4); /* yellow-100/40 */
-  outline: 2px solid rgb(250, 204, 21); /* yellow-400 */
+  background-color: rgba(55, 155, 131, 0.15);
+  outline: 2px solid rgba(55, 155, 131, 0.6);
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
 /* Tooltip - EXAKT som EditableText.jsx */
 body.cms-edit-mode [data-editable-text].cms-editable-active::before {
-  content: '✏️ Klicka för att redigera';
+  content: 'Klicka för att redigera';
   position: absolute;
   top: -1.5rem;
   left: 0;
@@ -205,18 +205,21 @@ body.cms-edit-mode [data-editable-text].cms-editable-active:hover::before {
 
 .cms-image-btn {
   padding: 0.75rem 1.5rem;
-  background-color: var(--color-primary);
+  background-color: #379b83;
   color: white;
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: 9999px;
   cursor: pointer;
   transition: all var(--transition-base);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .cms-image-btn:hover {
-  background-color: var(--color-primary-dark);
+  background-color: #2e8570;
   transform: scale(1.05);
 }
 

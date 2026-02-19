@@ -25,7 +25,7 @@ $is_frontend = !$is_cms;
             <?php if ($is_frontend): ?>
                 <div class="admin-bar__divider"></div>
                 <button id="toggle-edit-mode" class="admin-bar__button admin-bar__button--edit">
-                    ✏️ Aktivera redigering
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>Aktivera redigering
                 </button>
             <?php endif; ?>
         </div>
@@ -163,11 +163,11 @@ if (toggleBtn) {
         
         if (window.CMS.isEditMode) {
             toggleBtn.classList.add('active');
-            toggleBtn.textContent = '✓ Avsluta redigering';
+            toggleBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><polyline points="20 6 9 17 4 12"/></svg>Avsluta redigering';
             document.body.classList.add('cms-edit-mode');
         } else {
             toggleBtn.classList.remove('active');
-            toggleBtn.textContent = '✏️ Aktivera redigering';
+            toggleBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>Aktivera redigering';
             document.body.classList.remove('cms-edit-mode');
         }
         

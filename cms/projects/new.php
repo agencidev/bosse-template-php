@@ -571,7 +571,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <button type="button" data-cmd="insertOrderedList" title="Nummerlista">1. Lista</button>
                         <button type="button" data-cmd="formatBlock" data-value="BLOCKQUOTE" title="Citat">&#8220; Citat</button>
                         <div class="separator"></div>
-                        <button type="button" id="btn-link" title="Infoga länk">&#128279; Länk</button>
+                        <button type="button" id="btn-link" title="Infoga länk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 2px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Länk</button>
                     </div>
                     <div class="editor-content" contenteditable="true" id="content-editor"><?php echo isset($content) ? $content : ''; ?></div>
                     <input type="hidden" name="content" id="content-hidden">
