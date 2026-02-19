@@ -129,24 +129,24 @@ if (isset($_GET['action']) && $_GET['action'] === 'deactivate-sa') {
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     // Complete logout
     $_SESSION = array();
-    
+
     // Delete session cookie
     if (isset($_COOKIE[session_name()])) {
         setcookie(session_name(), '', time() - 3600, '/');
     }
-    
+
     // Destroy session
     session_destroy();
-    
+
     // Start new clean session
     session_start();
-    
+
     // Prevent caching
     header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     header('Cache-Control: post-check=0, pre-check=0', false);
     header('Pragma: no-cache');
     header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
-    
+
     // Redirect to login page
     header('Location: /admin');
     exit;
@@ -201,6 +201,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Logga in - CMS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -208,8 +211,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-sizing: border-box;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #fafafa;
+            font-family: 'DM Sans', sans-serif;
+            background: #033234;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -220,9 +223,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .login-container {
             width: 100%;
             max-width: 28rem;
-            background-color: white;
-            border-radius: 1rem;
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            background-color: rgba(255,255,255,0.05);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.10);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3), 0 8px 10px -6px rgba(0,0,0,0.3);
             padding: 2rem;
         }
         .logo-container {
@@ -241,26 +245,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: block;
             font-size: 0.875rem;
             font-weight: 600;
-            color: #18181b;
+            color: rgba(255,255,255,0.65);
             margin-bottom: 0.5rem;
         }
         .input {
             width: 100%;
             padding: 0.75rem 1rem;
-            border: 1px solid #d4d4d4;
+            border: 1px solid rgba(255,255,255,0.15);
             border-radius: 0.5rem;
             font-size: 1rem;
             outline: none;
             transition: all 0.2s;
+            background-color: rgba(255,255,255,0.05);
+            color: white;
         }
         .input:focus {
             border-color: transparent;
-            box-shadow: 0 0 0 2px #ff5722;
+            box-shadow: 0 0 0 2px #379b83;
         }
         .error {
-            background-color: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #b91c1c;
+            background-color: rgba(239,68,68,0.10);
+            border: 1px solid rgba(239,68,68,0.20);
+            color: #f87171;
             padding: 0.75rem 1rem;
             border-radius: 0.5rem;
             font-size: 0.875rem;
@@ -268,7 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .button {
             width: 100%;
-            background-color: #fe4f2a;
+            background-color: #379b83;
             color: white;
             padding: 0.875rem;
             border: none;
@@ -295,13 +301,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: none;
             border: none;
             cursor: pointer;
-            color: #71717a;
+            color: rgba(255,255,255,0.50);
             padding: 0.25rem;
             display: flex;
             align-items: center;
         }
         .toggle-password:hover {
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
         }
         .forgot-password {
             text-align: right;
@@ -310,11 +316,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .forgot-password a {
             font-size: 0.8125rem;
-            color: #71717a;
+            color: rgba(255,255,255,0.50);
             text-decoration: none;
         }
         .forgot-password a:hover {
-            color: #fe4f2a;
+            color: #379b83;
         }
         .forgot-modal {
             display: none;
@@ -330,8 +336,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: flex;
         }
         .forgot-modal-content {
-            background: white;
-            border-radius: 1rem;
+            background: #054547;
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.10);
             padding: 2rem;
             max-width: 24rem;
             width: 100%;
@@ -340,23 +347,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .forgot-modal-content h3 {
             margin-bottom: 0.75rem;
             font-size: 1.125rem;
+            color: white;
         }
         .forgot-modal-content p {
-            color: #52525b;
+            color: rgba(255,255,255,0.65);
             font-size: 0.875rem;
             line-height: 1.5;
             margin-bottom: 1.25rem;
         }
         .forgot-modal-content a.email-link {
-            color: #fe4f2a;
+            color: #379b83;
             text-decoration: none;
             font-weight: 600;
         }
         .forgot-modal-content button {
             padding: 0.5rem 1.5rem;
-            background: #f4f4f5;
+            background: rgba(255,255,255,0.10);
+            color: rgba(255,255,255,0.65);
             border: none;
-            border-radius: 0.5rem;
+            border-radius: 9999px;
             cursor: pointer;
             font-size: 0.875rem;
         }
@@ -366,7 +375,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-bottom: 1.5rem;
             border-radius: 0.5rem;
             overflow: hidden;
-            border: 1px solid #e4e4e7;
+            border: 1px solid rgba(255,255,255,0.10);
         }
         .login-tab {
             flex: 1;
@@ -375,13 +384,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 0.8125rem;
             font-weight: 600;
             cursor: pointer;
-            background: #fafafa;
+            background: rgba(255,255,255,0.05);
             border: none;
-            color: #71717a;
+            color: rgba(255,255,255,0.50);
             transition: all 0.2s;
         }
         .login-tab.active {
-            background: #18181b;
+            background: #379b83;
             color: white;
         }
     </style>
@@ -394,7 +403,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <?php if ($resetMode === 'reset' && isset($tokenValid) && $tokenValid): ?>
         <!-- ÅTERSTÄLL LÖSENORD -->
-        <h2 style="font-size:1.25rem;margin-bottom:1.5rem;text-align:center;">Nytt lösenord</h2>
+        <h2 style="font-size:1.25rem;margin-bottom:1.5rem;text-align:center;color:white;">Nytt lösenord</h2>
         <?php if ($resetError): ?>
             <div class="error"><?php echo htmlspecialchars($resetError); ?></div>
         <?php endif; ?>
@@ -475,14 +484,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <h3>Glömt lösenord?</h3>
                     <p>Ange din e-postadress så skickar vi en återställningslänk.</p>
                     <?php if ($resetError): ?>
-                        <p style="color:#b91c1c;font-size:0.8125rem;"><?php echo htmlspecialchars($resetError); ?></p>
+                        <p style="color:#f87171;font-size:0.8125rem;"><?php echo htmlspecialchars($resetError); ?></p>
                     <?php endif; ?>
                     <form method="POST" action="/admin?action=forgot">
                         <?php echo csrf_field(); ?>
                         <input type="email" name="reset_email" class="input" placeholder="din@epost.se" required style="margin-bottom:1rem;">
                         <button type="submit" class="button" style="margin-bottom:0.75rem;">Skicka återställningslänk</button>
                     </form>
-                    <button onclick="window.location='/admin'" style="background:none;border:none;color:#71717a;cursor:pointer;font-size:0.8125rem;">Tillbaka till inloggning</button>
+                    <button onclick="window.location='/admin'" style="background:none;border:none;color:rgba(255,255,255,0.50);cursor:pointer;font-size:0.8125rem;">Tillbaka till inloggning</button>
                 <?php endif; ?>
             </div>
         </div>
@@ -496,7 +505,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="email" name="reset_email" class="input" placeholder="din@epost.se" required style="margin-bottom:1rem;">
                     <button type="submit" class="button" style="margin-bottom:0.75rem;">Skicka återställningslänk</button>
                 </form>
-                <button onclick="document.getElementById('forgot-modal').classList.remove('active')" style="background:none;border:none;color:#71717a;cursor:pointer;font-size:0.8125rem;">Avbryt</button>
+                <button onclick="document.getElementById('forgot-modal').classList.remove('active')" style="background:none;border:none;color:rgba(255,255,255,0.50);cursor:pointer;font-size:0.8125rem;">Avbryt</button>
             </div>
         </div>
         <?php endif; ?>

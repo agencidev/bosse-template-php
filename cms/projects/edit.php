@@ -149,6 +149,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redigera inlägg - CMS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -156,8 +159,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-sizing: border-box;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #fafafa;
+            font-family: 'DM Sans', sans-serif;
+            background-color: #033234;
             min-height: 100vh;
         }
         .page-content {
@@ -169,25 +172,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .back-link {
             display: inline-block;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
             text-decoration: none;
             font-size: 0.875rem;
             margin-bottom: 1rem;
             transition: color 0.2s;
         }
         .back-link:hover {
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
         }
         .title {
             font-size: 2rem;
             font-weight: bold;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
             margin-bottom: 2rem;
         }
         .form-card {
-            background: white;
+            background: rgba(255,255,255,0.05);
             border-radius: 1.5rem;
-            border: 1px solid #e5e5e5;
+            border: 1px solid rgba(255,255,255,0.10);
             padding: 2rem;
         }
         .form-group {
@@ -197,29 +200,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: block;
             font-size: 0.875rem;
             font-weight: 600;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
             margin-bottom: 0.5rem;
         }
         .form-input, .form-select, .form-textarea {
             width: 100%;
             padding: 0.875rem 1rem;
-            border: 1px solid #d4d4d4;
+            border: 1px solid rgba(255,255,255,0.15);
             border-radius: 0.75rem;
             font-size: 1rem;
             font-family: inherit;
             transition: all 0.2s;
             outline: none;
+            background-color: rgba(255,255,255,0.05);
+            color: white;
         }
         .form-input:focus, .form-select:focus, .form-textarea:focus {
-            border-color: #fe4f2a;
-            box-shadow: 0 0 0 3px rgba(254, 79, 42, 0.1);
+            border-color: #379b83;
+            box-shadow: 0 0 0 3px rgba(55, 155, 131, 0.2);
         }
         .form-textarea {
             resize: none;
             min-height: 6rem;
         }
         .file-upload {
-            border: 2px dashed #d4d4d4;
+            border: 2px dashed rgba(255,255,255,0.15);
             border-radius: 0.75rem;
             padding: 1.5rem;
             text-align: center;
@@ -228,8 +233,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             position: relative;
         }
         .file-upload:hover {
-            border-color: #fe4f2a;
-            background: #fff7ed;
+            border-color: #379b83;
+            background: rgba(55, 155, 131, 0.1);
         }
         .file-upload input[type="file"] {
             position: absolute;
@@ -239,10 +244,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .file-upload-text {
             font-size: 0.875rem;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
         }
         .file-upload-text strong {
-            color: #fe4f2a;
+            color: #379b83;
         }
         .image-preview {
             max-height: 120px;
@@ -259,7 +264,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .current-image small {
             display: block;
-            color: #a3a3a3;
+            color: rgba(255,255,255,0.50);
             font-size: 0.75rem;
             margin-top: 0.25rem;
         }
@@ -290,7 +295,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             text-align: center;
         }
         .button-primary {
-            background: #fe4f2a;
+            background: #379b83;
             color: white;
         }
         .button-primary:disabled {
@@ -298,56 +303,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             cursor: not-allowed;
         }
         .button-secondary {
-            background: #e5e5e5;
-            color: #18181b;
+            background: rgba(255,255,255,0.10);
+            color: rgba(255,255,255,1.0);
         }
         .editor-toolbar {
             display: flex;
             flex-wrap: wrap;
             gap: 0.25rem;
             padding: 0.5rem;
-            border: 1px solid #d4d4d4;
+            border: 1px solid rgba(255,255,255,0.15);
             border-bottom: none;
             border-radius: 0.75rem 0.75rem 0 0;
-            background: #fafafa;
+            background: rgba(255,255,255,0.08);
         }
         .editor-toolbar button {
             padding: 0.375rem 0.625rem;
             border: 1px solid transparent;
-            border-radius: 0.375rem;
+            border-radius: 9999px;
             background: none;
             cursor: pointer;
             font-size: 0.875rem;
-            color: #525252;
+            color: rgba(255,255,255,0.65);
         }
         .editor-toolbar button:hover {
-            background: #e5e5e5;
+            background: rgba(255,255,255,0.10);
         }
         .editor-toolbar button.active {
-            background: #e5e5e5;
-            border-color: #d4d4d4;
+            background: rgba(255,255,255,0.10);
+            border-color: rgba(255,255,255,0.15);
         }
         .editor-toolbar .separator {
             width: 1px;
-            background: #d4d4d4;
+            background: rgba(255,255,255,0.15);
             margin: 0 0.25rem;
         }
         .editor-content {
             min-height: 12rem;
             padding: 1rem;
-            border: 1px solid #d4d4d4;
+            border: 1px solid rgba(255,255,255,0.15);
             border-radius: 0 0 0.75rem 0.75rem;
             outline: none;
             font-family: inherit;
             font-size: 1rem;
             line-height: 1.6;
+            background-color: rgba(255,255,255,0.05);
+            color: white;
         }
         .editor-content:focus {
-            border-color: #fe4f2a;
-            box-shadow: 0 0 0 3px rgba(254, 79, 42, 0.1);
+            border-color: #379b83;
+            box-shadow: 0 0 0 3px rgba(55, 155, 131, 0.2);
         }
         .editor-content a {
-            color: #fe4f2a;
+            color: #379b83;
             text-decoration: underline;
         }
         .link-modal {
@@ -363,7 +370,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: flex;
         }
         .link-modal-content {
-            background: white;
+            background: #054547;
             padding: 1.5rem;
             border-radius: 1rem;
             width: 100%;
@@ -373,6 +380,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 1rem;
             font-weight: 600;
             margin-bottom: 1rem;
+            color: rgba(255,255,255,1.0);
         }
         .link-modal-content .form-group {
             margin-bottom: 1rem;
@@ -391,11 +399,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border: none;
         }
         .link-modal-actions .btn-cancel {
-            background: #e5e5e5;
-            color: #18181b;
+            background: rgba(255,255,255,0.10);
+            color: rgba(255,255,255,1.0);
         }
         .link-modal-actions .btn-insert {
-            background: #fe4f2a;
+            background: #379b83;
             color: white;
         }
         .preview-modal {
@@ -410,7 +418,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: block;
         }
         .preview-page {
-            background: white;
+            background: #033234;
             min-height: 100vh;
         }
         .preview-topbar {
@@ -421,7 +429,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             justify-content: space-between;
             align-items: center;
             padding: 0.75rem 1.5rem;
-            background: #18181b;
+            background: #054547;
             color: white;
             font-size: 0.8125rem;
         }
@@ -430,7 +438,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .preview-topbar button {
             background: white;
-            color: #18181b;
+            color: #054547;
             border: none;
             padding: 0.4rem 1rem;
             border-radius: 0.375rem;
@@ -447,7 +455,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
             text-decoration: none;
             font-size: 0.875rem;
             margin-bottom: 2rem;
@@ -460,7 +468,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .preview-header .p-category {
             display: inline-block;
             padding: 0.375rem 1rem;
-            background: #a78bfa;
+            background: #379b83;
             color: white;
             font-size: 0.75rem;
             font-weight: 600;
@@ -472,13 +480,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .preview-header .p-title {
             font-size: 2.5rem;
             font-weight: 700;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
             margin-bottom: 1rem;
             line-height: 1.2;
         }
         .preview-header .p-meta {
             font-size: 0.875rem;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
         }
         .preview-cover {
             width: 100%;
@@ -493,15 +501,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .preview-inner .p-summary {
             font-size: 1.25rem;
-            color: #525252;
+            color: rgba(255,255,255,0.65);
             line-height: 1.7;
             margin-bottom: 2rem;
             padding-bottom: 2rem;
-            border-bottom: 1px solid #e5e5e5;
+            border-bottom: 1px solid rgba(255,255,255,0.10);
         }
         .preview-inner .p-body {
             font-size: 1.0625rem;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
             line-height: 1.8;
         }
         .preview-inner .p-body p { margin-bottom: 1.5rem; }
@@ -510,8 +518,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .preview-inner .p-body h4 { font-size: 1.125rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; }
         .preview-inner .p-body ul, .preview-inner .p-body ol { margin-bottom: 1.5rem; padding-left: 1.5rem; }
         .preview-inner .p-body li { margin-bottom: 0.5rem; }
-        .preview-inner .p-body blockquote { border-left: 3px solid #e5e5e5; padding-left: 1rem; color: #737373; margin: 1.5rem 0; font-style: italic; }
-        .preview-inner .p-body a { color: #8b5cf6; text-decoration: underline; }
+        .preview-inner .p-body blockquote { border-left: 3px solid rgba(255,255,255,0.10); padding-left: 1rem; color: rgba(255,255,255,0.50); margin: 1.5rem 0; font-style: italic; }
+        .preview-inner .p-body a { color: #379b83; text-decoration: underline; }
         .preview-inner .p-body strong { font-weight: 600; }
         .btn-preview {
             padding: 0.875rem 1.5rem;
@@ -519,20 +527,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            border: 1px solid #d4d4d4;
-            background: white;
-            color: #525252;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.65);
             transition: all 0.2s;
         }
         .btn-preview:hover {
-            background: #f5f5f5;
+            background: rgba(255,255,255,0.08);
         }
         .meta-info {
             font-size: 0.8125rem;
-            color: #a3a3a3;
+            color: rgba(255,255,255,0.50);
             margin-bottom: 1.5rem;
             padding-bottom: 1rem;
-            border-bottom: 1px solid #f5f5f5;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
     </style>
 </head>

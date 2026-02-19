@@ -91,13 +91,16 @@ function format_bytes(float $bytes): string {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Admin - <?php echo htmlspecialchars(SITE_NAME); ?></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #fafafa;
+            font-family: 'DM Sans', sans-serif;
+            background-color: #033234;
             min-height: 100vh;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
         }
         .sa-container {
             max-width: 64rem;
@@ -116,8 +119,8 @@ function format_bytes(float $bytes): string {
         }
         .sa-header .sa-version {
             font-size: 0.875rem;
-            color: #a3a3a3;
-            background: #f5f5f5;
+            color: rgba(255,255,255,0.50);
+            background: rgba(255,255,255,0.08);
             padding: 0.375rem 0.75rem;
             border-radius: 9999px;
         }
@@ -125,13 +128,13 @@ function format_bytes(float $bytes): string {
             display: inline-flex;
             align-items: center;
             gap: 0.375rem;
-            color: #a3a3a3;
+            color: rgba(255,255,255,0.50);
             text-decoration: none;
             font-size: 0.875rem;
             font-weight: 500;
             margin-bottom: 1rem;
         }
-        .sa-back:hover { color: #737373; }
+        .sa-back:hover { color: rgba(255,255,255,1.0); }
 
         /* Panels */
         .sa-grid {
@@ -144,14 +147,14 @@ function format_bytes(float $bytes): string {
             .sa-grid .sa-panel--full { grid-column: 1 / -1; }
         }
         .sa-panel {
-            background: white;
-            border: 1px solid #e5e5e5;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.10);
             border-radius: 1rem;
             overflow: hidden;
         }
         .sa-panel__header {
             padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid #f5f5f5;
+            border-bottom: 1px solid rgba(255,255,255,0.10);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -168,11 +171,11 @@ function format_bytes(float $bytes): string {
             justify-content: space-between;
             align-items: center;
             padding: 0.5rem 0;
-            border-bottom: 1px solid #f5f5f5;
+            border-bottom: 1px solid rgba(255,255,255,0.10);
             font-size: 0.875rem;
         }
         .sa-info-row:last-child { border-bottom: none; }
-        .sa-info-row .sa-label { color: #737373; }
+        .sa-info-row .sa-label { color: rgba(255,255,255,0.50); }
         .sa-info-row .sa-value { font-weight: 500; text-align: right; max-width: 60%; word-break: break-all; }
 
         /* Buttons */
@@ -181,7 +184,7 @@ function format_bytes(float $bytes): string {
             align-items: center;
             gap: 0.375rem;
             padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
+            border-radius: 9999px;
             font-size: 0.8125rem;
             font-weight: 600;
             cursor: pointer;
@@ -189,10 +192,10 @@ function format_bytes(float $bytes): string {
             transition: all 0.2s;
             text-decoration: none;
         }
-        .sa-btn--primary { background: #fe4f2a; color: white; }
-        .sa-btn--primary:hover { background: #e8461f; }
-        .sa-btn--secondary { background: #f5f5f5; color: #18181b; }
-        .sa-btn--secondary:hover { background: #e5e5e5; }
+        .sa-btn--primary { background: #379b83; color: white; }
+        .sa-btn--primary:hover { background: #2e8570; }
+        .sa-btn--secondary { background: rgba(255,255,255,0.08); color: rgba(255,255,255,1.0); }
+        .sa-btn--secondary:hover { background: rgba(255,255,255,0.15); }
         .sa-btn--danger { background: #fef2f2; color: #b91c1c; }
         .sa-btn--danger:hover { background: #fee2e2; }
         .sa-btn--success { background: #f0fdf4; color: #15803d; }
@@ -236,18 +239,18 @@ function format_bytes(float $bytes): string {
             align-items: center;
             justify-content: space-between;
             padding: 0.75rem 0;
-            border-bottom: 1px solid #f5f5f5;
+            border-bottom: 1px solid rgba(255,255,255,0.10);
             font-size: 0.875rem;
         }
         .sa-backup-item:last-child { border-bottom: none; }
         .sa-backup-item .sa-backup-info { flex: 1; }
         .sa-backup-item .sa-backup-version { font-weight: 600; }
-        .sa-backup-item .sa-backup-date { color: #a3a3a3; font-size: 0.8125rem; }
+        .sa-backup-item .sa-backup-date { color: rgba(255,255,255,0.50); font-size: 0.8125rem; }
         .sa-backup-actions { display: flex; gap: 0.5rem; }
 
         /* Error log */
         .sa-log {
-            background: #18181b;
+            background: #054547;
             color: #a3e635;
             font-family: 'SFMono-Regular', Consolas, monospace;
             font-size: 0.75rem;
@@ -264,7 +267,7 @@ function format_bytes(float $bytes): string {
             position: fixed;
             bottom: 2rem;
             right: 2rem;
-            background: #18181b;
+            background: #054547;
             color: white;
             padding: 1rem 1.5rem;
             border-radius: 1rem;
@@ -315,12 +318,12 @@ function format_bytes(float $bytes): string {
             margin-top: 2rem;
             padding: 0.5rem 1rem;
             font-size: 0.8125rem;
-            color: #a3a3a3;
+            color: rgba(255,255,255,0.50);
             text-decoration: none;
-            border: 1px solid #e5e5e5;
+            border: 1px solid rgba(255,255,255,0.10);
             border-radius: 0.5rem;
         }
-        .sa-deactivate:hover { color: #737373; background: #f5f5f5; }
+        .sa-deactivate:hover { color: rgba(255,255,255,1.0); background: rgba(255,255,255,0.08); }
 
         @media (max-width: 640px) {
             .sa-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
@@ -441,7 +444,7 @@ function format_bytes(float $bytes): string {
                 </div>
                 <div class="sa-panel__body">
                     <?php if (empty($backups)): ?>
-                        <p style="font-size: 0.875rem; color: #a3a3a3;">Inga backups ännu. En skapas automatiskt före varje uppdatering.</p>
+                        <p style="font-size: 0.875rem; color: rgba(255,255,255,0.50);">Inga backups ännu. En skapas automatiskt före varje uppdatering.</p>
                     <?php else: ?>
                         <?php foreach ($backups as $backup): ?>
                         <div class="sa-backup-item">
@@ -467,7 +470,7 @@ function format_bytes(float $bytes): string {
                 </div>
                 <div class="sa-panel__body">
                     <?php if (empty($updateLog)): ?>
-                        <p style="font-size: 0.875rem; color: #a3a3a3;">Inga uppdateringar har körts ännu. Uppdateringar sker automatiskt.</p>
+                        <p style="font-size: 0.875rem; color: rgba(255,255,255,0.50);">Inga uppdateringar har körts ännu. Uppdateringar sker automatiskt.</p>
                     <?php else: ?>
                         <?php foreach (array_slice($updateLog, 0, 15) as $entry): ?>
                         <div class="sa-info-row">
@@ -483,7 +486,7 @@ function format_bytes(float $bytes): string {
                             </span>
                             <span class="sa-value" style="font-weight: 400; font-size: 0.8125rem;">
                                 <?php echo htmlspecialchars($entry['message'] ?? ''); ?>
-                                <br><span style="color: #a3a3a3;"><?php echo htmlspecialchars($entry['date'] ?? ''); ?></span>
+                                <br><span style="color: rgba(255,255,255,0.50);"><?php echo htmlspecialchars($entry['date'] ?? ''); ?></span>
                             </span>
                         </div>
                         <?php endforeach; ?>
@@ -506,9 +509,9 @@ function format_bytes(float $bytes): string {
                         <span class="sa-value"><?php echo htmlspecialchars(defined('ADMIN_EMAIL') ? ADMIN_EMAIL : 'Ej angiven'); ?></span>
                     </div>
                     <div style="margin-top: 1rem;">
-                        <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#a3a3a3;">Nytt lösenord</label>
+                        <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:rgba(255,255,255,0.50);">Nytt lösenord</label>
                         <div style="display:flex;gap:0.5rem;">
-                            <input type="password" id="new-customer-password" placeholder="Minst 8 tecken" style="flex:1;padding:0.5rem 0.75rem;background:#27272a;border:1px solid #3f3f46;border-radius:0.375rem;color:white;font-size:0.875rem;">
+                            <input type="password" id="new-customer-password" placeholder="Minst 8 tecken" style="flex:1;padding:0.5rem 0.75rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:0.375rem;color:white;font-size:0.875rem;">
                             <button class="sa-btn sa-btn--success" onclick="changeCustomerPassword()">Ändra</button>
                         </div>
                     </div>
@@ -542,7 +545,7 @@ function format_bytes(float $bytes): string {
                         <button class="sa-btn sa-btn--success" onclick="testSmtp()" id="btn-smtp-test">Skicka testmail</button>
                     </div>
                     <?php else: ?>
-                    <p style="font-size: 0.875rem; color: #a3a3a3;">SMTP är inte konfigurerat. Lägg till SMTP-inställningar i config.php.</p>
+                    <p style="font-size: 0.875rem; color: rgba(255,255,255,0.50);">SMTP är inte konfigurerat. Lägg till SMTP-inställningar i config.php.</p>
                     <?php endif; ?>
                     <div id="smtp-result" style="margin-top: 0.75rem; font-size: 0.8125rem;"></div>
                 </div>
@@ -569,61 +572,61 @@ function format_bytes(float $bytes): string {
                     <h2>Redigera konfiguration</h2>
                 </div>
                 <div class="sa-panel__body">
-                    <p style="font-size: 0.8125rem; color: #a3a3a3; margin-bottom: 1.5rem;">Ändra inställningar som angavs vid setup. Sparar direkt till config.php.</p>
+                    <p style="font-size: 0.8125rem; color: rgba(255,255,255,0.50); margin-bottom: 1.5rem;">Ändra inställningar som angavs vid setup. Sparar direkt till config.php.</p>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div>
-                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Sajt-URL</label>
-                            <input type="text" id="cfg-site-url" value="<?php echo htmlspecialchars(defined('SITE_URL') ? SITE_URL : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:rgba(255,255,255,0.50);">Sajt-URL</label>
+                            <input type="text" id="cfg-site-url" value="<?php echo htmlspecialchars(defined('SITE_URL') ? SITE_URL : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid rgba(255,255,255,0.15);border-radius:0.375rem;font-size:0.875rem;background-color:rgba(255,255,255,0.05);color:white;">
                         </div>
                         <div>
-                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Företagsnamn</label>
-                            <input type="text" id="cfg-site-name" value="<?php echo htmlspecialchars(defined('SITE_NAME') ? SITE_NAME : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:rgba(255,255,255,0.50);">Företagsnamn</label>
+                            <input type="text" id="cfg-site-name" value="<?php echo htmlspecialchars(defined('SITE_NAME') ? SITE_NAME : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid rgba(255,255,255,0.15);border-radius:0.375rem;font-size:0.875rem;background-color:rgba(255,255,255,0.05);color:white;">
                         </div>
                         <div>
-                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Beskrivning</label>
-                            <input type="text" id="cfg-site-desc" value="<?php echo htmlspecialchars(defined('SITE_DESCRIPTION') ? SITE_DESCRIPTION : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:rgba(255,255,255,0.50);">Beskrivning</label>
+                            <input type="text" id="cfg-site-desc" value="<?php echo htmlspecialchars(defined('SITE_DESCRIPTION') ? SITE_DESCRIPTION : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid rgba(255,255,255,0.15);border-radius:0.375rem;font-size:0.875rem;background-color:rgba(255,255,255,0.05);color:white;">
                         </div>
                         <div>
-                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Kontakt-email</label>
-                            <input type="email" id="cfg-contact-email" value="<?php echo htmlspecialchars(defined('CONTACT_EMAIL') ? CONTACT_EMAIL : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:rgba(255,255,255,0.50);">Kontakt-email</label>
+                            <input type="email" id="cfg-contact-email" value="<?php echo htmlspecialchars(defined('CONTACT_EMAIL') ? CONTACT_EMAIL : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid rgba(255,255,255,0.15);border-radius:0.375rem;font-size:0.875rem;background-color:rgba(255,255,255,0.05);color:white;">
                         </div>
                         <div>
-                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Kontakt-telefon</label>
-                            <input type="text" id="cfg-contact-phone" value="<?php echo htmlspecialchars(defined('CONTACT_PHONE') ? CONTACT_PHONE : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:rgba(255,255,255,0.50);">Kontakt-telefon</label>
+                            <input type="text" id="cfg-contact-phone" value="<?php echo htmlspecialchars(defined('CONTACT_PHONE') ? CONTACT_PHONE : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid rgba(255,255,255,0.15);border-radius:0.375rem;font-size:0.875rem;background-color:rgba(255,255,255,0.05);color:white;">
                         </div>
                         <div>
-                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Admin-användarnamn</label>
-                            <input type="text" id="cfg-admin-username" value="<?php echo htmlspecialchars(defined('ADMIN_USERNAME') ? ADMIN_USERNAME : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:rgba(255,255,255,0.50);">Admin-användarnamn</label>
+                            <input type="text" id="cfg-admin-username" value="<?php echo htmlspecialchars(defined('ADMIN_USERNAME') ? ADMIN_USERNAME : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid rgba(255,255,255,0.15);border-radius:0.375rem;font-size:0.875rem;background-color:rgba(255,255,255,0.05);color:white;">
                         </div>
                     </div>
 
-                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #f5f5f5;">
-                        <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: #737373;">SMTP</h3>
+                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.10);">
+                        <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: rgba(255,255,255,0.50);">SMTP</h3>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                             <div>
-                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">SMTP-server</label>
-                                <input type="text" id="cfg-smtp-host" value="<?php echo htmlspecialchars(defined('SMTP_HOST') ? SMTP_HOST : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:rgba(255,255,255,0.50);">SMTP-server</label>
+                                <input type="text" id="cfg-smtp-host" value="<?php echo htmlspecialchars(defined('SMTP_HOST') ? SMTP_HOST : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid rgba(255,255,255,0.15);border-radius:0.375rem;font-size:0.875rem;background-color:rgba(255,255,255,0.05);color:white;">
                             </div>
                             <div>
-                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Port</label>
-                                <input type="number" id="cfg-smtp-port" value="<?php echo htmlspecialchars(defined('SMTP_PORT') ? SMTP_PORT : '465'); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:rgba(255,255,255,0.50);">Port</label>
+                                <input type="number" id="cfg-smtp-port" value="<?php echo htmlspecialchars(defined('SMTP_PORT') ? SMTP_PORT : '465'); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid rgba(255,255,255,0.15);border-radius:0.375rem;font-size:0.875rem;background-color:rgba(255,255,255,0.05);color:white;">
                             </div>
                             <div>
-                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Kryptering</label>
-                                <select id="cfg-smtp-encryption" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:rgba(255,255,255,0.50);">Kryptering</label>
+                                <select id="cfg-smtp-encryption" style="width:100%;padding:0.5rem 0.75rem;border:1px solid rgba(255,255,255,0.15);border-radius:0.375rem;font-size:0.875rem;background-color:rgba(255,255,255,0.05);color:white;">
                                     <option value="ssl" <?php echo (defined('SMTP_ENCRYPTION') && SMTP_ENCRYPTION === 'ssl') ? 'selected' : ''; ?>>SSL</option>
                                     <option value="tls" <?php echo (defined('SMTP_ENCRYPTION') && SMTP_ENCRYPTION === 'tls') ? 'selected' : ''; ?>>TLS</option>
                                     <option value="" <?php echo (defined('SMTP_ENCRYPTION') && SMTP_ENCRYPTION === '') ? 'selected' : ''; ?>>Ingen</option>
                                 </select>
                             </div>
                             <div>
-                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">SMTP-användare</label>
-                                <input type="text" id="cfg-smtp-username" value="<?php echo htmlspecialchars(defined('SMTP_USERNAME') ? SMTP_USERNAME : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:rgba(255,255,255,0.50);">SMTP-användare</label>
+                                <input type="text" id="cfg-smtp-username" value="<?php echo htmlspecialchars(defined('SMTP_USERNAME') ? SMTP_USERNAME : ''); ?>" style="width:100%;padding:0.5rem 0.75rem;border:1px solid rgba(255,255,255,0.15);border-radius:0.375rem;font-size:0.875rem;background-color:rgba(255,255,255,0.05);color:white;">
                             </div>
                             <div>
-                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">SMTP-lösenord</label>
-                                <input type="password" id="cfg-smtp-password" placeholder="Lämna tomt för att behålla" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:rgba(255,255,255,0.50);">SMTP-lösenord</label>
+                                <input type="password" id="cfg-smtp-password" placeholder="Lämna tomt för att behålla" style="width:100%;padding:0.5rem 0.75rem;border:1px solid rgba(255,255,255,0.15);border-radius:0.375rem;font-size:0.875rem;background-color:rgba(255,255,255,0.05);color:white;">
                                 <?php if (defined('SMTP_PASSWORD') && SMTP_PASSWORD !== ''): ?>
                                     <span style="font-size:0.75rem;color:#15803d;margin-top:0.25rem;display:block;">Lösenord konfigurerat</span>
                                 <?php endif; ?>
@@ -631,16 +634,16 @@ function format_bytes(float $bytes): string {
                         </div>
                     </div>
 
-                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #f5f5f5;">
-                        <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: #737373;">GitHub</h3>
+                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.10);">
+                        <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: rgba(255,255,255,0.50);">GitHub</h3>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                             <div>
-                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Repo (org/namn)</label>
-                                <input type="text" id="cfg-github-repo" value="<?php echo htmlspecialchars(defined('GITHUB_REPO') ? GITHUB_REPO : ''); ?>" placeholder="peysdev/kundnamn" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:rgba(255,255,255,0.50);">Repo (org/namn)</label>
+                                <input type="text" id="cfg-github-repo" value="<?php echo htmlspecialchars(defined('GITHUB_REPO') ? GITHUB_REPO : ''); ?>" placeholder="peysdev/kundnamn" style="width:100%;padding:0.5rem 0.75rem;border:1px solid rgba(255,255,255,0.15);border-radius:0.375rem;font-size:0.875rem;background-color:rgba(255,255,255,0.05);color:white;">
                             </div>
                             <div>
-                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Token</label>
-                                <input type="password" id="cfg-github-token" placeholder="Lämna tomt för att behålla" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                                <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:rgba(255,255,255,0.50);">Token</label>
+                                <input type="password" id="cfg-github-token" placeholder="Lämna tomt för att behålla" style="width:100%;padding:0.5rem 0.75rem;border:1px solid rgba(255,255,255,0.15);border-radius:0.375rem;font-size:0.875rem;background-color:rgba(255,255,255,0.05);color:white;">
                                 <?php if (defined('GITHUB_TOKEN') && GITHUB_TOKEN !== ''): ?>
                                     <span style="font-size:0.75rem;color:#15803d;margin-top:0.25rem;display:block;">Token konfigurerad (<?php echo htmlspecialchars(substr(GITHUB_TOKEN, 0, 6)); ?>***)</span>
                                 <?php endif; ?>
@@ -648,11 +651,11 @@ function format_bytes(float $bytes): string {
                         </div>
                     </div>
 
-                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #f5f5f5;">
-                        <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: #737373;">Google Analytics</h3>
+                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.10);">
+                        <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: rgba(255,255,255,0.50);">Google Analytics</h3>
                         <div>
-                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Mät-ID</label>
-                            <input type="text" id="cfg-ga-id" value="<?php echo htmlspecialchars(defined('GOOGLE_ANALYTICS_ID') ? GOOGLE_ANALYTICS_ID : ''); ?>" placeholder="G-XXXXXXXXXX" style="width:100%;max-width:20rem;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:rgba(255,255,255,0.50);">Mät-ID</label>
+                            <input type="text" id="cfg-ga-id" value="<?php echo htmlspecialchars(defined('GOOGLE_ANALYTICS_ID') ? GOOGLE_ANALYTICS_ID : ''); ?>" placeholder="G-XXXXXXXXXX" style="width:100%;max-width:20rem;padding:0.5rem 0.75rem;border:1px solid rgba(255,255,255,0.15);border-radius:0.375rem;font-size:0.875rem;background-color:rgba(255,255,255,0.05);color:white;">
                         </div>
                     </div>
 
@@ -676,7 +679,7 @@ function format_bytes(float $bytes): string {
                     <?php if (!empty($errorLog)): ?>
                     <div class="sa-log" id="error-log-content"><?php echo htmlspecialchars($errorLog); ?></div>
                     <?php else: ?>
-                    <p style="font-size: 0.875rem; color: #a3a3a3;" id="error-log-content">Inga felloggar hittades eller error_log är inte lasbar.</p>
+                    <p style="font-size: 0.875rem; color: rgba(255,255,255,0.50);" id="error-log-content">Inga felloggar hittades eller error_log är inte lasbar.</p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -688,7 +691,7 @@ function format_bytes(float $bytes): string {
                     <span class="sa-badge sa-badge--ok" id="integrity-badge">Ej kontrollerad</span>
                 </div>
                 <div class="sa-panel__body">
-                    <p style="font-size: 0.875rem; color: #a3a3a3; margin-bottom: 1rem;">
+                    <p style="font-size: 0.875rem; color: rgba(255,255,255,0.50); margin-bottom: 1rem;">
                         Jämför core-filers status. Upptäcker om filer har ändrats manuellt eller saknas.
                     </p>
                     <button class="sa-btn sa-btn--secondary" onclick="checkIntegrity()">Kontrollera filer</button>
@@ -888,7 +891,7 @@ function format_bytes(float $bytes): string {
                 var el = document.getElementById('error-log-content');
                 el.className = '';
                 el.style.fontSize = '0.875rem';
-                el.style.color = '#a3a3a3';
+                el.style.color = 'rgba(255,255,255,0.50)';
                 el.textContent = 'Inga felloggar hittades.';
                 showToast('Felloggar rensade!', 3000, 'success');
             } else {

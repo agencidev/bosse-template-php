@@ -168,7 +168,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
     position: fixed;
     bottom: 1.5rem;
     left: 1.5rem;
-    background: #2d2d2d;
+    background: #054547;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     z-index: 9999;
     border-radius: 0.75rem;
@@ -219,7 +219,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 .cookie-banner-btn {
     width: 100%;
     padding: 0.875rem 1.25rem;
-    border-radius: 0.5rem;
+    border-radius: 9999px;
     font-size: 0.9375rem;
     font-weight: 600;
     cursor: pointer;
@@ -230,7 +230,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 
 .cookie-banner-btn-primary {
     background: white;
-    color: #2d2d2d;
+    color: #033234;
 }
 
 .cookie-banner-btn-primary:hover {
@@ -239,7 +239,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 
 .cookie-banner-btn-secondary {
     background: white;
-    color: #2d2d2d;
+    color: #033234;
 }
 
 .cookie-banner-btn-secondary:hover {
@@ -283,7 +283,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 }
 
 .cookie-modal-content {
-    background: #1a1a1a;
+    background: #033234;
     border-radius: 0.75rem;
     max-width: 680px;
     width: 100%;
@@ -347,7 +347,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 }
 
 .cookie-category {
-    background: #2d2d2d;
+    background: #054547;
     border-radius: 0.5rem;
     margin-bottom: 0.75rem;
     overflow: hidden;
@@ -417,7 +417,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #d4d4d4;
+    background-color: rgba(255,255,255,0.20);
     transition: 0.3s;
     border-radius: 24px;
 }
@@ -435,7 +435,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 }
 
 .cookie-toggle input:checked + .cookie-toggle-slider {
-    background-color: var(--color-primary, #fe4f2a);
+    background-color: var(--color-primary, #379b83);
 }
 
 .cookie-toggle input:checked + .cookie-toggle-slider:before {
@@ -448,7 +448,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 }
 
 .cookie-info-section {
-    background: #2d2d2d;
+    background: #054547;
     border-radius: 0.5rem;
     margin-top: 0.75rem;
     overflow: hidden;
@@ -490,7 +490,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 .cookie-modal-btn {
     flex: 1;
     padding: 0.875rem 1.25rem;
-    border-radius: 0.5rem;
+    border-radius: 9999px;
     font-size: 0.9375rem;
     font-weight: 600;
     cursor: pointer;
@@ -501,7 +501,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 
 .cookie-modal-btn-primary {
     background: white;
-    color: #1a1a1a;
+    color: #033234;
 }
 
 .cookie-modal-btn-primary:hover {
@@ -510,7 +510,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 
 .cookie-modal-btn-secondary {
     background: white;
-    color: #1a1a1a;
+    color: #033234;
 }
 
 .cookie-modal-btn-secondary:hover {

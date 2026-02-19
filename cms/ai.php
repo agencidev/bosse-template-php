@@ -13,6 +13,9 @@ if (!is_logged_in()) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI-assistent - CMS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -20,9 +23,10 @@ if (!is_logged_in()) {
             box-sizing: border-box;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #fafafa;
+            font-family: 'DM Sans', sans-serif;
+            background-color: #033234;
             min-height: 100vh;
+            color: rgba(255,255,255,1.0);
         }
         .page-content {
             padding: 3rem 1.5rem;
@@ -33,14 +37,14 @@ if (!is_logged_in()) {
         }
         .back-link {
             display: inline-block;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
             text-decoration: none;
             font-size: 0.875rem;
             margin-bottom: 1.5rem;
             transition: color 0.2s;
         }
         .back-link:hover {
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
         }
         .header {
             display: flex;
@@ -51,7 +55,7 @@ if (!is_logged_in()) {
         .title {
             font-size: 2rem;
             font-weight: bold;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
         }
         .status-badge {
             display: flex;
@@ -74,9 +78,9 @@ if (!is_logged_in()) {
             font-weight: 500;
         }
         .chat-card {
-            background: linear-gradient(to bottom, #fafafa, white);
+            background: linear-gradient(to bottom, rgba(255,255,255,0.03), rgba(255,255,255,0.05));
             border-radius: 1.5rem;
-            border: 1px solid #e5e5e5;
+            border: 1px solid rgba(255,255,255,0.10);
             overflow: hidden;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
             margin-bottom: 1.5rem;
@@ -105,14 +109,14 @@ if (!is_logged_in()) {
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
         .message-user .message-bubble {
-            background: #fe4f2a;
+            background: #379b83;
             color: white;
             border-bottom-right-radius: 0.25rem;
         }
         .message-assistant .message-bubble {
-            background: white;
-            border: 1px solid #e5e5e5;
-            color: #18181b;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.10);
+            color: rgba(255,255,255,1.0);
             border-bottom-left-radius: 0.25rem;
         }
         .message-text {
@@ -127,7 +131,7 @@ if (!is_logged_in()) {
         .typing-dot {
             width: 0.5rem;
             height: 0.5rem;
-            background: #a3a3a3;
+            background: rgba(255,255,255,0.50);
             border-radius: 50%;
             animation: bounce 1.4s infinite ease-in-out;
         }
@@ -138,8 +142,8 @@ if (!is_logged_in()) {
             40% { transform: scale(1); }
         }
         .chat-input-wrapper {
-            border-top: 1px solid #e5e5e5;
-            background: white;
+            border-top: 1px solid rgba(255,255,255,0.10);
+            background: rgba(255,255,255,0.05);
             padding: 1.5rem;
         }
         .chat-input-container {
@@ -149,17 +153,18 @@ if (!is_logged_in()) {
         .chat-input {
             width: 100%;
             padding: 1rem 6rem 1rem 1.25rem;
-            background: #fafafa;
-            border: 1px solid #e5e5e5;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.10);
             border-radius: 9999px;
             font-size: 0.875rem;
             font-family: inherit;
             outline: none;
             transition: all 0.2s;
+            color: white;
         }
         .chat-input:focus {
-            border-color: #fe4f2a;
-            box-shadow: 0 0 0 3px rgba(254, 79, 42, 0.1);
+            border-color: #379b83;
+            box-shadow: 0 0 0 3px rgba(55, 155, 131, 0.1);
         }
         .chat-input-actions {
             position: absolute;
@@ -173,14 +178,14 @@ if (!is_logged_in()) {
             padding: 0.5rem;
             background: none;
             border: none;
-            color: #a3a3a3;
+            color: rgba(255,255,255,0.50);
             cursor: pointer;
-            border-radius: 0.75rem;
+            border-radius: 9999px;
             transition: all 0.2s;
         }
         .icon-button:hover {
-            background: #f5f5f5;
-            color: #18181b;
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,1.0);
         }
         .icon-button svg {
             width: 1.25rem;
@@ -196,16 +201,16 @@ if (!is_logged_in()) {
             align-items: center;
             gap: 0.5rem;
             padding: 0.5rem 1rem;
-            background: #fafafa;
-            border: 1px solid #e5e5e5;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.10);
             border-radius: 9999px;
             font-size: 0.875rem;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
             cursor: pointer;
             transition: all 0.2s;
         }
         .quick-action:hover {
-            background: #f5f5f5;
+            background: rgba(255,255,255,0.08);
         }
         .quick-action svg {
             width: 1rem;
@@ -218,20 +223,20 @@ if (!is_logged_in()) {
             margin-bottom: 1.5rem;
         }
         .info-card {
-            background: white;
+            background: rgba(255,255,255,0.05);
             border-radius: 1rem;
-            border: 1px solid #e5e5e5;
+            border: 1px solid rgba(255,255,255,0.10);
             padding: 1rem;
         }
         .info-card-label {
             font-size: 0.75rem;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
             margin-bottom: 0.25rem;
         }
         .info-card-value {
             font-size: 0.875rem;
             font-weight: 500;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
         }
         .info-card-status {
             display: flex;
@@ -240,7 +245,7 @@ if (!is_logged_in()) {
         }
         .info-text {
             font-size: 0.75rem;
-            color: #a3a3a3;
+            color: rgba(255,255,255,0.50);
             text-align: center;
             line-height: 1.6;
         }

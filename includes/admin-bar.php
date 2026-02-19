@@ -64,7 +64,7 @@ $is_frontend = !$is_cms;
 }
 
 .admin-bar--dark {
-    background-color: #18181b;
+    background-color: #033234;
     color: white;
 }
 
@@ -131,7 +131,7 @@ $is_frontend = !$is_cms;
 }
 
 .admin-bar__button--edit.active {
-    background: #fe4f2a;
+    background: #379b83;
     color: white;
 }
 

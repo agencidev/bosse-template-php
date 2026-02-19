@@ -4,14 +4,14 @@
 
 /* Colors from Bosse Portal */
 :root {
-  --color-woodsmoke: #18181b;
-  --color-persimmon: #ff5722;
+  --color-woodsmoke: #033234;
+  --color-persimmon: #379b83;
 }
 
 /* Tailwind-like utility classes */
-.bg-woodsmoke { background-color: #18181b; }
+.bg-woodsmoke { background-color: #033234; }
 .text-white { color: white; }
-.bg-persimmon { background-color: #ff5722; }
+.bg-persimmon { background-color: #379b83; }
 .fixed { position: fixed; }
 .top-0 { top: 0; }
 .left-0 { left: 0; }

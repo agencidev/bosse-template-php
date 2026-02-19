@@ -31,8 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="sv">
 <head><meta charset="UTF-8"></head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #18181b; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <h2 style="color: #fe4f2a; border-bottom: 2px solid #fe4f2a; padding-bottom: 10px;">Supportärende</h2>
+<body style="font-family: 'DM Sans', sans-serif; color: #18181b; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h2 style="color: #379b83; border-bottom: 2px solid #379b83; padding-bottom: 10px;">Supportärende</h2>
     <table style="width: 100%; border-collapse: collapse;">
         <tr><td style="padding: 8px 0; font-weight: 600; width: 120px;">Admin:</td><td style="padding: 8px 0;">{$admin_user}</td></tr>
         <tr><td style="padding: 8px 0; font-weight: 600;">Ämne:</td><td style="padding: 8px 0;">{$safe_subject}</td></tr>
@@ -70,6 +70,9 @@ HTML;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Support - CMS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -77,9 +80,10 @@ HTML;
             box-sizing: border-box;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #fafafa;
+            font-family: 'DM Sans', sans-serif;
+            background-color: #033234;
             min-height: 100vh;
+            color: rgba(255,255,255,1.0);
         }
         .page-content {
             padding: 3rem 1.5rem;
@@ -90,23 +94,23 @@ HTML;
         }
         .back-link {
             display: inline-block;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
             text-decoration: none;
             font-size: 0.875rem;
             margin-bottom: 1rem;
             transition: color 0.2s;
         }
         .back-link:hover {
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
         }
         .title {
             font-size: 2rem;
             font-weight: bold;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
             margin-bottom: 0.5rem;
         }
         .subtitle {
-            color: #737373;
+            color: rgba(255,255,255,0.50);
             margin-bottom: 2rem;
         }
         .success-card {
@@ -120,17 +124,17 @@ HTML;
         .success-title {
             font-size: 2rem;
             font-weight: bold;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
             margin-bottom: 1rem;
         }
         .success-text {
-            color: #737373;
+            color: rgba(255,255,255,0.50);
             margin-bottom: 2rem;
         }
         .form-card {
-            background: white;
+            background: rgba(255,255,255,0.05);
             border-radius: 1.5rem;
-            border: 1px solid #e5e5e5;
+            border: 1px solid rgba(255,255,255,0.10);
             padding: 2rem;
         }
         .form-group {
@@ -140,22 +144,24 @@ HTML;
             display: block;
             font-size: 0.875rem;
             font-weight: 600;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
             margin-bottom: 0.5rem;
         }
         .form-input, .form-textarea {
             width: 100%;
             padding: 0.875rem 1rem;
-            border: 1px solid #d4d4d4;
+            border: 1px solid rgba(255,255,255,0.15);
             border-radius: 0.75rem;
             font-size: 1rem;
             font-family: inherit;
             transition: all 0.2s;
             outline: none;
+            background-color: rgba(255,255,255,0.05);
+            color: white;
         }
         .form-input:focus, .form-textarea:focus {
-            border-color: #fe4f2a;
-            box-shadow: 0 0 0 3px rgba(254, 79, 42, 0.1);
+            border-color: #379b83;
+            box-shadow: 0 0 0 3px rgba(55, 155, 131, 0.1);
         }
         .form-textarea {
             resize: none;
@@ -163,7 +169,7 @@ HTML;
         }
         .button-primary {
             width: 100%;
-            background: #fe4f2a;
+            background: #379b83;
             color: white;
             padding: 0.875rem 1.5rem;
             border-radius: 9999px;

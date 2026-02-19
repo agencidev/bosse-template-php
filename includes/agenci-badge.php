@@ -21,7 +21,8 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: white;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.10);
     padding: 0.5rem 1rem;
     border-radius: 9999px;
     text-decoration: none;
@@ -34,7 +35,7 @@
 
 .agenci-badge__text {
     font-size: 0.875rem;
-    color: #18181b;
+    color: rgba(255,255,255,0.65);
     font-weight: 600;
 }
 </style>

@@ -233,8 +233,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($postStep === 2) {
             // Validera steg 2
             $primary_color = $_POST['primary_color'] ?? '#8b5cf6';
-            $secondary_color = $_POST['secondary_color'] ?? '#FF6B35';
-            $accent_color = $_POST['accent_color'] ?? '#fe4f2a';
+            $secondary_color = $_POST['secondary_color'] ?? '#379b83';
+            $accent_color = $_POST['accent_color'] ?? '#379b83';
             $font_heading = $_POST['font_heading'] ?? 'System UI';
             $font_body = $_POST['font_body'] ?? 'System UI';
 
@@ -1004,6 +1004,9 @@ $saved = $_SESSION['setup_data'] ?? [];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Setup Wizard - Konfigurera din webbplats</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -1012,9 +1015,9 @@ $saved = $_SESSION['setup_data'] ?? [];
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #fafafa;
-            color: #18181b;
+            font-family: 'DM Sans', sans-serif;
+            background-color: #033234;
+            color: rgba(255,255,255,1.0);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -1035,13 +1038,13 @@ $saved = $_SESSION['setup_data'] ?? [];
         .setup-header h1 {
             font-size: 2.25rem;
             font-weight: bold;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
             margin-bottom: 0.75rem;
         }
 
         .setup-header p {
             font-size: 1.125rem;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
         }
 
         /* Progress Steps */
@@ -1068,15 +1071,15 @@ $saved = $_SESSION['setup_data'] ?? [];
             justify-content: center;
             font-weight: 600;
             font-size: 0.875rem;
-            border: 2px solid #d4d4d4;
-            color: #a3a3a3;
-            background: white;
+            border: 2px solid rgba(255,255,255,0.10);
+            color: rgba(255,255,255,0.50);
+            background: rgba(255,255,255,0.05);
             transition: all 0.2s;
         }
 
         .step-circle.active {
-            border-color: #fe4f2a;
-            background: #fe4f2a;
+            border-color: #379b83;
+            background: #379b83;
             color: white;
         }
 
@@ -1089,7 +1092,7 @@ $saved = $_SESSION['setup_data'] ?? [];
         .step-label {
             font-size: 0.8125rem;
             font-weight: 600;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
             display: none;
         }
 
@@ -1100,7 +1103,7 @@ $saved = $_SESSION['setup_data'] ?? [];
         .step-line {
             width: 60px;
             height: 2px;
-            background: #d4d4d4;
+            background: rgba(255,255,255,0.10);
             margin: 0 0.75rem;
             transition: background 0.2s;
         }
@@ -1111,16 +1114,16 @@ $saved = $_SESSION['setup_data'] ?? [];
 
         /* Card — matches CMS dashboard/support style */
         .setup-card {
-            background: white;
+            background: rgba(255,255,255,0.05);
             border-radius: 1.5rem;
-            border: 1px solid #e5e5e5;
+            border: 1px solid rgba(255,255,255,0.10);
             padding: 2rem;
         }
 
         .setup-card h2 {
             font-size: 1.25rem;
             font-weight: bold;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
             margin-bottom: 1.5rem;
         }
 
@@ -1133,13 +1136,13 @@ $saved = $_SESSION['setup_data'] ?? [];
             display: block;
             font-size: 0.875rem;
             font-weight: 600;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
             margin-bottom: 0.5rem;
         }
 
         .form-group .hint {
             font-size: 0.75rem;
-            color: #a3a3a3;
+            color: rgba(255,255,255,0.50);
             margin-top: 0.375rem;
         }
 
@@ -1153,12 +1156,12 @@ $saved = $_SESSION['setup_data'] ?? [];
         select {
             width: 100%;
             padding: 0.875rem 1rem;
-            border: 1px solid #d4d4d4;
+            border: 1px solid rgba(255,255,255,0.10);
             border-radius: 0.75rem;
             font-size: 1rem;
             font-family: inherit;
-            background: white;
-            color: #18181b;
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,1.0);
             outline: none;
             transition: all 0.2s;
         }
@@ -1167,7 +1170,7 @@ $saved = $_SESSION['setup_data'] ?? [];
         textarea:focus,
         select:focus {
             border-color: transparent;
-            box-shadow: 0 0 0 2px #ff5722;
+            box-shadow: 0 0 0 2px #379b83;
         }
 
         textarea {
@@ -1179,10 +1182,10 @@ $saved = $_SESSION['setup_data'] ?? [];
             width: 48px;
             height: 44px;
             padding: 2px;
-            border: 1px solid #d4d4d4;
+            border: 1px solid rgba(255,255,255,0.10);
             border-radius: 0.75rem;
             cursor: pointer;
-            background: white;
+            background: rgba(255,255,255,0.05);
         }
 
         .color-group {
@@ -1200,25 +1203,25 @@ $saved = $_SESSION['setup_data'] ?? [];
             margin-top: 2rem;
             margin-bottom: 1rem;
             padding-top: 1.5rem;
-            border-top: 1px solid #e5e5e5;
+            border-top: 1px solid rgba(255,255,255,0.10);
         }
 
         .section-divider h3 {
             font-size: 1rem;
             font-weight: bold;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
             margin-bottom: 0.25rem;
         }
 
         .section-divider p {
             font-size: 0.8125rem;
-            color: #a3a3a3;
+            color: rgba(255,255,255,0.50);
             margin-bottom: 1.25rem;
         }
 
         /* File upload */
         .file-upload {
-            border: 2px dashed #d4d4d4;
+            border: 2px dashed rgba(255,255,255,0.10);
             border-radius: 0.75rem;
             padding: 1.25rem;
             text-align: center;
@@ -1228,8 +1231,8 @@ $saved = $_SESSION['setup_data'] ?? [];
         }
 
         .file-upload:hover {
-            border-color: #fe4f2a;
-            background: #fff7ed;
+            border-color: #379b83;
+            background: rgba(55,155,131,0.10);
         }
 
         .file-upload input[type="file"] {
@@ -1241,11 +1244,11 @@ $saved = $_SESSION['setup_data'] ?? [];
 
         .file-upload-text {
             font-size: 0.875rem;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
         }
 
         .file-upload-text strong {
-            color: #fe4f2a;
+            color: #379b83;
         }
 
         .logo-preview {
@@ -1258,7 +1261,7 @@ $saved = $_SESSION['setup_data'] ?? [];
 
         /* Preview card */
         .design-preview {
-            border: 1px solid #e5e5e5;
+            border: 1px solid rgba(255,255,255,0.10);
             border-radius: 1rem;
             padding: 1.5rem;
             margin-top: 1.5rem;
@@ -1267,7 +1270,7 @@ $saved = $_SESSION['setup_data'] ?? [];
         .design-preview h3 {
             font-size: 0.875rem;
             font-weight: 600;
-            color: #a3a3a3;
+            color: rgba(255,255,255,0.50);
             text-transform: uppercase;
             letter-spacing: 0.05em;
             margin-bottom: 1rem;
@@ -1293,7 +1296,7 @@ $saved = $_SESSION['setup_data'] ?? [];
 
         .preview-text p {
             font-size: 0.875rem;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
         }
 
         .preview-button {
@@ -1311,7 +1314,7 @@ $saved = $_SESSION['setup_data'] ?? [];
         .password-strength {
             height: 4px;
             border-radius: 2px;
-            background: #e5e5e5;
+            background: rgba(255,255,255,0.10);
             margin-top: 0.5rem;
             overflow: hidden;
         }
@@ -1326,7 +1329,7 @@ $saved = $_SESSION['setup_data'] ?? [];
         .password-strength-text {
             font-size: 0.75rem;
             margin-top: 0.25rem;
-            color: #a3a3a3;
+            color: rgba(255,255,255,0.50);
         }
 
         /* Buttons — matches CMS button style */
@@ -1353,23 +1356,23 @@ $saved = $_SESSION['setup_data'] ?? [];
         }
 
         .btn-primary {
-            background: #fe4f2a;
+            background: #379b83;
             color: white;
         }
 
         .btn-primary:hover {
-            background: #e8461f;
+            background: #2e8570;
         }
 
         .btn-secondary {
             background: none;
-            color: #a3a3a3;
-            border: 1px solid #d4d4d4;
+            color: rgba(255,255,255,0.50);
+            border: 1px solid rgba(255,255,255,0.10);
         }
 
         .btn-secondary:hover {
-            background: #f5f5f5;
-            color: #737373;
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.75);
         }
 
         .btn-success {
@@ -1383,8 +1386,8 @@ $saved = $_SESSION['setup_data'] ?? [];
 
         /* Errors */
         .error-list {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
+            background: rgba(239,68,68,0.10);
+            border: 1px solid rgba(239,68,68,0.30);
             border-radius: 0.75rem;
             padding: 1rem 1.25rem;
             margin-bottom: 1.5rem;
@@ -1393,19 +1396,19 @@ $saved = $_SESSION['setup_data'] ?? [];
 
         .error-list li {
             font-size: 0.875rem;
-            color: #b91c1c;
+            color: #fca5a5;
             padding: 0.125rem 0;
         }
 
         /* Writable errors */
         .writable-error {
-            background: #fffbeb;
-            border: 1px solid #fde68a;
+            background: rgba(245,158,11,0.10);
+            border: 1px solid rgba(245,158,11,0.30);
             border-radius: 0.75rem;
             padding: 1rem 1.25rem;
             margin-bottom: 1.5rem;
             font-size: 0.875rem;
-            color: #92400e;
+            color: #fcd34d;
         }
 
         .writable-error code {
@@ -1427,7 +1430,7 @@ $saved = $_SESSION['setup_data'] ?? [];
             gap: 0.75rem;
             padding: 0.75rem 0;
             font-size: 0.9375rem;
-            border-bottom: 1px solid #f5f5f5;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
         .complete-list li:last-child {
@@ -1476,13 +1479,14 @@ $saved = $_SESSION['setup_data'] ?? [];
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            background: white;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.10);
             padding: 0.5rem 1rem;
             border-radius: 9999px;
             text-decoration: none;
             transition: all 0.2s;
             font-size: 0.875rem;
-            color: #18181b;
+            color: rgba(255,255,255,0.65);
             font-weight: 600;
         }
         .agenci-badge a:hover {
@@ -1895,10 +1899,10 @@ $saved = $_SESSION['setup_data'] ?? [];
                         <label for="secondary_color">Sekundärfärg</label>
                         <div class="color-group">
                             <input type="color" id="secondary_color" name="secondary_color"
-                                   value="<?php echo htmlspecialchars($saved['secondary_color'] ?? '#FF6B35'); ?>"
+                                   value="<?php echo htmlspecialchars($saved['secondary_color'] ?? '#379b83'); ?>"
                                    onchange="updateColorText(this, 'secondary_text'); updatePreview();">
                             <input type="text" id="secondary_text"
-                                   value="<?php echo htmlspecialchars($saved['secondary_color'] ?? '#FF6B35'); ?>"
+                                   value="<?php echo htmlspecialchars($saved['secondary_color'] ?? '#379b83'); ?>"
                                    onchange="document.getElementById('secondary_color').value = this.value; updatePreview();"
                                    pattern="#[0-9a-fA-F]{6}" maxlength="7">
                         </div>
@@ -1907,10 +1911,10 @@ $saved = $_SESSION['setup_data'] ?? [];
                         <label for="accent_color">Accentfärg</label>
                         <div class="color-group">
                             <input type="color" id="accent_color" name="accent_color"
-                                   value="<?php echo htmlspecialchars($saved['accent_color'] ?? '#fe4f2a'); ?>"
+                                   value="<?php echo htmlspecialchars($saved['accent_color'] ?? '#379b83'); ?>"
                                    onchange="updateColorText(this, 'accent_text'); updatePreview();">
                             <input type="text" id="accent_text"
-                                   value="<?php echo htmlspecialchars($saved['accent_color'] ?? '#fe4f2a'); ?>"
+                                   value="<?php echo htmlspecialchars($saved['accent_color'] ?? '#379b83'); ?>"
                                    onchange="document.getElementById('accent_color').value = this.value; updatePreview();"
                                    pattern="#[0-9a-fA-F]{6}" maxlength="7">
                         </div>
@@ -2066,8 +2070,8 @@ $saved = $_SESSION['setup_data'] ?? [];
                     <h3>Förhandsgranskning</h3>
                     <div class="preview-colors">
                         <div class="preview-swatch" id="swatch-primary" style="background: #8b5cf6;"></div>
-                        <div class="preview-swatch" id="swatch-secondary" style="background: #FF6B35;"></div>
-                        <div class="preview-swatch" id="swatch-accent" style="background: #fe4f2a;"></div>
+                        <div class="preview-swatch" id="swatch-secondary" style="background: #379b83;"></div>
+                        <div class="preview-swatch" id="swatch-accent" style="background: #379b83;"></div>
                     </div>
                     <div class="preview-text">
                         <h4 id="preview-heading" style="font-family: system-ui, sans-serif;">Rubrik-exempel</h4>
@@ -2147,12 +2151,12 @@ $saved = $_SESSION['setup_data'] ?? [];
         <!-- STEG 4: Verifiering + Färdig -->
         <div class="setup-card" id="verify-card">
             <h2 style="text-align: center;" id="verify-title">Verifierar installation...</h2>
-            <p style="text-align: center; color: #737373; margin-bottom: 1.5rem;" id="verify-subtitle">Kontrollerar att allt genererats korrekt</p>
+            <p style="text-align: center; color: rgba(255,255,255,0.50); margin-bottom: 1.5rem;" id="verify-subtitle">Kontrollerar att allt genererats korrekt</p>
 
             <ul class="complete-list" id="verify-list">
                 <?php foreach ($checks as $i => $check): ?>
                 <li data-index="<?php echo $i; ?>" data-ok="<?php echo $check['ok'] ? '1' : '0'; ?>" style="opacity: 0.3;">
-                    <span class="check-icon" style="background: #d4d4d4;" id="icon-<?php echo $i; ?>">
+                    <span class="check-icon" style="background: rgba(255,255,255,0.10);" id="icon-<?php echo $i; ?>">
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display:none;" id="svg-<?php echo $i; ?>">
                             <path d="M2 6L5 9L10 3" stroke="white" stroke-width="2" stroke-linecap="round"/>
                         </svg>
@@ -2269,8 +2273,8 @@ $saved = $_SESSION['setup_data'] ?? [];
     // Update preview
     function updatePreview() {
         const primary = document.getElementById('primary_color')?.value || '#8b5cf6';
-        const secondary = document.getElementById('secondary_color')?.value || '#FF6B35';
-        const accent = document.getElementById('accent_color')?.value || '#fe4f2a';
+        const secondary = document.getElementById('secondary_color')?.value || '#379b83';
+        const accent = document.getElementById('accent_color')?.value || '#379b83';
 
         const sp = document.getElementById('swatch-primary');
         const ss = document.getElementById('swatch-secondary');

@@ -56,6 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SEO - CMS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -63,9 +66,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-sizing: border-box;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #fafafa;
+            font-family: 'DM Sans', sans-serif;
+            background-color: #033234;
             min-height: 100vh;
+            color: rgba(255,255,255,1.0);
         }
         .page-content {
             padding: 3rem 1.5rem;
@@ -76,14 +80,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .back-link {
             display: inline-block;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
             text-decoration: none;
             font-size: 0.875rem;
             margin-bottom: 1.5rem;
             transition: color 0.2s;
         }
         .back-link:hover {
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
         }
         .header {
             display: flex;
@@ -94,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .title {
             font-size: 2rem;
             font-weight: bold;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
         }
         .status-badge {
             display: flex;
@@ -117,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-weight: 500;
         }
         .description {
-            color: #737373;
+            color: rgba(255,255,255,0.50);
             font-size: 0.875rem;
             line-height: 1.6;
             margin-bottom: 2rem;
@@ -135,20 +139,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-bottom: 1.5rem;
         }
         .card {
-            background: white;
+            background: rgba(255,255,255,0.05);
             border-radius: 1.5rem;
-            border: 1px solid #e5e5e5;
+            border: 1px solid rgba(255,255,255,0.10);
             padding: 1.5rem;
         }
         .card-title {
             font-size: 0.875rem;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
             margin-bottom: 0.5rem;
         }
         .card-value {
             font-size: 2.5rem;
             font-weight: bold;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
             margin-bottom: 0.5rem;
         }
         .card-change {
@@ -162,7 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .card-subtitle {
             font-size: 0.75rem;
-            color: #a3a3a3;
+            color: rgba(255,255,255,0.50);
             margin-top: 0.5rem;
         }
         .chart {
@@ -181,13 +185,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .chart-bar-fill {
             width: 100%;
-            background: linear-gradient(to top, #fe4f2a, rgba(254, 79, 42, 0.3));
+            background: linear-gradient(to top, #379b83, rgba(55, 155, 131, 0.3));
             border-radius: 0.25rem 0.25rem 0 0;
             transition: height 0.5s ease;
         }
         .chart-label {
             font-size: 0.75rem;
-            color: #a3a3a3;
+            color: rgba(255,255,255,0.50);
             margin-top: 0.5rem;
         }
         .status-grid {
@@ -197,9 +201,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-bottom: 1.5rem;
         }
         .status-card {
-            background: white;
+            background: rgba(255,255,255,0.05);
             border-radius: 1rem;
-            border: 1px solid #e5e5e5;
+            border: 1px solid rgba(255,255,255,0.10);
             padding: 1rem;
         }
         .status-card-header {
@@ -211,12 +215,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .status-card-icon {
             width: 1.25rem;
             height: 1.25rem;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
         }
         .status-card-title {
             font-size: 0.875rem;
             font-weight: 500;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
         }
         .status-indicator {
             display: flex;
@@ -234,15 +238,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #16a34a;
         }
         .activity-card {
-            background: white;
+            background: rgba(255,255,255,0.05);
             border-radius: 1.5rem;
-            border: 1px solid #e5e5e5;
+            border: 1px solid rgba(255,255,255,0.10);
             padding: 1.5rem;
         }
         .activity-title {
             font-size: 1.125rem;
             font-weight: 600;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
             margin-bottom: 1rem;
         }
         .activity-list {
@@ -256,13 +260,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .activity-date {
             font-size: 0.75rem;
-            color: #a3a3a3;
+            color: rgba(255,255,255,0.50);
             width: 3.5rem;
             padding-top: 0.125rem;
         }
         .activity-text {
             font-size: 0.875rem;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
             flex: 1;
         }
         @media (max-width: 768px) {
@@ -271,16 +275,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         .meta-card {
-            background: white;
+            background: rgba(255,255,255,0.05);
             border-radius: 1.5rem;
-            border: 1px solid #e5e5e5;
+            border: 1px solid rgba(255,255,255,0.10);
             padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
         .meta-card-title {
             font-size: 1.125rem;
             font-weight: 600;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
             margin-bottom: 1rem;
         }
         .form-group {
@@ -290,22 +294,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: block;
             font-size: 0.875rem;
             font-weight: 600;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
             margin-bottom: 0.375rem;
         }
         .form-input, .form-textarea {
             width: 100%;
             padding: 0.75rem 1rem;
-            border: 1px solid #d4d4d4;
+            border: 1px solid rgba(255,255,255,0.15);
             border-radius: 0.5rem;
             font-size: 1rem;
             font-family: inherit;
             outline: none;
             transition: all 0.2s;
+            background-color: rgba(255,255,255,0.05);
+            color: white;
         }
         .form-input:focus, .form-textarea:focus {
-            border-color: #fe4f2a;
-            box-shadow: 0 0 0 3px rgba(254, 79, 42, 0.1);
+            border-color: #379b83;
+            box-shadow: 0 0 0 3px rgba(55, 155, 131, 0.1);
         }
         .form-textarea {
             resize: vertical;
@@ -313,7 +319,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .char-count {
             font-size: 0.75rem;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
             margin-top: 0.25rem;
             text-align: right;
         }
@@ -336,11 +342,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transition: all 0.2s;
         }
         .btn-primary {
-            background: #fe4f2a;
+            background: #379b83;
             color: white;
         }
         .btn-primary:hover {
-            background: #e8461f;
+            background: #2e8570;
         }
         .alert {
             padding: 0.875rem 1rem;
@@ -359,15 +365,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #dc2626;
         }
         .google-preview {
-            background: white;
-            border: 1px solid #e5e5e5;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.10);
             border-radius: 1rem;
             padding: 1.25rem;
             margin-top: 1.5rem;
         }
         .google-preview-label {
             font-size: 0.75rem;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
             margin-bottom: 0.75rem;
             font-weight: 500;
         }

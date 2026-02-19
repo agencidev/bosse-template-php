@@ -79,6 +79,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inlägg - CMS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -86,8 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-sizing: border-box;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #fafafa;
+            font-family: 'DM Sans', sans-serif;
+            background-color: #033234;
             min-height: 100vh;
         }
         .page-content {
@@ -99,14 +102,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .back-link {
             display: inline-block;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
             text-decoration: none;
             font-size: 0.875rem;
             margin-bottom: 1rem;
             transition: color 0.2s;
         }
         .back-link:hover {
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
         }
         .header {
             display: flex;
@@ -117,10 +120,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .title {
             font-size: 2rem;
             font-weight: bold;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
         }
         .button-primary {
-            background: #fe4f2a;
+            background: #379b83;
             color: white;
             padding: 0.75rem 1.5rem;
             border-radius: 9999px;
@@ -131,12 +134,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .empty-state {
             text-align: center;
             padding: 4rem 1.5rem;
-            background: white;
+            background: rgba(255,255,255,0.05);
             border-radius: 1.5rem;
-            border: 1px solid #e5e5e5;
+            border: 1px solid rgba(255,255,255,0.10);
         }
         .empty-state p {
-            color: #737373;
+            color: rgba(255,255,255,0.50);
             margin-bottom: 1.5rem;
         }
         .projects-list {
@@ -145,9 +148,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             gap: 1rem;
         }
         .project-card {
-            background: white;
+            background: rgba(255,255,255,0.05);
             border-radius: 1rem;
-            border: 1px solid #e5e5e5;
+            border: 1px solid rgba(255,255,255,0.10);
             padding: 1.5rem;
             display: flex;
             justify-content: space-between;
@@ -168,12 +171,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             height: 4rem;
             border-radius: 0.75rem;
             object-fit: cover;
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+            background: linear-gradient(135deg, rgba(55, 155, 131, 0.2) 0%, rgba(55, 155, 131, 0.1) 100%);
         }
         .project-details h3 {
             font-size: 1rem;
             font-weight: 600;
-            color: #18181b;
+            color: rgba(255,255,255,1.0);
             margin-bottom: 0.25rem;
         }
         .project-meta {
@@ -181,7 +184,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             gap: 0.75rem;
             align-items: center;
             font-size: 0.875rem;
-            color: #737373;
+            color: rgba(255,255,255,0.50);
         }
         .status-published {
             color: #16a34a;
@@ -204,11 +207,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             text-decoration: none;
         }
         .button-edit {
-            background: #f5f5f5;
-            color: #18181b;
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,1.0);
         }
         .button-edit:hover {
-            background: #e5e5e5;
+            background: rgba(255,255,255,0.15);
         }
         .button-delete {
             background: #fef2f2;
@@ -222,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             align-items: center;
             gap: 1rem;
             padding: 1rem;
-            background: #18181b;
+            background: #054547;
             border-radius: 1rem;
             margin-bottom: 1rem;
         }
@@ -268,7 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             width: 1.25rem;
             height: 1.25rem;
             cursor: pointer;
-            accent-color: #fe4f2a;
+            accent-color: #379b83;
         }
         .select-all-container {
             display: flex;
@@ -276,12 +279,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             gap: 0.5rem;
             margin-bottom: 1rem;
             padding: 0.75rem 1rem;
-            background: #f5f5f5;
+            background: rgba(255,255,255,0.08);
             border-radius: 0.75rem;
         }
         .select-all-container label {
             font-size: 0.875rem;
-            color: #525252;
+            color: rgba(255,255,255,0.65);
             cursor: pointer;
         }
         .alert {
@@ -301,8 +304,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include __DIR__ . '/../../includes/admin-bar.php'; ?>
     <div class="page-content">
     <div class="container">
-        <a href="/dashboard" class="back-link">← Tillbaka</a>
-        
+        <a href="/dashboard" class="back-link">&larr; Tillbaka</a>
+
         <div class="header">
             <h1 class="title">Inlägg</h1>
             <a href="/cms/projects/new" class="button-primary">+ Nytt inlägg</a>
@@ -350,7 +353,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <h3><?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?></h3>
                                     <div class="project-meta">
                                         <span><?php echo htmlspecialchars($project['category'] ?? 'Okategoriserad', ENT_QUOTES, 'UTF-8'); ?></span>
-                                        <span>•</span>
+                                        <span>&bull;</span>
                                         <span class="<?php echo ($project['status'] ?? 'draft') === 'published' ? 'status-published' : 'status-draft'; ?>">
                                             <?php echo ($project['status'] ?? 'draft') === 'published' ? 'Publicerad' : 'Utkast'; ?>
                                         </span>
