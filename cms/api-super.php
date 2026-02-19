@@ -336,6 +336,23 @@ function handle_save_config(): void {
         );
     }
 
+    // Add GitHub defines if missing in config.php
+    if (!empty($input['github_repo']) || !empty($input['github_token'])) {
+        $hasGithubRepo = strpos($config, "define('GITHUB_REPO'") !== false;
+        $hasGithubToken = strpos($config, "define('GITHUB_TOKEN'") !== false;
+
+        if (!$hasGithubRepo || !$hasGithubToken) {
+            $githubBlock = "\n// GitHub (för automatisk push vid uppdatering)\n";
+            if (!$hasGithubRepo && !empty($input['github_repo'])) {
+                $githubBlock .= "define('GITHUB_REPO', " . var_export($input['github_repo'], true) . ");\n";
+            }
+            if (!$hasGithubToken && !empty($input['github_token'])) {
+                $githubBlock .= "define('GITHUB_TOKEN', " . var_export($input['github_token'], true) . ");\n";
+            }
+            $config = rtrim($config) . "\n" . $githubBlock;
+        }
+    }
+
     if (file_put_contents($configFile, $config, LOCK_EX) === false) {
         echo json_encode(['success' => false, 'error' => 'Kunde inte skriva till config.php']);
         return;
