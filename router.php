@@ -102,6 +102,17 @@ if (file_exists($file)) {
     return true;
 }
 
+// Try pages/ directory (e.g. /om-oss → pages/om-oss.php)
+$pageFile = __DIR__ . '/pages' . $uri . '.php';
+if (file_exists($pageFile)) {
+    if ($query) {
+        $_SERVER['QUERY_STRING'] = $query;
+        parse_str($query, $_GET);
+    }
+    require $pageFile;
+    return true;
+}
+
 // Try with index.php in directory
 if (is_dir(__DIR__ . $uri)) {
     $indexFile = __DIR__ . $uri . '/index.php';
