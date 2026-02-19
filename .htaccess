@@ -52,7 +52,11 @@ RewriteRule ^projekt/?$ pages/projekt.php [L]
 # /projekt/{slug} -> /pages/projekt-single.php?slug={slug}
 RewriteRule ^projekt/([a-z0-9-]+)/?$ pages/projekt-single.php?slug=$1 [QSA,L]
 
-# Ta bort .php från alla URLer (endast om filen finns)
+# Ta bort .php — kolla pages/ först, sedan rot
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/pages/$1.php -f
+RewriteRule ^(.+?)/?$ pages/$1.php [L,QSA]
+
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}.php -f
 RewriteRule ^(.+?)/?$ $1.php [L,QSA]
