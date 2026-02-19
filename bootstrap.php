@@ -17,7 +17,14 @@ if (!file_exists($configPath)) {
 require_once $configPath;
 
 // Ladda version
-require_once __DIR__ . '/includes/version.php';
+if (file_exists(__DIR__ . '/includes/version.php')) {
+    require_once __DIR__ . '/includes/version.php';
+} elseif (file_exists(__DIR__ . '/version.php')) {
+    require_once __DIR__ . '/version.php';
+} else {
+    define('BOSSE_VERSION', '0.0.0');
+    define('BOSSE_VERSION_DATE', '');
+}
 
 // Sätt paths
 define('ROOT_PATH', __DIR__);
