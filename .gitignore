@@ -14,5 +14,14 @@ data/login_attempts.json
 data/tmp/
 data/backups/
 
+# Setup state (generated per server)
+data/.setup-complete
+data/content.json
+data/projects.json
+
 # Lokal AI-config
 .claude
+.windsurf/
+
+# Removed from template
+.env.example

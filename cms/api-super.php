@@ -60,6 +60,11 @@ switch ($action) {
         handle_error_log();
         break;
 
+    case 'clear-error-log':
+        if ($method !== 'POST') { method_not_allowed(); }
+        handle_clear_error_log();
+        break;
+
     case 'check-integrity':
         handle_check_integrity();
         break;
@@ -244,6 +249,23 @@ function handle_error_log(): void {
     }
 
     echo json_encode(['log' => $log]);
+}
+
+function handle_clear_error_log(): void {
+    $errorLogPath = ini_get('error_log');
+
+    if (!$errorLogPath || !file_exists($errorLogPath)) {
+        echo json_encode(['success' => true, 'message' => 'Ingen loggfil att rensa']);
+        return;
+    }
+
+    if (!is_writable($errorLogPath)) {
+        echo json_encode(['success' => false, 'error' => 'Loggfilen är inte skrivbar']);
+        return;
+    }
+
+    $result = file_put_contents($errorLogPath, '', LOCK_EX);
+    echo json_encode(['success' => $result !== false]);
 }
 
 function handle_change_password(): void {

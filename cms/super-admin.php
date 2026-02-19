@@ -624,6 +624,9 @@ function format_bytes(float $bytes): string {
                             <div>
                                 <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">SMTP-lösenord</label>
                                 <input type="password" id="cfg-smtp-password" placeholder="Lämna tomt för att behålla" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                                <?php if (defined('SMTP_PASSWORD') && SMTP_PASSWORD !== ''): ?>
+                                    <span style="font-size:0.75rem;color:#15803d;margin-top:0.25rem;display:block;">Lösenord konfigurerat</span>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -638,6 +641,9 @@ function format_bytes(float $bytes): string {
                             <div>
                                 <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:#737373;">Token</label>
                                 <input type="password" id="cfg-github-token" placeholder="Lämna tomt för att behålla" style="width:100%;padding:0.5rem 0.75rem;border:1px solid #e5e5e5;border-radius:0.375rem;font-size:0.875rem;">
+                                <?php if (defined('GITHUB_TOKEN') && GITHUB_TOKEN !== ''): ?>
+                                    <span style="font-size:0.75rem;color:#15803d;margin-top:0.25rem;display:block;">Token konfigurerad (<?php echo htmlspecialchars(substr(GITHUB_TOKEN, 0, 6)); ?>***)</span>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -661,7 +667,10 @@ function format_bytes(float $bytes): string {
             <div class="sa-panel sa-panel--full">
                 <div class="sa-panel__header">
                     <h2>Felloggar</h2>
-                    <button class="sa-btn sa-btn--secondary" onclick="refreshErrorLog()">Uppdatera</button>
+                    <div style="display:flex;gap:0.5rem;">
+                        <button class="sa-btn sa-btn--secondary" onclick="refreshErrorLog()">Uppdatera</button>
+                        <button class="sa-btn sa-btn--danger" onclick="clearErrorLog()" id="btn-clear-log">Rensa</button>
+                    </div>
                 </div>
                 <div class="sa-panel__body">
                     <?php if (!empty($errorLog)): ?>
@@ -867,6 +876,27 @@ function format_bytes(float $bytes): string {
         }).catch(function() {
             setLoading('btn-smtp-test', false);
             showToast('Nätverksfel');
+        });
+    }
+
+    function clearErrorLog() {
+        if (!confirm('Vill du rensa alla felloggar?')) return;
+        setLoading('btn-clear-log', true);
+        apiRequest('clear-error-log', 'POST').then(function(data) {
+            setLoading('btn-clear-log', false);
+            if (data.success) {
+                var el = document.getElementById('error-log-content');
+                el.className = '';
+                el.style.fontSize = '0.875rem';
+                el.style.color = '#a3a3a3';
+                el.textContent = 'Inga felloggar hittades.';
+                showToast('Felloggar rensade!', 3000, 'success');
+            } else {
+                showToast('Fel: ' + (data.error || 'Kunde inte rensa'), 4000, 'error');
+            }
+        }).catch(function() {
+            setLoading('btn-clear-log', false);
+            showToast('Nätverksfel', 4000, 'error');
         });
     }
 
