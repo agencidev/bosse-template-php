@@ -398,7 +398,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <div class="login-container">
         <div class="logo-container">
-            <img src="/assets/images/cms/agenci-logo-light.png" alt="Agenci" class="logo">
+            <img src="/assets/images/cms/peys-logo-light.png" alt="PEYS" class="logo">
         </div>
 
         <?php if ($resetMode === 'reset' && isset($tokenValid) && $tokenValid): ?>
