@@ -26,6 +26,7 @@ const UPDATABLE_FILES = [
     'assets/css/reset.css', 'assets/css/cms.css',
     'assets/js/cms.js',
     '.windsurfrules',
+    'bosse-health.php',
 ];
 
 // Wildcard-matchade uppdateringsbara mappar
@@ -733,6 +734,16 @@ function auto_apply_from_state(array $state): bool {
 
         log_update_event('success', $state['latest_version'] ?? '?',
             count($result['updated_files']) . ' filer uppdaterade');
+
+        // Logga GitHub push-resultat
+        $ghPush = $result['github_push'] ?? null;
+        if ($ghPush) {
+            if ($ghPush['success']) {
+                log_update_event('github_push', $state['latest_version'] ?? '?', $ghPush['message'] ?? 'OK');
+            } else {
+                log_update_event('github_push_error', $state['latest_version'] ?? '?', $ghPush['message'] ?? 'Okänt fel');
+            }
+        }
 
         // Städa gamla backups och tmp-filer
         cleanup_old_data();
