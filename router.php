@@ -42,6 +42,7 @@ $routes = [
     '/setup' => '/setup.php',
     '/super-admin' => '/cms/super-admin.php',
     '/api/super' => '/cms/api-super.php',
+    '/bosse-health' => '/bosse-health.php',
     '/projekt' => '/pages/projekt.php',
 ];
 

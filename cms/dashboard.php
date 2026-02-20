@@ -79,16 +79,16 @@ if (file_exists($updateLogFile)) {
             min-height: 100vh;
         }
         .container {
-            max-width: 36rem;
+            max-width: 40rem;
             margin: 0 auto;
-            padding: 4rem 1.5rem;
+            padding: 5rem 1.5rem;
         }
         .header {
             text-align: center;
             margin-bottom: 2.5rem;
         }
         .title {
-            font-size: 2.25rem;
+            font-size: 2rem;
             font-weight: bold;
             color: rgba(255,255,255,1.0);
             margin-bottom: 0.75rem;
@@ -119,8 +119,8 @@ if (file_exists($updateLogFile)) {
             background-color: rgba(255,255,255,0.08);
         }
         .icon {
-            width: 2.5rem;
-            height: 2.5rem;
+            width: 2.75rem;
+            height: 2.75rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -136,7 +136,7 @@ if (file_exists($updateLogFile)) {
             height: 1.75rem;
         }
         .label {
-            font-size: 0.875rem;
+            font-size: 0.9375rem;
             font-weight: 600;
             color: rgba(255,255,255,0.65);
         }
@@ -171,6 +171,159 @@ if (file_exists($updateLogFile)) {
         }
         .logout button:hover {
             color: rgba(255,255,255,0.65);
+        }
+        /* Traffic overview */
+        .traffic-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.10);
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: rgba(255,255,255,1.0);
+        }
+        .section-period {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.05);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .traffic-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .traffic-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 1rem;
+            padding: 1rem;
+        }
+        .traffic-label {
+            font-size: 0.6875rem;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 0.375rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        .traffic-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1.2;
+        }
+        .traffic-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+        .traffic-change.up { color: #34d399; }
+        .traffic-change.down { color: #f87171; }
+        .chart-container {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .chart-title {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+        }
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.375rem;
+            height: 5rem;
+        }
+        .chart-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.375rem;
+        }
+        .chart-bar {
+            width: 100%;
+            border-radius: 0.25rem 0.25rem 0 0;
+            background: linear-gradient(to top, #379b83, rgba(55,155,131,0.3));
+            transition: height 0.5s ease;
+        }
+        .chart-day {
+            font-size: 0.625rem;
+            color: rgba(255,255,255,0.35);
+        }
+        .pages-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+        .pages-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 1rem;
+            padding: 1rem;
+        }
+        .pages-title {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 0.75rem;
+        }
+        .pages-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .pages-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .pages-name {
+            font-size: 0.8125rem;
+            color: rgba(255,255,255,0.65);
+        }
+        .pages-count {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+        }
+        .pages-bar-wrap {
+            flex: 1;
+            height: 4px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 9999px;
+            margin: 0 0.75rem;
+        }
+        .pages-bar-fill {
+            height: 100%;
+            border-radius: 9999px;
+            background: #379b83;
+        }
+        @media (max-width: 640px) {
+            .traffic-grid { grid-template-columns: repeat(2, 1fr); }
+            .pages-grid { grid-template-columns: 1fr; }
         }
         .stats-section {
             margin-top: 2rem;
@@ -344,6 +497,109 @@ if (file_exists($updateLogFile)) {
             <?php endif; ?>
         </div>
 
+        <!-- Trafik -->
+        <div class="traffic-section">
+            <div class="section-header">
+                <h2 class="section-title">Trafik</h2>
+                <span class="section-period">Senaste 30 dagarna</span>
+            </div>
+
+            <div class="traffic-grid">
+                <div class="traffic-card">
+                    <div class="traffic-label">Besökare</div>
+                    <div class="traffic-value">1 247</div>
+                    <div class="traffic-change up">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+                        +14.5%
+                    </div>
+                </div>
+                <div class="traffic-card">
+                    <div class="traffic-label">Kontaktförfrågningar</div>
+                    <div class="traffic-value">18</div>
+                    <div class="traffic-change up">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+                        +5 st
+                    </div>
+                </div>
+                <div class="traffic-card">
+                    <div class="traffic-label">Google-klick</div>
+                    <div class="traffic-value">724</div>
+                    <div class="traffic-change up">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+                        +22.3%
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <span class="chart-title">Besökare per dag</span>
+                </div>
+                <div class="chart-bars">
+                    <div class="chart-col"><div class="chart-bar" style="height:68%"></div><span class="chart-day">Mån</span></div>
+                    <div class="chart-col"><div class="chart-bar" style="height:72%"></div><span class="chart-day">Tis</span></div>
+                    <div class="chart-col"><div class="chart-bar" style="height:85%"></div><span class="chart-day">Ons</span></div>
+                    <div class="chart-col"><div class="chart-bar" style="height:60%"></div><span class="chart-day">Tor</span></div>
+                    <div class="chart-col"><div class="chart-bar" style="height:100%"></div><span class="chart-day">Fre</span></div>
+                    <div class="chart-col"><div class="chart-bar" style="height:48%"></div><span class="chart-day">Lör</span></div>
+                    <div class="chart-col"><div class="chart-bar" style="height:35%"></div><span class="chart-day">Sön</span></div>
+                </div>
+            </div>
+
+            <div class="pages-grid">
+                <div class="pages-card">
+                    <div class="pages-title">Populära sidor</div>
+                    <div class="pages-list">
+                        <div class="pages-row">
+                            <span class="pages-name">/</span>
+                            <div class="pages-bar-wrap"><div class="pages-bar-fill" style="width:100%"></div></div>
+                            <span class="pages-count">1 204</span>
+                        </div>
+                        <div class="pages-row">
+                            <span class="pages-name">/kontakt</span>
+                            <div class="pages-bar-wrap"><div class="pages-bar-fill" style="width:42%"></div></div>
+                            <span class="pages-count">508</span>
+                        </div>
+                        <div class="pages-row">
+                            <span class="pages-name">/projekt</span>
+                            <div class="pages-bar-wrap"><div class="pages-bar-fill" style="width:28%"></div></div>
+                            <span class="pages-count">341</span>
+                        </div>
+                        <div class="pages-row">
+                            <span class="pages-name">/om-oss</span>
+                            <div class="pages-bar-wrap"><div class="pages-bar-fill" style="width:15%"></div></div>
+                            <span class="pages-count">184</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="pages-card">
+                    <div class="pages-title">Trafikkällor</div>
+                    <div class="pages-list">
+                        <div class="pages-row">
+                            <span class="pages-name">Google</span>
+                            <div class="pages-bar-wrap"><div class="pages-bar-fill" style="width:100%"></div></div>
+                            <span class="pages-count">58%</span>
+                        </div>
+                        <div class="pages-row">
+                            <span class="pages-name">Direkt</span>
+                            <div class="pages-bar-wrap"><div class="pages-bar-fill" style="width:40%"></div></div>
+                            <span class="pages-count">23%</span>
+                        </div>
+                        <div class="pages-row">
+                            <span class="pages-name">Sociala medier</span>
+                            <div class="pages-bar-wrap"><div class="pages-bar-fill" style="width:22%"></div></div>
+                            <span class="pages-count">13%</span>
+                        </div>
+                        <div class="pages-row">
+                            <span class="pages-name">Övriga</span>
+                            <div class="pages-bar-wrap"><div class="pages-bar-fill" style="width:10%"></div></div>
+                            <span class="pages-count">6%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Systemstatus -->
         <div class="stats-section">
             <h2 class="stats-title">Systemstatus</h2>
@@ -355,14 +611,6 @@ if (file_exists($updateLogFile)) {
                 <div class="stat-card">
                     <div class="stat-label">Bosse-version</div>
                     <div class="stat-value"><?php echo htmlspecialchars(BOSSE_VERSION); ?></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Inlägg</div>
-                    <div class="stat-value"><?php echo $projectCount; ?></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Publicerade</div>
-                    <div class="stat-value"><?php echo $publishedCount; ?></div>
                 </div>
             </div>
 

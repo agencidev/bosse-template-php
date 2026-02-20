@@ -10,10 +10,10 @@ if (!is_logged_in()) {
 
 // Check if we're on frontend (not in CMS/dashboard)
 $uri = $_SERVER['REQUEST_URI'];
-$is_cms = preg_match('#^/(cms/|dashboard|admin)#', $uri);
+$is_cms = preg_match('#^/(cms/|dashboard|admin|super-admin|seo|support|ai|projects|setup|api/|settings)#', $uri);
 $is_frontend = !$is_cms;
 ?>
-<div class="admin-bar admin-bar--dark">
+<div class="admin-bar">
     <div class="admin-bar__container">
         <div class="admin-bar__left">
             <a href="/dashboard" class="admin-bar__logo">
@@ -24,18 +24,23 @@ $is_frontend = !$is_cms;
             <?php endif; ?>
             <?php if ($is_frontend): ?>
                 <div class="admin-bar__divider"></div>
-                <button id="toggle-edit-mode" class="admin-bar__button admin-bar__button--edit">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>Aktivera redigering
+                <button id="toggle-edit-mode" class="admin-bar__btn-edit">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                    <span>Aktivera redigering</span>
                 </button>
             <?php endif; ?>
         </div>
 
         <div class="admin-bar__right">
-            <a href="/dashboard" class="admin-bar__button">Dashboard</a>
-            <form method="get" action="/cms/admin.php" style="display: inline; margin: 0;">
+            <a href="/dashboard" class="admin-bar__nav-link">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                <span>Dashboard</span>
+            </a>
+            <form method="get" action="/cms/admin.php" style="display:inline;margin:0;">
                 <input type="hidden" name="action" value="logout">
-                <button type="submit" class="admin-bar__button" style="background: none; border: none; font: inherit; cursor: pointer; padding: 0.5rem 1rem; border-radius: 9999px; background-color: rgba(255, 255, 255, 0.1); color: white; font-size: 0.875rem; font-weight: 600;">
-                    Logga ut
+                <button type="submit" class="admin-bar__nav-link admin-bar__nav-link--logout">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                    <span>Logga ut</span>
                 </button>
             </form>
         </div>
@@ -49,12 +54,13 @@ $is_frontend = !$is_cms;
     left: 0;
     right: 0;
     z-index: 10000;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    height: 3rem;
-    /* CMS-isolering: ignorera brand guide-variabler */
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    height: 3.5rem;
+    background: #033234;
+    color: white;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     font-size: 0.875rem;
     line-height: 1.5;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
 .admin-bar *,
@@ -63,36 +69,27 @@ $is_frontend = !$is_cms;
     font-family: inherit !important;
 }
 
-.admin-bar--dark {
-    background-color: #033234;
-    color: white;
-}
-
 .admin-bar__container {
     width: 100%;
     max-width: 1400px;
     margin: 0 auto;
     padding: 0 1.5rem;
-    display: grid;
-    grid-template-columns: 1fr auto;
+    display: flex;
     align-items: center;
-    gap: 2rem;
+    justify-content: space-between;
     height: 100%;
 }
 
 .admin-bar__left {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    width: 100%;
-    max-width: 450px;
+    gap: 0.75rem;
 }
 
 .admin-bar__right {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    justify-self: end;
+    gap: 0.25rem;
 }
 
 .admin-bar__logo {
@@ -106,33 +103,86 @@ $is_frontend = !$is_cms;
 }
 
 .admin-bar__logo-img {
-    height: 1.25rem;
+    height: 1.625rem;
     width: auto;
 }
 
 .admin-bar__divider {
     width: 1px;
-    height: 1.5rem;
-    background-color: rgba(255, 255, 255, 0.2);
+    height: 1.25rem;
+    background: rgba(255,255,255,0.15);
 }
 
-.admin-bar__button {
-    padding: 0.5rem 1rem;
+/* Edit mode toggle button */
+.admin-bar__btn-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.875rem;
     border-radius: 9999px;
     font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
-    border: none;
-    text-decoration: none;
-    display: inline-block;
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: transparent;
+    color: rgba(255,255,255,0.8);
     white-space: nowrap;
+    transition: all 0.2s;
+    line-height: 1;
 }
 
-.admin-bar__button--edit.active {
+.admin-bar__btn-edit:hover {
+    background: rgba(255,255,255,0.08);
+    color: white;
+    border-color: rgba(255,255,255,0.25);
+}
+
+.admin-bar__btn-edit.active {
     background: #379b83;
     color: white;
+    border-color: #379b83;
+}
+
+.admin-bar__btn-edit.active:hover {
+    background: #2e8570;
+    border-color: #2e8570;
+}
+
+.admin-bar__btn-edit svg {
+    flex-shrink: 0;
+}
+
+/* Navigation links (Dashboard, Logga ut) */
+.admin-bar__nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.55);
+    white-space: nowrap;
+    transition: all 0.15s;
+    text-decoration: none;
+    line-height: 1;
+}
+
+.admin-bar__nav-link:hover {
+    color: white;
+    background: rgba(255,255,255,0.08);
+}
+
+.admin-bar__nav-link svg {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.admin-bar__nav-link:hover svg {
+    opacity: 1;
 }
 
 .admin-bar__sa-badge {
@@ -144,7 +194,7 @@ $is_frontend = !$is_cms;
 }
 
 body.has-admin-bar {
-    padding-top: 3rem;
+    padding-top: 3.5rem;
 }
 </style>
 
@@ -160,17 +210,17 @@ const toggleBtn = document.getElementById('toggle-edit-mode');
 if (toggleBtn) {
     toggleBtn.addEventListener('click', function() {
         window.CMS.isEditMode = !window.CMS.isEditMode;
-        
+
         if (window.CMS.isEditMode) {
             toggleBtn.classList.add('active');
-            toggleBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><polyline points="20 6 9 17 4 12"/></svg>Avsluta redigering';
+            toggleBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Avsluta redigering</span>';
             document.body.classList.add('cms-edit-mode');
         } else {
             toggleBtn.classList.remove('active');
-            toggleBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>Aktivera redigering';
+            toggleBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg><span>Aktivera redigering</span>';
             document.body.classList.remove('cms-edit-mode');
         }
-        
+
         window.dispatchEvent(new CustomEvent('cms-edit-mode-changed', { detail: { isEditMode: window.CMS.isEditMode } }));
     });
 }

@@ -26,107 +26,55 @@ if (!is_logged_in()) {
             font-family: 'DM Sans', sans-serif;
             background-color: #033234;
             min-height: 100vh;
-            color: rgba(255,255,255,1.0);
+            color: white;
         }
-        .page-content {
-            padding: 3rem 1.5rem;
-        }
-        .container {
-            max-width: 48rem;
-            margin: 0 auto;
-        }
-        .back-link {
-            display: inline-block;
-            color: rgba(255,255,255,0.50);
-            text-decoration: none;
-            font-size: 0.875rem;
-            margin-bottom: 1.5rem;
-            transition: color 0.2s;
-        }
-        .back-link:hover {
-            color: rgba(255,255,255,1.0);
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-        .title {
-            font-size: 2rem;
-            font-weight: bold;
-            color: rgba(255,255,255,1.0);
-        }
-        .status-badge {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            border-radius: 9999px;
-            padding: 0.5rem 1rem;
-        }
-        .status-dot {
-            width: 0.5rem;
-            height: 0.5rem;
-            background: #22c55e;
-            border-radius: 50%;
-        }
-        .status-text {
-            color: #166534;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-        .chat-card {
-            background: linear-gradient(to bottom, rgba(255,255,255,0.03), rgba(255,255,255,0.05));
-            border-radius: 1.5rem;
-            border: 1px solid rgba(255,255,255,0.10);
-            overflow: hidden;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-            margin-bottom: 1.5rem;
-        }
-        .chat-messages {
-            height: 500px;
-            overflow-y: auto;
-            padding: 2rem;
+        .chat-page {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            height: calc(100vh - 3.5rem);
+            max-width: 52rem;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2.5rem 0 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
         .message {
             display: flex;
+            align-items: flex-start;
+            gap: 1rem;
         }
-        .message-user {
-            justify-content: flex-end;
-        }
-        .message-assistant {
-            justify-content: flex-start;
+        .message-avatar {
+            flex-shrink: 0;
+            color: rgba(255,255,255,0.7);
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 2.25rem;
+            line-height: 1;
+            padding-top: 0.25rem;
+            user-select: none;
         }
         .message-bubble {
-            max-width: 75%;
-            padding: 1rem 1.25rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        }
-        .message-user .message-bubble {
-            background: #379b83;
+            padding: 1.125rem 1.5rem;
+            border-radius: 1.125rem;
+            background: rgba(55,155,131,0.18);
+            border: 1px solid rgba(55,155,131,0.12);
             color: white;
-            border-bottom-right-radius: 0.25rem;
-        }
-        .message-assistant .message-bubble {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.10);
-            color: rgba(255,255,255,1.0);
-            border-bottom-left-radius: 0.25rem;
         }
         .message-text {
-            font-size: 0.875rem;
-            line-height: 1.6;
+            font-size: 1.125rem;
+            line-height: 1.55;
+            font-weight: 500;
         }
         .typing-indicator {
             display: flex;
             gap: 0.375rem;
-            padding: 1rem 1.25rem;
+            padding: 1.125rem 1.5rem;
         }
         .typing-dot {
             width: 0.5rem;
@@ -141,208 +89,93 @@ if (!is_logged_in()) {
             0%, 80%, 100% { transform: scale(0); }
             40% { transform: scale(1); }
         }
-        .chat-input-wrapper {
-            border-top: 1px solid rgba(255,255,255,0.10);
-            background: rgba(255,255,255,0.05);
-            padding: 1.5rem;
+        .chat-input-area {
+            padding: 1rem 0 1.5rem;
         }
         .chat-input-container {
             position: relative;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
         .chat-input {
             width: 100%;
-            padding: 1rem 6rem 1rem 1.25rem;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.10);
-            border-radius: 9999px;
-            font-size: 0.875rem;
+            padding: 1.125rem 3.75rem 1.125rem 1.5rem;
+            background: rgba(55,155,131,0.12);
+            border: 1px solid rgba(55,155,131,0.20);
+            border-radius: 1rem;
+            font-size: 1.0625rem;
             font-family: inherit;
             outline: none;
             transition: all 0.2s;
             color: white;
         }
-        .chat-input:focus {
-            border-color: #379b83;
-            box-shadow: 0 0 0 3px rgba(55, 155, 131, 0.1);
+        .chat-input::placeholder {
+            color: rgba(255,255,255,0.30);
         }
-        .chat-input-actions {
+        .chat-input:focus {
+            border-color: rgba(55,155,131,0.45);
+            background: rgba(55,155,131,0.15);
+        }
+        .send-btn {
             position: absolute;
-            right: 0.5rem;
+            right: 0.75rem;
             top: 50%;
             transform: translateY(-50%);
-            display: flex;
-            gap: 0.5rem;
-        }
-        .icon-button {
-            padding: 0.5rem;
-            background: none;
-            border: none;
-            color: rgba(255,255,255,0.50);
-            cursor: pointer;
+            width: 2.5rem;
+            height: 2.5rem;
             border-radius: 9999px;
-            transition: all 0.2s;
-        }
-        .icon-button:hover {
-            background: rgba(255,255,255,0.08);
-            color: rgba(255,255,255,1.0);
-        }
-        .icon-button svg {
-            width: 1.25rem;
-            height: 1.25rem;
-        }
-        .quick-actions {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-        .quick-action {
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.45);
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.10);
-            border-radius: 9999px;
-            font-size: 0.875rem;
-            color: rgba(255,255,255,0.50);
-            cursor: pointer;
+            justify-content: center;
             transition: all 0.2s;
         }
-        .quick-action:hover {
-            background: rgba(255,255,255,0.08);
+        .send-btn:hover {
+            background: rgba(55,155,131,0.25);
+            color: white;
+            border-color: rgba(55,155,131,0.4);
         }
-        .quick-action svg {
-            width: 1rem;
-            height: 1rem;
+        .send-btn svg {
+            width: 1.125rem;
+            height: 1.125rem;
         }
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .info-card {
-            background: rgba(255,255,255,0.05);
-            border-radius: 1rem;
-            border: 1px solid rgba(255,255,255,0.10);
-            padding: 1rem;
-        }
-        .info-card-label {
+        .input-hint {
             font-size: 0.75rem;
-            color: rgba(255,255,255,0.50);
-            margin-bottom: 0.25rem;
-        }
-        .info-card-value {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: rgba(255,255,255,1.0);
-        }
-        .info-card-status {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .info-text {
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.50);
-            text-align: center;
-            line-height: 1.6;
-        }
-        @media (max-width: 768px) {
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
+            color: rgba(255,255,255,0.25);
+            padding-left: 0.25rem;
         }
     </style>
 </head>
 <body>
     <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
-    <div class="page-content">
-    <div class="container">
-        <a href="/dashboard" class="back-link">← Tillbaka</a>
-        
-        <div class="header">
-            <h1 class="title">AI-assistent</h1>
-            <div class="status-badge">
-                <div class="status-dot"></div>
-                <span class="status-text">Aktiv</span>
-            </div>
-        </div>
-
-        <div class="chat-card">
-            <div class="chat-messages" id="chatMessages">
-                <div class="message message-assistant">
-                    <div class="message-bubble">
-                        <p class="message-text">Hej! Jag är här för att hjälpa dig förstå din webb bättre. Ställ gärna frågor om webbens innehåll, struktur eller status så svarar jag utifrån vad jag vet.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="chat-input-wrapper">
-                <div class="chat-input-container">
-                    <input 
-                        type="text" 
-                        class="chat-input" 
-                        id="chatInput"
-                        placeholder="Fråga mig vad som helst..."
-                    >
-                    <div class="chat-input-actions">
-                        <button class="icon-button" type="button" id="sendButton" title="Skicka">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="quick-actions">
-                    <button class="quick-action" onclick="setQuestion('Hur ser webbens struktur ut?')">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        Översikt
-                    </button>
-                    <button class="quick-action" onclick="setQuestion('Vad kan förbättras på webben?')">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
-                        Förbättringar
-                    </button>
-                    <button class="quick-action" onclick="setQuestion('Hur är webbens prestanda?')">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        Prestanda
-                    </button>
+    <div class="chat-page">
+        <div class="chat-messages" id="chatMessages">
+            <div class="message">
+                <div class="message-avatar">p</div>
+                <div class="message-bubble">
+                    <p class="message-text">Hej! Jag hjälper dig förstå din webb bättre. Ställ gärna frågor om innehåll, struktur eller status.</p>
                 </div>
             </div>
         </div>
 
-        <div class="info-grid">
-            <div class="info-card">
-                <div class="info-card-label">Status</div>
-                <div class="info-card-status">
-                    <div class="status-dot"></div>
-                    <span class="info-card-value">Aktiv</span>
-                </div>
+        <div class="chat-input-area">
+            <div class="chat-input-container">
+                <input
+                    type="text"
+                    class="chat-input"
+                    id="chatInput"
+                    placeholder="Fråga mig vad som helst..."
+                >
+                <button class="send-btn" type="button" id="sendButton" title="Skicka">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                    </svg>
+                </button>
             </div>
-
-            <div class="info-card">
-                <div class="info-card-label">Senaste analys</div>
-                <span class="info-card-value">13 januari 2026</span>
-            </div>
-
-            <div class="info-card">
-                <div class="info-card-label">Övervakar</div>
-                <span class="info-card-value">Innehåll, struktur, status</span>
-            </div>
+            <div class="input-hint">Enter = skicka</div>
         </div>
-
-        <p class="info-text">
-            AI-assistenten ger svar baserat på webbens aktuella status. Förbättringar hanteras alltid av teamet.
-        </p>
-    </div>
     </div>
 
     <script>
@@ -368,8 +201,8 @@ if (!is_logged_in()) {
         function addMessage(text, isUser) {
             const messagesDiv = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message message-${isUser ? 'user' : 'assistant'}`;
-            messageDiv.innerHTML = `<div class="message-bubble"><p class="message-text">${text}</p></div>`;
+            messageDiv.className = 'message';
+            messageDiv.innerHTML = `<div class="message-avatar">p</div><div class="message-bubble"><p class="message-text">${text}</p></div>`;
             messagesDiv.appendChild(messageDiv);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
@@ -377,9 +210,9 @@ if (!is_logged_in()) {
         function showTyping() {
             const messagesDiv = document.getElementById('chatMessages');
             const typingDiv = document.createElement('div');
-            typingDiv.className = 'message message-assistant';
+            typingDiv.className = 'message';
             typingDiv.id = 'typing';
-            typingDiv.innerHTML = `<div class="message-bubble typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+            typingDiv.innerHTML = '<div class="message-avatar">p</div><div class="message-bubble typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
             messagesDiv.appendChild(typingDiv);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
@@ -403,10 +236,6 @@ if (!is_logged_in()) {
                 const response = getResponse(message);
                 addMessage(response, false);
             }, 1000 + Math.random() * 1000);
-        }
-
-        function setQuestion(question) {
-            document.getElementById('chatInput').value = question;
         }
 
         document.getElementById('sendButton').addEventListener('click', sendMessage);

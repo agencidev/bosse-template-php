@@ -421,7 +421,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             }
                         }
                         // Inkludera CSS-filer och andra setup-genererade filer
-                        foreach (['assets/css/variables.css', 'assets/css/overrides.css', 'assets/css/main.css', 'assets/css/components.css', 'includes/header.php', 'includes/footer.php', 'includes/fonts.php', '.installed'] as $f) {
+                        foreach (['assets/css/variables.css', 'assets/css/overrides.css', 'assets/css/main.css', 'assets/css/components.css', 'includes/header.php', 'includes/footer.php', 'includes/fonts.php', '.installed', '.site-url'] as $f) {
                             if (file_exists(__DIR__ . '/' . $f)) {
                                 $brandFiles[] = $f;
                             }
@@ -718,6 +718,9 @@ function generateAllFiles(array $data): array {
     // 6a. .installed marker (committas till git — triggar config-only mode vid re-klon)
     file_put_contents(__DIR__ . '/.installed', 'installed');
 
+    // 6b. .site-url (committas till git — används av portalen för att visa domän)
+    file_put_contents(__DIR__ . '/.site-url', rtrim($data['site_url'], '/'));
+
     // 6b. data/projects.json (tom array om den inte finns)
     $projectsFile = $dataDir . '/projects.json';
     if (!file_exists($projectsFile)) {
@@ -977,6 +980,9 @@ function generateConfigOnly(array $data): array {
     if (file_put_contents(__DIR__ . '/config.php', $configContent) === false) {
         $errors[] = 'Kunde inte skriva config.php';
     }
+
+    // .site-url (committas till git — används av portalen för att visa domän)
+    file_put_contents(__DIR__ . '/.site-url', rtrim($siteUrl, '/'));
 
     return $errors;
 }

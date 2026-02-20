@@ -37,6 +37,9 @@ RewriteRule ^super-admin/?$ cms/super-admin.php [L]
 # /api/super -> /cms/api-super.php
 RewriteRule ^api/super/?$ cms/api-super.php [QSA,L]
 
+# /bosse-health -> /bosse-health.php
+RewriteRule ^bosse-health/?$ bosse-health.php [L]
+
 # /kontakt -> /pages/kontakt.php
 RewriteRule ^kontakt/?$ pages/kontakt.php [L]
 

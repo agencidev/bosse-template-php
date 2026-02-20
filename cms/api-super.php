@@ -380,6 +380,11 @@ function handle_save_config(): void {
         return;
     }
 
+    // Sync .site-url if SITE_URL changed (used by Bosse Portal)
+    if (!empty($input['site_url'])) {
+        @file_put_contents(ROOT_PATH . '/.site-url', rtrim($input['site_url'], '/'));
+    }
+
     echo json_encode(['success' => true]);
 }
 

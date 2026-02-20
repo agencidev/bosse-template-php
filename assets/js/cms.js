@@ -71,131 +71,142 @@ function setupEditableText(element) {
   function startEditing() {
     isEditing = true;
     originalValue = element.textContent.trim();
-    
-    const isMultiline = tag === 'p' || tag === 'div' || tag === 'textarea';
-    
-    // Save element width before hiding
-    const savedWidth = element.offsetWidth;
 
-    // Create wrapper
+    const isMultiline = tag === 'p' || tag === 'div' || tag === 'textarea';
+
+    // Save element width before hiding
+    const savedWidth = Math.max(element.offsetWidth, 280);
+
+    // Create wrapper — all inline styles (no Tailwind dependency)
     const wrapper = document.createElement('div');
-    wrapper.className = 'relative';
-    wrapper.style.width = savedWidth + 'px';
-    wrapper.style.maxWidth = '100%';
-    wrapper.style.borderRadius = '1rem';
-    wrapper.style.overflow = 'hidden';
-    wrapper.style.boxShadow = '0 10px 25px rgba(0,0,0,0.25)';
-    
-    // Create input element
-    const inputElement = isMultiline 
+    Object.assign(wrapper.style, {
+      position: 'relative',
+      width: savedWidth + 'px',
+      maxWidth: '100%',
+      borderRadius: '1rem',
+      overflow: 'hidden',
+      border: '1px solid #e5e7eb',
+      zIndex: '1000'
+    });
+
+    // Buttons container (top bar)
+    const buttonsDiv = document.createElement('div');
+    Object.assign(buttonsDiv.style, {
+      display: 'flex',
+      gap: '0.5rem',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      padding: '0.5rem 0.75rem',
+      background: '#054547',
+      borderBottom: '1px solid rgba(255,255,255,0.08)'
+    });
+
+    // Save button — PEYS green pill
+    const saveBtn = document.createElement('button');
+    saveBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polyline points="20 6 9 17 4 12"/></svg>Spara';
+    Object.assign(saveBtn.style, {
+      display: 'inline-flex',
+      alignItems: 'center',
+      padding: '0.375rem 1rem',
+      background: '#379b83',
+      color: 'white',
+      fontSize: '0.8125rem',
+      fontWeight: '600',
+      fontFamily: "'DM Sans', sans-serif",
+      borderRadius: '9999px',
+      border: 'none',
+      cursor: 'pointer',
+      transition: 'background 0.15s'
+    });
+    saveBtn.onmouseenter = () => { saveBtn.style.background = '#2e8570'; };
+    saveBtn.onmouseleave = () => { saveBtn.style.background = '#379b83'; };
+    saveBtn.onclick = async function() {
+      saveBtn.disabled = true;
+      saveBtn.style.opacity = '0.6';
+      saveBtn.textContent = 'Sparar...';
+      await handleSave(inputElement.value);
+    };
+
+    // Cancel button — subtle X
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = '✕';
+    Object.assign(cancelBtn.style, {
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '1.75rem',
+      height: '1.75rem',
+      background: 'transparent',
+      color: 'rgba(255,255,255,0.5)',
+      fontSize: '1rem',
+      lineHeight: '1',
+      border: 'none',
+      borderRadius: '9999px',
+      cursor: 'pointer',
+      transition: 'all 0.15s'
+    });
+    cancelBtn.title = 'Avbryt';
+    cancelBtn.onmouseenter = () => { cancelBtn.style.background = 'rgba(255,255,255,0.1)'; cancelBtn.style.color = 'white'; };
+    cancelBtn.onmouseleave = () => { cancelBtn.style.background = 'transparent'; cancelBtn.style.color = 'rgba(255,255,255,0.5)'; };
+    cancelBtn.onclick = function() { handleCancel(); };
+
+    buttonsDiv.appendChild(cancelBtn);
+    buttonsDiv.appendChild(saveBtn);
+
+    // Input element
+    const inputElement = isMultiline
       ? document.createElement('textarea')
       : document.createElement('input');
-    
+
     if (!isMultiline) {
       inputElement.type = 'text';
     }
-    
-    inputElement.value = element.textContent.trim();
-    inputElement.className = 'rounded-b-2xl p-4 w-full resize-none font-inherit text-inherit';
-    inputElement.style.background = 'rgba(255,255,255,0.05)';
-    inputElement.style.color = 'white';
-    inputElement.style.border = '1px solid rgba(255,255,255,0.15)';
-    inputElement.style.borderTop = 'none';
-    inputElement.style.outline = 'none';
-    inputElement.style.boxShadow = 'none';
-    inputElement.style.transition = 'border-color 0.2s';
-    inputElement.style.fontSize = 'inherit';
-    inputElement.style.lineHeight = 'inherit';
-    inputElement.style.fontWeight = 'inherit';
-    inputElement.style.width = '100%';
-    inputElement.style.boxSizing = 'border-box';
-    inputElement.style.fontFamily = "'DM Sans', sans-serif";
 
-    // Focus state
-    inputElement.addEventListener('focus', function() {
-      inputElement.style.borderColor = '#379b83';
+    inputElement.value = element.textContent.trim();
+    Object.assign(inputElement.style, {
+      display: 'block',
+      width: '100%',
+      padding: '0.875rem 1rem',
+      background: 'white',
+      color: '#1a1a1a',
+      border: 'none',
+      borderTop: '1px solid #e5e7eb',
+      outline: 'none',
+      boxShadow: 'none',
+      fontSize: 'inherit',
+      lineHeight: 'inherit',
+      fontWeight: 'inherit',
+      fontFamily: "'DM Sans', sans-serif",
+      boxSizing: 'border-box',
+      resize: 'none'
     });
-    inputElement.addEventListener('blur', function() {
-      inputElement.style.borderColor = 'rgba(255,255,255,0.15)';
-    });
-    
+
     if (isMultiline) {
-      // Auto-resize textarea based on content
       inputElement.rows = 1;
       inputElement.style.minHeight = '80px';
       inputElement.style.overflow = 'hidden';
-      
-      // Function to auto-resize
       const autoResize = () => {
         inputElement.style.height = 'auto';
         inputElement.style.height = inputElement.scrollHeight + 'px';
       };
-      
-      // Initial resize
       setTimeout(autoResize, 0);
-      
-      // Resize on input
       inputElement.addEventListener('input', autoResize);
     } else {
       inputElement.style.height = '48px';
     }
-    
-    // Create buttons container (above input)
-    const buttonsDiv = document.createElement('div');
-    buttonsDiv.className = 'flex gap-2 items-center justify-end p-2 z-50';
-    buttonsDiv.style.background = '#054547';
-    buttonsDiv.style.color = 'white';
-    buttonsDiv.style.border = '1px solid rgba(255,255,255,0.10)';
-    buttonsDiv.style.borderBottom = 'none';
-    buttonsDiv.style.borderRadius = '1rem 1rem 0 0';
-    buttonsDiv.style.marginBottom = '0';
-    buttonsDiv.style.boxShadow = 'none';
-    
-    // Save button
-    const saveBtn = document.createElement('button');
-    saveBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><polyline points="20 6 9 17 4 12"/></svg>Spara';
-    saveBtn.className = 'px-4 py-2 text-white text-xs font-semibold disabled:opacity-50 transition';
-    saveBtn.style.background = '#379b83';
-    saveBtn.style.borderRadius = '9999px';
-    saveBtn.style.border = 'none';
-    saveBtn.style.cursor = 'pointer';
-    saveBtn.onclick = async function() {
-      saveBtn.disabled = true;
-      saveBtn.textContent = 'Sparar...';
-      await handleSave(inputElement.value);
-    };
-    
-    // Cancel button
-    const cancelBtn = document.createElement('button');
-    cancelBtn.textContent = '✕';
-    cancelBtn.className = 'px-3 py-2 font-semibold transition';
-    cancelBtn.style.fontSize = '18px';
-    cancelBtn.style.lineHeight = '1';
-    cancelBtn.style.backgroundColor = 'transparent';
-    cancelBtn.style.color = 'rgba(255,255,255,0.65)';
-    cancelBtn.style.border = 'none';
-    cancelBtn.style.cursor = 'pointer';
-    cancelBtn.style.borderRadius = '9999px';
-    cancelBtn.title = 'Avbryt';
-    cancelBtn.onclick = function() {
-      handleCancel();
-    };
-    
-    buttonsDiv.appendChild(cancelBtn);
-    buttonsDiv.appendChild(saveBtn);
-    
+
     wrapper.appendChild(buttonsDiv);
     wrapper.appendChild(inputElement);
-    
-    // Replace element with input
+
+    // Replace element with editor
     element.style.display = 'none';
     element.parentNode.insertBefore(wrapper, element.nextSibling);
-    
+
     inputElement.focus();
     if (!isMultiline) {
       inputElement.select();
     }
-    
+
     // Keyboard shortcuts
     inputElement.addEventListener('keydown', function(e) {
       if (e.key === 'Enter' && !isMultiline) {
