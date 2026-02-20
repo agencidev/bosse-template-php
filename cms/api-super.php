@@ -287,8 +287,8 @@ function handle_change_password(): void {
     $config = file_get_contents($configFile);
     $newHash = password_hash($newPassword, PASSWORD_BCRYPT);
     $config = preg_replace(
-        "/define\('ADMIN_PASSWORD_HASH',\s*'[^']*'\)/",
-        "define('ADMIN_PASSWORD_HASH', " . var_export($newHash, true) . ")",
+        "/define\('ADMIN_PASSWORD_HASH',\s*'[^']*'\);/",
+        "define('ADMIN_PASSWORD_HASH', " . var_export($newHash, true) . ");",
         $config
     );
 
@@ -336,24 +336,24 @@ function handle_save_config(): void {
         if (!isset($input[$inputKey])) continue;
         $newValue = $input[$inputKey];
         // Byt ut define-raden
-        $pattern = "/define\('" . preg_quote($constant, '/') . "',\s*'[^']*'\)/";
-        $replacement = "define('" . $constant . "', " . var_export($newValue, true) . ")";
+        $pattern = "/define\('" . preg_quote($constant, '/') . "',\s*'[^']*'\);/";
+        $replacement = "define('" . $constant . "', " . var_export($newValue, true) . ");";
         $config = preg_replace($pattern, $replacement, $config);
     }
 
     // Lösenordsfält — bara uppdatera om icke-tomma
     if (!empty($input['smtp_password'])) {
         $config = preg_replace(
-            "/define\('SMTP_PASSWORD',\s*'[^']*'\)/",
-            "define('SMTP_PASSWORD', " . var_export($input['smtp_password'], true) . ")",
+            "/define\('SMTP_PASSWORD',\s*'[^']*'\);/",
+            "define('SMTP_PASSWORD', " . var_export($input['smtp_password'], true) . ");",
             $config
         );
     }
 
     if (!empty($input['github_token'])) {
         $config = preg_replace(
-            "/define\('GITHUB_TOKEN',\s*'[^']*'\)/",
-            "define('GITHUB_TOKEN', " . var_export($input['github_token'], true) . ")",
+            "/define\('GITHUB_TOKEN',\s*'[^']*'\);/",
+            "define('GITHUB_TOKEN', " . var_export($input['github_token'], true) . ");",
             $config
         );
     }
