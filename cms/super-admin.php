@@ -477,6 +477,10 @@ function format_bytes(float $bytes): string {
                             <span class="sa-label" style="display: flex; align-items: center; gap: 0.5rem;">
                                 <?php if ($entry['type'] === 'success'): ?>
                                     <span class="sa-badge sa-badge--ok">OK</span>
+                                <?php elseif ($entry['type'] === 'github_push'): ?>
+                                    <span class="sa-badge sa-badge--ok">GitHub</span>
+                                <?php elseif ($entry['type'] === 'github_push_error'): ?>
+                                    <span class="sa-badge sa-badge--error">GitHub</span>
                                 <?php elseif ($entry['type'] === 'error'): ?>
                                     <span class="sa-badge sa-badge--error">Fel</span>
                                 <?php else: ?>
