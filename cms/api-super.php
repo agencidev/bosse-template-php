@@ -325,7 +325,6 @@ function handle_save_config(): void {
         'contact_phone' => 'CONTACT_PHONE',
         'admin_username' => 'ADMIN_USERNAME',
         'smtp_host' => 'SMTP_HOST',
-        'smtp_port' => 'SMTP_PORT',
         'smtp_encryption' => 'SMTP_ENCRYPTION',
         'smtp_username' => 'SMTP_USERNAME',
         'github_repo' => 'GITHUB_REPO',
@@ -339,6 +338,12 @@ function handle_save_config(): void {
         $pattern = "/define\('" . preg_quote($constant, '/') . "',\s*'[^']*'\);/";
         $replacement = "define('" . $constant . "', " . var_export($newValue, true) . ");";
         $config = preg_replace($pattern, $replacement, $config);
+    }
+
+    // SMTP_PORT — sparas som heltal, inte sträng
+    if (isset($input['smtp_port'])) {
+        $smtpPort = (int)$input['smtp_port'];
+        $config = preg_replace("/define\('SMTP_PORT',\s*\d+\);/", "define('SMTP_PORT', " . $smtpPort . ");", $config);
     }
 
     // Lösenordsfält — bara uppdatera om icke-tomma
