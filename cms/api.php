@@ -143,6 +143,8 @@ function handleUpload() {
 
     // Flytta fil
     if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
+        // Optimera bild (resize + komprimering + WebP)
+        $optResult = optimize_image($upload_path);
         $url = '/uploads/' . $filename;
 
         // Spara URL + bilddimensioner i en atomisk skrivning
@@ -154,7 +156,7 @@ function handleUpload() {
         }
         save_content_bulk($updates);
 
-        echo json_encode(['success' => true, 'url' => $url]);
+        echo json_encode(['success' => true, 'url' => $url, 'optimized' => $optResult['optimized'] ?? false]);
     } else {
         http_response_code(500);
         echo json_encode(['success' => false, 'error' => 'Failed to upload file']);
