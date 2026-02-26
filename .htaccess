@@ -86,9 +86,9 @@ RewriteRule . /index.php [L]
         Header set Pragma "no-cache"
     </FilesMatch>
 
-    # CSS & JS – lång cache (versionerade med ?v=VERSION)
+    # CSS & JS – cache med revalidering (immutable bryter @import-filer utan ?v=)
     <FilesMatch "\.(css|js)$">
-        Header set Cache-Control "public, max-age=2592000, immutable"
+        Header set Cache-Control "public, max-age=86400, must-revalidate"
     </FilesMatch>
 
     # Bilder – 30 dagars cache
