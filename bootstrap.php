@@ -61,6 +61,10 @@ header('Vary: Cookie');
 if (file_exists(__DIR__ . '/security/csp.php')) {
     require_once __DIR__ . '/security/csp.php';
     send_csp_header();
+} else {
+    // Fallback when csp.php not yet deployed — return empty strings so calls don't fatal
+    function csp_nonce(): string { return ''; }
+    function csp_nonce_attr(): string { return ''; }
 }
 
 // Ladda super admin (efter session start)
