@@ -11,7 +11,7 @@ function organizationSchema($name = null, $logo = null, $description = null) {
     $name = $name ?? SITE_NAME;
     $logo = $logo ?? SITE_URL . '/assets/images/logo.png';
     $description = $description ?? SITE_DESCRIPTION;
-    
+
     $schema = [
         "@context" => "https://schema.org",
         "@type" => "Organization",
@@ -34,7 +34,7 @@ function organizationSchema($name = null, $logo = null, $description = null) {
     if (!empty($sameAs)) {
         $schema['sameAs'] = $sameAs;
     }
-    
+
     echo '<script type="application/ld+json" ' . csp_nonce_attr() . '>';
     echo json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     echo '</script>';
@@ -55,7 +55,7 @@ function websiteSchema() {
             "query-input" => "required name=search_term_string"
         ]
     ];
-    
+
     echo '<script type="application/ld+json" ' . csp_nonce_attr() . '>';
     echo json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     echo '</script>';
@@ -79,7 +79,7 @@ function localBusinessSchema($businessType = 'LocalBusiness', $address = [], $ge
             "addressCountry" => "SE"
         ]
     ];
-    
+
     if (!empty($geo)) {
         $schema["geo"] = [
             "@type" => "GeoCoordinates",
@@ -118,7 +118,7 @@ function localBusinessSchema($businessType = 'LocalBusiness', $address = [], $ge
     if (!empty($sameAs)) {
         $schema['sameAs'] = $sameAs;
     }
-    
+
     echo '<script type="application/ld+json" ' . csp_nonce_attr() . '>';
     echo json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     echo '</script>';
@@ -130,7 +130,7 @@ function localBusinessSchema($businessType = 'LocalBusiness', $address = [], $ge
 function articleSchema($title, $description, $image, $datePublished, $dateModified = null, $author = null) {
     $author = $author ?? SITE_NAME;
     $dateModified = $dateModified ?? $datePublished;
-    
+
     $schema = [
         "@context" => "https://schema.org",
         "@type" => "Article",
@@ -152,8 +152,17 @@ function articleSchema($title, $description, $image, $datePublished, $dateModifi
             ]
         ]
     ];
-    
+
     echo '<script type="application/ld+json" ' . csp_nonce_attr() . '>';
     echo json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     echo '</script>';
+}
+
+/**
+ * Output Default Schemas
+ * Outputs both organization and website schemas
+ */
+function outputDefaultSchemas() {
+    organizationSchema();
+    websiteSchema();
 }
