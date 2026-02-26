@@ -60,7 +60,6 @@ RewriteRule ^projekt/?$ pages/projekt.php [L]
 RewriteRule ^projekt/([a-z0-9-]+)/?$ pages/projekt-single.php?slug=$1 [QSA,L]
 
 # Ta bort .php — kolla pages/ först, sedan rot
-RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{DOCUMENT_ROOT}/pages/$1.php -f
 RewriteRule ^(.+?)/?$ pages/$1.php [L,QSA]
 
