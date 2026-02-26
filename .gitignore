@@ -23,5 +23,8 @@ data/projects.json
 .claude
 .windsurf/
 
+# Build output (lives in bosse-updates repo)
+dist/
+
 # Removed from template
 .env.example
