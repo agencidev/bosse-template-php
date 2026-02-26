@@ -44,7 +44,7 @@ När du skapar nya sidor (om-oss.php, tjanster.php etc.):
 // Minsta struktur för ny sida i pages/:
 <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
 <?php include __DIR__ . '/../includes/header.php'; ?>
-<main>
+<main id="main-content">
     <!-- Innehåll -->
 </main>
 <?php include __DIR__ . '/../includes/footer.php'; ?>

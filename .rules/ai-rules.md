@@ -203,6 +203,26 @@ Snabbguide:
 - Filer i `uploads/` får inte exekvera PHP
 - Session-inställningar: httponly, secure, samesite=strict
 
+### CSP (Content Security Policy) — OBLIGATORISKT
+Bosse använder nonce-baserad CSP. `unsafe-inline` är borttaget för scripts.
+
+- **Alla `<script>`-block** MÅSTE ha nonce: `<script <?php echo csp_nonce_attr(); ?>>`
+- **Alla `<script type="application/ld+json">`** MÅSTE ha nonce
+- **ALDRIG** använd inline event handlers (`onclick`, `onchange`, `onsubmit` etc.)
+- **ALLTID** använd `addEventListener()` eller `data-*` attribut + delegation
+- `csp_nonce_attr()` finns via `security/csp.php` (laddas automatiskt av bootstrap)
+
+```php
+// ❌ FEL — blockeras av CSP
+<button onclick="doSomething()">Klicka</button>
+
+// ✅ RÄTT — addEventListener
+<button id="my-btn">Klicka</button>
+<script <?php echo csp_nonce_attr(); ?>>
+document.getElementById('my-btn').addEventListener('click', doSomething);
+</script>
+```
+
 ---
 
 ## CMS-användning
@@ -282,6 +302,8 @@ Använd `editable_text()` för innehåll som ska vara redigerbart via CMS:
 - Referera med `/uploads/filnamn.ext`
 - Max storlek: 5MB
 - Tillåtna format: jpg, png, webp, svg
+- Bilder optimeras automatiskt vid uppladdning (resize >2000px, JPEG-komprimering, WebP-kopia)
+- Bilddimensioner sparas i content.json (`key_width`, `key_height`) för CLS-prevention
 
 ---
 
@@ -320,7 +342,7 @@ require_once __DIR__ . '/../seo/meta.php';
     <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
     <?php include __DIR__ . '/../includes/header.php'; ?>
 
-    <main>
+    <main id="main-content">
         <!-- Sidinnehåll här -->
     </main>
 
