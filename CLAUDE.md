@@ -6,7 +6,7 @@ Se `.rules/brand-guide.md` för varumärkesguide (färger, typsnitt, tonalitet).
 ## ⛔ CORE-FILER — RÖR INTE!
 
 Dessa filer/mappar tillhör Bosse-ramverket och skrivs över vid uppdatering:
-`bootstrap.php`, `router.php`, `setup.php`, `cms/`, `security/`, `bin/`, `assets/css/variables.css`, `assets/css/components.css`, `assets/js/cms.js`
+`bootstrap.php`, `router.php`, `setup.php`, `bosse-health.php`, `cms/`, `security/`, `bin/`, `seo/`, `includes/admin-bar.php`, `includes/cookie-consent.php`, `includes/mailer.php`, `assets/css/variables.css`, `assets/css/components.css`, `assets/js/cms.js`
 
 **Du får ändra:** `index.php` (startsidan), `pages/errors/` (felsidor), `assets/css/overrides.css`, `includes/header.php`, `includes/footer.php`, sidor i `pages/`, `cms/extensions/routes.php`, `data/content.json`, `data/projects.json`, `uploads/`
 

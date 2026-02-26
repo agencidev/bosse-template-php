@@ -42,12 +42,12 @@ Bosse-ramverket har **CORE-filer** som uppdateras automatiskt. Ändra ALDRIG des
 ### CORE-filer (ÄNDRA ALDRIG)
 | Kategori | Filer |
 |----------|-------|
-| **Ramverk** | `bootstrap.php`, `router.php`, `setup.php`, `.htaccess`, `.user.ini` |
-| **CMS** | Alla filer i `cms/` (undantag: `cms/extensions/`) |
-| **Säkerhet** | Alla filer i `security/` |
+| **Ramverk** | `bootstrap.php`, `router.php`, `setup.php`, `bosse-health.php`, `.htaccess`, `.user.ini`, `.windsurfrules`, `CLAUDE.md` |
+| **CMS** | Specifika filer i `cms/` + alla i `cms/projects/` (undantag: `cms/extensions/`) |
+| **Säkerhet** | Alla filer i `security/` (inkl. `csp.php` för nonce-baserad CSP) |
 | **Build** | Alla filer i `bin/` |
 | **System-includes** | `includes/version.php`, `includes/admin-bar.php`, `includes/cookie-consent.php`, `includes/mailer.php`, `includes/agenci-badge.php` |
-| **System-CSS/JS** | `assets/css/reset.css`, `assets/css/cms.css`, `assets/css/variables.css`, `assets/css/components.css`, `assets/css/main.css`, `assets/js/cms.js` |
+| **System-CSS/JS** | `assets/css/reset.css`, `assets/css/cms.css`, `assets/js/cms.js` |
 | **CMS-styrda sidor** | `pages/projekt.php`, `pages/projekt-single.php` |
 | **SEO** | `seo/meta.php`, `seo/schema.php`, `seo/sitemap.php`, `seo/robots.php` |
 
