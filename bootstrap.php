@@ -58,8 +58,10 @@ session_start();
 header('Vary: Cookie');
 
 // CSP nonce (innan output)
-require_once __DIR__ . '/security/csp.php';
-send_csp_header();
+if (file_exists(__DIR__ . '/security/csp.php')) {
+    require_once __DIR__ . '/security/csp.php';
+    send_csp_header();
+}
 
 // Ladda super admin (efter session start)
 require_once __DIR__ . '/security/super-admin.php';
