@@ -581,7 +581,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label class="form-label">Omslagsbild</label>
                     <div class="file-upload" id="cover-upload">
                         <input type="file" name="cover_image" accept="image/jpeg,image/png,image/webp,image/gif"
-                               onchange="previewImage(this)">
+                               data-preview-image="cover-preview">
                         <div class="file-upload-text">
                             <strong>Välj bild</strong> eller dra hit
                             <br><small>JPG, PNG, WebP, GIF (max 5MB)</small>
@@ -615,7 +615,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="button" id="preview-close">Stäng</button>
             </div>
             <article class="preview-article">
-                <a href="#" class="preview-back" onclick="document.getElementById('preview-modal').classList.remove('active');return false;">&#8592; Tillbaka till projekt</a>
+                <a href="#" class="preview-back" id="preview-back-link">&#8592; Tillbaka till projekt</a>
                 <header class="preview-header">
                     <span class="p-category" id="preview-category"></span>
                     <h1 class="p-title" id="preview-title"></h1>
@@ -649,7 +649,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <script>
+    <script <?php echo csp_nonce_attr(); ?>>
     function previewImage(input) {
         const preview = document.getElementById('cover-preview');
         if (input.files && input.files[0]) {
@@ -808,6 +808,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             hidden.value = editor.innerHTML;
         });
     })();
+
+    // Event bindings (CSP-compliant)
+    document.querySelectorAll('[data-preview-image]').forEach(function(el) {
+        el.addEventListener('change', function() { previewImage(this); });
+    });
+    var previewBackLink = document.getElementById('preview-back-link');
+    if (previewBackLink) {
+        previewBackLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('preview-modal').classList.remove('active');
+        });
+    }
     </script>
 </body>
 </html>

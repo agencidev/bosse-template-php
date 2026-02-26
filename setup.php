@@ -593,7 +593,9 @@ function generateAllFiles(array $data): array {
             $css = preg_replace('/(--section-padding:\s*)[^;]+;/', '${1}' . $sectionPadding . ';', $css);
         }
 
-        file_put_contents($cssFile, $css);
+        if (file_put_contents($cssFile, $css, LOCK_EX) === false) {
+            $errors[] = 'Kunde inte skriva till: ' . $cssFile;
+        }
     }
 
     // 3. data/content.json
@@ -620,7 +622,9 @@ function generateAllFiles(array $data): array {
     if (!is_dir($dataDir)) {
         mkdir($dataDir, 0755, true);
     }
-    file_put_contents($dataDir . '/content.json', json_encode($contentJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    if (file_put_contents($dataDir . '/content.json', json_encode($contentJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX) === false) {
+        $errors[] = 'Kunde inte skriva till: ' . $dataDir . '/content.json';
+    }
 
     // 4. .rules/brand-guide.md
     $rulesDir = __DIR__ . '/.rules';
@@ -702,29 +706,41 @@ function generateAllFiles(array $data): array {
             ],
             $brandTemplate
         );
-        file_put_contents($rulesDir . '/brand-guide.md', $brandGuide);
+        if (file_put_contents($rulesDir . '/brand-guide.md', $brandGuide, LOCK_EX) === false) {
+            $errors[] = 'Kunde inte skriva till: brand-guide.md';
+        }
     }
 
     // 5. .rules/ai-rules.md
     $aiTemplate = file_get_contents(__DIR__ . '/templates/ai-rules-template.md');
     if ($aiTemplate) {
         $aiRules = str_replace('{{COMPANY_NAME}}', $data['site_name'], $aiTemplate);
-        file_put_contents($rulesDir . '/ai-rules.md', $aiRules);
+        if (file_put_contents($rulesDir . '/ai-rules.md', $aiRules, LOCK_EX) === false) {
+            $errors[] = 'Kunde inte skriva till: ai-rules.md';
+        }
     }
 
     // 6. data/.setup-complete
-    file_put_contents($dataDir . '/.setup-complete', 'Setup completed: ' . date('Y-m-d H:i:s') . "\n");
+    if (file_put_contents($dataDir . '/.setup-complete', 'Setup completed: ' . date('Y-m-d H:i:s') . "\n", LOCK_EX) === false) {
+        $errors[] = 'Kunde inte skriva till: .setup-complete';
+    }
 
     // 6a. .installed marker (committas till git — triggar config-only mode vid re-klon)
-    file_put_contents(__DIR__ . '/.installed', 'installed');
+    if (file_put_contents(__DIR__ . '/.installed', 'installed', LOCK_EX) === false) {
+        $errors[] = 'Kunde inte skriva till: .installed';
+    }
 
     // 6b. .site-url (committas till git — används av portalen för att visa domän)
-    file_put_contents(__DIR__ . '/.site-url', rtrim($data['site_url'], '/'));
+    if (file_put_contents(__DIR__ . '/.site-url', rtrim($data['site_url'], '/'), LOCK_EX) === false) {
+        $errors[] = 'Kunde inte skriva till: .site-url';
+    }
 
     // 6b. data/projects.json (tom array om den inte finns)
     $projectsFile = $dataDir . '/projects.json';
     if (!file_exists($projectsFile)) {
-        file_put_contents($projectsFile, json_encode([], JSON_PRETTY_PRINT));
+        if (file_put_contents($projectsFile, json_encode([], JSON_PRETTY_PRINT), LOCK_EX) === false) {
+            $errors[] = 'Kunde inte skriva till: projects.json';
+        }
     }
 
     // 6c. CLAUDE.md (referens-fil för Claude Code)
@@ -769,7 +785,9 @@ function generateAllFiles(array $data): array {
     $claudeMdContent .= "- `/admin` — Logga in\n";
     $claudeMdContent .= "- `/dashboard` — Översikt\n";
     $claudeMdContent .= "- `/projects` — Hantera inlägg\n";
-    file_put_contents(__DIR__ . '/CLAUDE.md', $claudeMdContent);
+    if (file_put_contents(__DIR__ . '/CLAUDE.md', $claudeMdContent, LOCK_EX) === false) {
+        $errors[] = 'Kunde inte skriva till: CLAUDE.md';
+    }
 
     // 7. includes/fonts.php
     $fontsContent = "<?php\n// Genererad av Setup Wizard\n?>\n";
@@ -812,7 +830,9 @@ function generateAllFiles(array $data): array {
         $fontsContent = "<?php\n// System UI - ingen extern font behövs\n";
     }
 
-    file_put_contents(__DIR__ . '/includes/fonts.php', $fontsContent);
+    if (file_put_contents(__DIR__ . '/includes/fonts.php', $fontsContent, LOCK_EX) === false) {
+        $errors[] = 'Kunde inte skriva till: fonts.php';
+    }
 
     // 8. Favicon (kopiera logo-dark som favicon om den finns)
     $logoDark = __DIR__ . '/assets/images/logo-dark.png';
@@ -866,13 +886,15 @@ function generateAllFiles(array $data): array {
         $gaContent = "<?php\n// Google Analytics 4 - Genererad av Setup Wizard\n";
         $gaContent .= "// Använder Google Consent Mode v2 (konfigureras i cookie-consent.php)\n?>\n";
         $gaContent .= "<script async src=\"https://www.googletagmanager.com/gtag/js?id=" . htmlspecialchars($data['ga_id']) . "\"></script>\n";
-        $gaContent .= "<script>\n";
+        $gaContent .= "<script <?php echo csp_nonce_attr(); ?>>\n";
         $gaContent .= "window.dataLayer = window.dataLayer || [];\n";
         $gaContent .= "function gtag(){dataLayer.push(arguments);}\n";
         $gaContent .= "gtag('js', new Date());\n";
         $gaContent .= "gtag('config', '" . htmlspecialchars($data['ga_id']) . "');\n";
         $gaContent .= "</script>\n";
-        file_put_contents(__DIR__ . '/includes/analytics.php', $gaContent);
+        if (file_put_contents(__DIR__ . '/includes/analytics.php', $gaContent, LOCK_EX) === false) {
+            $errors[] = 'Kunde inte skriva till: analytics.php';
+        }
     }
 
     // 10. overrides.css (tom fil med header — för framtida AI-overrides)
@@ -891,7 +913,9 @@ function generateAllFiles(array $data): array {
         $overridesContent .= " * .button--primary { border-radius: 0; background: linear-gradient(...); }\n";
         $overridesContent .= " * .card { box-shadow: none; border: 2px solid #000; }\n";
         $overridesContent .= " */\n";
-        file_put_contents($overridesFile, $overridesContent);
+        if (file_put_contents($overridesFile, $overridesContent, LOCK_EX) === false) {
+            $errors[] = 'Kunde inte skriva till: overrides.css';
+        }
     }
 
     return $errors;
@@ -982,7 +1006,9 @@ function generateConfigOnly(array $data): array {
     }
 
     // .site-url (committas till git — används av portalen för att visa domän)
-    file_put_contents(__DIR__ . '/.site-url', rtrim($siteUrl, '/'));
+    if (file_put_contents(__DIR__ . '/.site-url', rtrim($siteUrl, '/'), LOCK_EX) === false) {
+        $errors[] = 'Kunde inte skriva till: .site-url';
+    }
 
     return $errors;
 }

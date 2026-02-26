@@ -134,12 +134,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (file_exists($configPath)) {
                 if (function_exists('backup_config')) backup_config();
                 $config = file_get_contents($configPath);
-                $config = preg_replace("/define\('SITE_NAME',\s*'[^']*'\);/", "define('SITE_NAME', " . var_export($newName, true) . ");", $config);
-                $config = preg_replace("/define\('SITE_DESCRIPTION',\s*'[^']*'\);/", "define('SITE_DESCRIPTION', " . var_export($newDesc, true) . ");", $config);
-                $config = preg_replace("/define\('CONTACT_EMAIL',\s*'[^']*'\);/", "define('CONTACT_EMAIL', " . var_export($newEmail, true) . ");", $config);
-                $config = preg_replace("/define\('CONTACT_PHONE',\s*'[^']*'\);/", "define('CONTACT_PHONE', " . var_export($newPhone, true) . ");", $config);
+                $failures = [];
+
+                $r = safe_config_replace("/define\('SITE_NAME',\s*'[^']*'\);/", "define('SITE_NAME', " . var_export($newName, true) . ");", $config, 'SITE_NAME');
+                $config = $r['config']; if (!$r['success']) $failures[] = 'SITE_NAME';
+
+                $r = safe_config_replace("/define\('SITE_DESCRIPTION',\s*'[^']*'\);/", "define('SITE_DESCRIPTION', " . var_export($newDesc, true) . ");", $config, 'SITE_DESCRIPTION');
+                $config = $r['config']; if (!$r['success']) $failures[] = 'SITE_DESCRIPTION';
+
+                $r = safe_config_replace("/define\('CONTACT_EMAIL',\s*'[^']*'\);/", "define('CONTACT_EMAIL', " . var_export($newEmail, true) . ");", $config, 'CONTACT_EMAIL');
+                $config = $r['config']; if (!$r['success']) $failures[] = 'CONTACT_EMAIL';
+
+                $r = safe_config_replace("/define\('CONTACT_PHONE',\s*'[^']*'\);/", "define('CONTACT_PHONE', " . var_export($newPhone, true) . ");", $config, 'CONTACT_PHONE');
+                $config = $r['config']; if (!$r['success']) $failures[] = 'CONTACT_PHONE';
+
                 file_put_contents($configPath, $config, LOCK_EX);
-                $success = 'Företagsinformation uppdaterad!';
+
+                if (!empty($failures)) {
+                    $error = 'Varning: Kunde inte uppdatera: ' . implode(', ', $failures) . '. Kontrollera config.php manuellt.';
+                } else {
+                    $success = 'Företagsinformation uppdaterad!';
+                }
                 // Update current values
                 $currentConfig['site_name'] = $newName;
                 $currentConfig['site_description'] = $newDesc;
@@ -389,12 +404,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Check if SMTP section exists
                 if (preg_match("/define\('SMTP_HOST'/", $config)) {
                     // Update existing
-                    $config = preg_replace("/define\('SMTP_HOST',\s*'[^']*'\);/", "define('SMTP_HOST', " . var_export($smtpHost, true) . ");", $config);
-                    $config = preg_replace("/define\('SMTP_PORT',\s*\d+\);/", "define('SMTP_PORT', " . $smtpPort . ");", $config);
-                    $config = preg_replace("/define\('SMTP_ENCRYPTION',\s*'[^']*'\);/", "define('SMTP_ENCRYPTION', " . var_export($smtpEncryption, true) . ");", $config);
-                    $config = preg_replace("/define\('SMTP_USERNAME',\s*'[^']*'\);/", "define('SMTP_USERNAME', " . var_export($smtpUsername, true) . ");", $config);
+                    $failures = [];
+                    $r = safe_config_replace("/define\('SMTP_HOST',\s*'[^']*'\);/", "define('SMTP_HOST', " . var_export($smtpHost, true) . ");", $config, 'SMTP_HOST');
+                    $config = $r['config']; if (!$r['success']) $failures[] = 'SMTP_HOST';
+
+                    $r = safe_config_replace("/define\('SMTP_PORT',\s*\d+\);/", "define('SMTP_PORT', " . $smtpPort . ");", $config, 'SMTP_PORT');
+                    $config = $r['config']; if (!$r['success']) $failures[] = 'SMTP_PORT';
+
+                    $r = safe_config_replace("/define\('SMTP_ENCRYPTION',\s*'[^']*'\);/", "define('SMTP_ENCRYPTION', " . var_export($smtpEncryption, true) . ");", $config, 'SMTP_ENCRYPTION');
+                    $config = $r['config']; if (!$r['success']) $failures[] = 'SMTP_ENCRYPTION';
+
+                    $r = safe_config_replace("/define\('SMTP_USERNAME',\s*'[^']*'\);/", "define('SMTP_USERNAME', " . var_export($smtpUsername, true) . ");", $config, 'SMTP_USERNAME');
+                    $config = $r['config']; if (!$r['success']) $failures[] = 'SMTP_USERNAME';
+
                     if (!empty($smtpPassword)) {
-                        $config = preg_replace("/define\('SMTP_PASSWORD',\s*'[^']*'\);/", "define('SMTP_PASSWORD', " . var_export($smtpPassword, true) . ");", $config);
+                        $r = safe_config_replace("/define\('SMTP_PASSWORD',\s*'[^']*'\);/", "define('SMTP_PASSWORD', " . var_export($smtpPassword, true) . ");", $config, 'SMTP_PASSWORD');
+                        $config = $r['config']; if (!$r['success']) $failures[] = 'SMTP_PASSWORD';
+                    }
+
+                    if (!empty($failures)) {
+                        $error = 'Varning: Kunde inte uppdatera: ' . implode(', ', $failures);
                     }
                 } elseif (!empty($smtpHost)) {
                     // Add new SMTP section
@@ -776,10 +805,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="color-group">
                                 <input type="color" id="primary_color" name="primary_color"
                                        value="<?php echo htmlspecialchars($primaryColor); ?>"
-                                       onchange="document.getElementById('primary_text').value = this.value">
+                                       data-sync="primary_text">
                                 <input type="text" id="primary_text" class="form-input"
                                        value="<?php echo htmlspecialchars($primaryColor); ?>"
-                                       onchange="document.getElementById('primary_color').value = this.value"
+                                       data-sync="primary_color"
                                        pattern="#[0-9a-fA-F]{6}" maxlength="7">
                             </div>
                         </div>
@@ -788,10 +817,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="color-group">
                                 <input type="color" id="secondary_color" name="secondary_color"
                                        value="<?php echo htmlspecialchars($secondaryColor); ?>"
-                                       onchange="document.getElementById('secondary_text').value = this.value">
+                                       data-sync="secondary_text">
                                 <input type="text" id="secondary_text" class="form-input"
                                        value="<?php echo htmlspecialchars($secondaryColor); ?>"
-                                       onchange="document.getElementById('secondary_color').value = this.value"
+                                       data-sync="secondary_color"
                                        pattern="#[0-9a-fA-F]{6}" maxlength="7">
                             </div>
                         </div>
@@ -800,10 +829,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="color-group">
                                 <input type="color" id="accent_color" name="accent_color"
                                        value="<?php echo htmlspecialchars($accentColor); ?>"
-                                       onchange="document.getElementById('accent_text').value = this.value">
+                                       data-sync="accent_text">
                                 <input type="text" id="accent_text" class="form-input"
                                        value="<?php echo htmlspecialchars($accentColor); ?>"
-                                       onchange="document.getElementById('accent_color').value = this.value"
+                                       data-sync="accent_color"
                                        pattern="#[0-9a-fA-F]{6}" maxlength="7">
                             </div>
                         </div>
@@ -847,7 +876,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                             <?php endif; ?>
                             <div class="file-upload" id="upload-dark">
-                                <input type="file" name="logo_dark" accept=".png,.jpg,.jpeg,.svg,.webp" onchange="previewLogo(this, 'preview-dark', 'upload-dark')">
+                                <input type="file" name="logo_dark" accept=".png,.jpg,.jpeg,.svg,.webp" data-preview-logo="preview-dark" data-upload-box="upload-dark">
                                 <div class="file-upload-text">
                                     <strong>Välj fil</strong> eller dra hit<br>
                                     <small>PNG, JPG, SVG, WebP</small>
@@ -865,7 +894,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                             <?php endif; ?>
                             <div class="file-upload" id="upload-light">
-                                <input type="file" name="logo_light" accept=".png,.jpg,.jpeg,.svg,.webp" onchange="previewLogo(this, 'preview-light', 'upload-light')">
+                                <input type="file" name="logo_light" accept=".png,.jpg,.jpeg,.svg,.webp" data-preview-logo="preview-light" data-upload-box="upload-light">
                                 <div class="file-upload-text">
                                     <strong>Välj fil</strong> eller dra hit<br>
                                     <small>PNG, JPG, SVG, WebP</small>
@@ -885,7 +914,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php echo csrf_field(); ?>
                         <input type="hidden" name="section" value="delete_logo">
                         <input type="hidden" name="logo_type" value="logo-dark">
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Ta bort mörk logotyp?')">Ta bort mörk</button>
+                        <button type="submit" class="btn btn-danger btn-sm" data-confirm="Ta bort mörk logotyp?">Ta bort mörk</button>
                     </form>
                     <?php endif; ?>
                     <?php if ($logoLightPath): ?>
@@ -893,7 +922,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php echo csrf_field(); ?>
                         <input type="hidden" name="section" value="delete_logo">
                         <input type="hidden" name="logo_type" value="logo-light">
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Ta bort ljus logotyp?')">Ta bort ljus</button>
+                        <button type="submit" class="btn btn-danger btn-sm" data-confirm="Ta bort ljus logotyp?">Ta bort ljus</button>
                     </form>
                     <?php endif; ?>
                 </div>
@@ -922,7 +951,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <?php endif; ?>
                         <div class="file-upload" id="upload-favicon">
-                            <input type="file" name="favicon" accept=".png,.ico,.svg" onchange="previewFavicon(this)">
+                            <input type="file" name="favicon" accept=".png,.ico,.svg" data-preview-favicon="true">
                             <div class="file-upload-text">
                                 <strong>Välj fil</strong> eller dra hit<br>
                                 <small>PNG, ICO, SVG (max 1MB, rekommenderat 32x32px)</small>
@@ -938,7 +967,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <form method="POST" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.10);">
                     <?php echo csrf_field(); ?>
                     <input type="hidden" name="section" value="delete_favicon">
-                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Ta bort favicon?')">Ta bort favicon</button>
+                    <button type="submit" class="btn btn-danger btn-sm" data-confirm="Ta bort favicon?">Ta bort favicon</button>
                 </form>
                 <?php endif; ?>
             </div>
@@ -1103,7 +1132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <script>
+    <script <?php echo csp_nonce_attr(); ?>>
     // Förhandsvisning av logotyp
     function previewLogo(input, previewId, uploadId) {
         const preview = document.getElementById(previewId);
@@ -1141,6 +1170,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             uploadBox.classList.remove('file-selected');
         }
     }
+
+    // Event bindings (CSP-compliant)
+    document.querySelectorAll('[data-sync]').forEach(function(el) {
+        el.addEventListener('change', function() {
+            var target = document.getElementById(this.dataset.sync);
+            if (target) target.value = this.value;
+        });
+    });
+    document.querySelectorAll('[data-preview-logo]').forEach(function(el) {
+        el.addEventListener('change', function() {
+            previewLogo(this, this.dataset.previewLogo, this.dataset.uploadBox);
+        });
+    });
+    document.querySelectorAll('[data-preview-favicon]').forEach(function(el) {
+        el.addEventListener('change', function() { previewFavicon(this); });
+    });
+    document.querySelectorAll('[data-confirm]').forEach(function(el) {
+        el.addEventListener('click', function(e) {
+            if (!confirm(this.dataset.confirm)) e.preventDefault();
+        });
+    });
     </script>
 </body>
 </html>

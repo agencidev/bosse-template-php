@@ -206,7 +206,7 @@ sort($categories);
     <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
     <?php include __DIR__ . '/../includes/header.php'; ?>
 
-    <main>
+    <main id="main-content">
         <!-- Hero Section -->
         <section class="projekt-hero">
             <div class="container">

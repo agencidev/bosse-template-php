@@ -145,8 +145,14 @@ function handleUpload() {
     if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
         $url = '/uploads/' . $filename;
 
-        // Spara URL i content
-        save_content($key, $url);
+        // Spara URL + bilddimensioner i en atomisk skrivning
+        $updates = [$key => $url];
+        $imgSize = @getimagesize($upload_path);
+        if ($imgSize !== false) {
+            $updates[$key . '_width'] = $imgSize[0];
+            $updates[$key . '_height'] = $imgSize[1];
+        }
+        save_content_bulk($updates);
 
         echo json_encode(['success' => true, 'url' => $url]);
     } else {

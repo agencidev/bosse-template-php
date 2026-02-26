@@ -243,8 +243,33 @@ function optimize_image(string $path, int $max_width = 2000, int $quality = 85):
 
     // Hoppa över om redan tillräckligt liten
     if ($width <= $max_width) {
-        // Fortfarande komprimera JPEG om det är en
-        if ($mime === 'image/jpeg') {
+        // Generate WebP copy for non-WebP images
+        if ($mime !== 'image/webp' && function_exists('imagewebp')) {
+            $sourceImg = null;
+            switch ($mime) {
+                case 'image/jpeg': $sourceImg = @imagecreatefromjpeg($path); break;
+                case 'image/png':  $sourceImg = @imagecreatefrompng($path); break;
+                case 'image/gif':  $sourceImg = @imagecreatefromgif($path); break;
+            }
+            if ($sourceImg !== false && $sourceImg !== null) {
+                $webpPath = preg_replace('/\.[^.]+$/', '.webp', $path);
+                if ($webpPath !== $path) {
+                    @imagewebp($sourceImg, $webpPath, min($quality, 80));
+                }
+                // Also compress JPEG while we have it loaded
+                if ($mime === 'image/jpeg') {
+                    imagejpeg($sourceImg, $path, $quality);
+                }
+                imagedestroy($sourceImg);
+                return [
+                    'success' => true,
+                    'path' => $path,
+                    'optimized' => true,
+                    'message' => $mime === 'image/jpeg' ? 'JPEG komprimerad + WebP genererad' : 'WebP-kopia genererad'
+                ];
+            }
+        } elseif ($mime === 'image/jpeg') {
+            // Fallback: just compress JPEG if no WebP support
             $image = @imagecreatefromjpeg($path);
             if ($image !== false) {
                 imagejpeg($image, $path, $quality);
@@ -344,6 +369,14 @@ function optimize_image(string $path, int $max_width = 2000, int $quality = 85):
         case 'image/gif':
             $saved = imagegif($resized, $path);
             break;
+    }
+
+    // Generate WebP version alongside the original (before destroying resources)
+    if ($saved && function_exists('imagewebp') && $mime !== 'image/webp') {
+        $webpPath = preg_replace('/\.[^.]+$/', '.webp', $path);
+        if ($webpPath !== $path) {
+            @imagewebp($resized, $webpPath, min($quality, 80));
+        }
     }
 
     // Frigör minne

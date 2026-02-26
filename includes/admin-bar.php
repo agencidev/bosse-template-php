@@ -4,8 +4,21 @@
  * Visar admin-bar när användaren är inloggad
  */
 
+// Defensive requires for standalone inclusion safety
+if (!function_exists('is_logged_in')) {
+    require_once __DIR__ . '/../security/session.php';
+}
 if (!is_logged_in()) {
     return;
+}
+if (!function_exists('csrf_field')) {
+    require_once __DIR__ . '/../security/csrf.php';
+}
+if (!function_exists('is_super_admin')) {
+    require_once __DIR__ . '/../security/super-admin.php';
+}
+if (!function_exists('csp_nonce_attr')) {
+    require_once __DIR__ . '/../security/csp.php';
 }
 
 // Check if we're on frontend (not in CMS/dashboard)
@@ -36,7 +49,8 @@ $is_frontend = !$is_cms;
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
                 <span>Dashboard</span>
             </a>
-            <form method="get" action="/cms/admin.php" style="display:inline;margin:0;">
+            <form method="post" action="/cms/admin.php" style="display:inline;margin:0;">
+                <?php echo csrf_field(); ?>
                 <input type="hidden" name="action" value="logout">
                 <button type="submit" class="admin-bar__nav-link admin-bar__nav-link--logout">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
@@ -198,7 +212,7 @@ body.has-admin-bar {
 }
 </style>
 
-<script>
+<script <?php echo csp_nonce_attr(); ?>>
 document.body.classList.add('has-admin-bar');
 
 // CMS Edit Mode State

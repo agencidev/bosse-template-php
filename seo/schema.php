@@ -35,7 +35,7 @@ function organizationSchema($name = null, $logo = null, $description = null) {
         $schema['sameAs'] = $sameAs;
     }
     
-    echo '<script type="application/ld+json">';
+    echo '<script type="application/ld+json" ' . csp_nonce_attr() . '>';
     echo json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     echo '</script>';
 }
@@ -56,7 +56,7 @@ function websiteSchema() {
         ]
     ];
     
-    echo '<script type="application/ld+json">';
+    echo '<script type="application/ld+json" ' . csp_nonce_attr() . '>';
     echo json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     echo '</script>';
 }
@@ -119,7 +119,7 @@ function localBusinessSchema($businessType = 'LocalBusiness', $address = [], $ge
         $schema['sameAs'] = $sameAs;
     }
     
-    echo '<script type="application/ld+json">';
+    echo '<script type="application/ld+json" ' . csp_nonce_attr() . '>';
     echo json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     echo '</script>';
 }
@@ -153,7 +153,7 @@ function articleSchema($title, $description, $image, $datePublished, $dateModifi
         ]
     ];
     
-    echo '<script type="application/ld+json">';
+    echo '<script type="application/ld+json" ' . csp_nonce_attr() . '>';
     echo json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     echo '</script>';
 }

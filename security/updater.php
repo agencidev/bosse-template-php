@@ -19,7 +19,7 @@ const UPDATABLE_FILES = [
     'cms/helpers.php',
     'cms/projects/index.php', 'cms/projects/new.php', 'cms/projects/edit.php',
     'security/csrf.php', 'security/session.php', 'security/validation.php',
-    'security/super-admin.php', 'security/updater.php',
+    'security/super-admin.php', 'security/updater.php', 'security/csp.php',
     'seo/meta.php', 'seo/schema.php', 'seo/sitemap.php',
     'includes/admin-bar.php', 'includes/cookie-consent.php',
     'includes/mailer.php', 'includes/agenci-badge.php',

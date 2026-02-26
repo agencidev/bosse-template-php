@@ -1,3 +1,2 @@
 # Blockera all direkt webbåtkomst till data-mappen
-Order allow,deny
-Deny from all
+Require all denied

@@ -145,7 +145,7 @@ HTML;
     <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
     <?php include __DIR__ . '/../includes/header.php'; ?>
 
-    <main>
+    <main id="main-content">
         <section class="section section--white">
             <div class="container" style="max-width: 640px;">
                 <h1 class="text-center" style="margin-bottom: 0.5rem;">Kontakta oss</h1>

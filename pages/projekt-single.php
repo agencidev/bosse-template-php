@@ -59,9 +59,22 @@ function projectSchema($project) {
         'headline' => $project['title'] ?? '',
         'description' => $project['summary'] ?? '',
         'datePublished' => $project['createdAt'] ?? '',
+        'dateModified' => $project['updatedAt'] ?? $project['createdAt'] ?? '',
         'author' => [
             '@type' => 'Organization',
             'name' => SITE_NAME
+        ],
+        'publisher' => [
+            '@type' => 'Organization',
+            'name' => SITE_NAME,
+            'logo' => [
+                '@type' => 'ImageObject',
+                'url' => SITE_URL . '/assets/images/logo-dark.png'
+            ]
+        ],
+        'mainEntityOfPage' => [
+            '@type' => 'WebPage',
+            '@id' => SITE_URL . '/projekt/' . ($project['slug'] ?? '')
         ]
     ];
 
@@ -69,7 +82,7 @@ function projectSchema($project) {
         $schema['image'] = SITE_URL . $project['coverImage'];
     }
 
-    return '<script type="application/ld+json">' . json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>';
+    return '<script type="application/ld+json" ' . csp_nonce_attr() . '>' . json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>';
 }
 ?>
 <!DOCTYPE html>
@@ -80,9 +93,14 @@ function projectSchema($project) {
 
     <?php
     generateMeta(
-        htmlspecialchars($project['title'] ?? 'Projekt', ENT_QUOTES, 'UTF-8') . ' - ' . SITE_NAME,
-        htmlspecialchars($project['summary'] ?? '', ENT_QUOTES, 'UTF-8'),
-        $project['coverImage'] ?? '/assets/images/og-image.jpg'
+        $project['title'] ?? 'Projekt',
+        $project['summary'] ?? '',
+        $project['coverImage'] ?? '/assets/images/og-image.jpg',
+        'article',
+        [
+            'published' => $project['createdAt'] ?? '',
+            'modified' => $project['updatedAt'] ?? $project['createdAt'] ?? '',
+        ]
     );
     ?>
 
@@ -317,7 +335,7 @@ function projectSchema($project) {
     <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
     <?php include __DIR__ . '/../includes/header.php'; ?>
 
-    <main>
+    <main id="main-content">
         <article class="projekt-single">
             <div class="container">
                 <a href="/projekt" class="projekt-single__back">

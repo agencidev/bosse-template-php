@@ -548,7 +548,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 }
 </style>
 
-<script>
+<script <?php echo csp_nonce_attr(); ?>>
 // Google Consent Mode v2
 window.dataLayer = window.dataLayer || [];
 function gtag() { dataLayer.push(arguments); }

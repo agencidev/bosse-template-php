@@ -4,6 +4,7 @@
  * Global header med navigation
  */
 ?>
+<a href="#main-content" class="skip-to-content">Hoppa till innehåll</a>
 <header class="header">
     <div class="container">
         <div class="header__content">
@@ -36,6 +37,31 @@
 </header>
 
 <style>
+.skip-to-content {
+    position: absolute;
+    left: -9999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    z-index: 10001;
+    background: var(--color-primary, #379b83);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 0 0 0.5rem 0;
+}
+
+.skip-to-content:focus {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: auto;
+    height: auto;
+    overflow: visible;
+}
+
 .header {
     background-color: white;
     border-bottom: 1px solid var(--color-gray-200);

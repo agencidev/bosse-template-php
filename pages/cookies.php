@@ -47,7 +47,7 @@ $site_url = defined('SITE_URL') ? SITE_URL : 'https://example.com';
     <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
     <?php include __DIR__ . '/../includes/header.php'; ?>
 
-    <main>
+    <main id="main-content">
         <section class="section section--white">
             <div class="container" style="max-width: 780px;">
                 <h1 style="margin-bottom: 0.5rem;">Cookie Policy</h1>
@@ -135,7 +135,7 @@ $site_url = defined('SITE_URL') ? SITE_URL : 'https://example.com';
                     <h2>Hantera dina cookies</h2>
                     <p>Du kan när som helst ändra dina cookie-inställningar genom att klicka på knappen nedan:</p>
                     <p>
-                        <button onclick="document.getElementById('cookie-settings-modal').style.display='flex';" class="button button--outline" style="cursor: pointer;">
+                        <button id="open-cookie-settings" class="button button--outline" style="cursor: pointer;">
                             Hantera cookie-inställningar
                         </button>
                     </p>
@@ -176,6 +176,15 @@ $site_url = defined('SITE_URL') ? SITE_URL : 'https://example.com';
     <?php endif; ?>
 
     <?php include __DIR__ . '/../includes/cookie-consent.php'; ?>
+
+    <script <?php echo csp_nonce_attr(); ?>>
+    var openBtn = document.getElementById('open-cookie-settings');
+    if (openBtn) {
+        openBtn.addEventListener('click', function() {
+            document.getElementById('cookie-settings-modal').style.display = 'flex';
+        });
+    }
+    </script>
 
     <style>
     .policy-content h2 {

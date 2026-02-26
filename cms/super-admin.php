@@ -348,7 +348,7 @@ function format_bytes(float $bytes): string {
                 <p>Version <?php echo htmlspecialchars($updateState['latest_version'] ?? ''); ?> tillgänglig<?php echo !empty($updateState['critical']) ? ' (kritisk)' : ''; ?></p>
                 <small><?php echo htmlspecialchars($updateState['changelog'] ?? ''); ?></small>
             </div>
-            <button class="sa-btn sa-btn--success" onclick="applyUpdate()" id="btn-apply-update" style="background: #10b981; color: white;">
+            <button class="sa-btn sa-btn--success" id="btn-apply-update" style="background: #10b981; color: white;">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="vertical-align: middle; margin-right: 0.25rem;"><path d="M2 8L6 12L14 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 Uppdatera nu
             </button>
@@ -428,9 +428,9 @@ function format_bytes(float $bytes): string {
                     </div>
                     <?php endif; ?>
                     <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
-                        <button class="sa-btn sa-btn--secondary" onclick="checkUpdate()" id="btn-check-update">Sök uppdatering</button>
+                        <button class="sa-btn sa-btn--secondary" id="btn-check-update">Sök uppdatering</button>
                         <?php if (!empty($updateState['update_available'])): ?>
-                        <button class="sa-btn sa-btn--primary" onclick="applyUpdate()" id="btn-apply-update-2">Uppdatera</button>
+                        <button class="sa-btn sa-btn--primary" id="btn-apply-update-2">Uppdatera</button>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -453,8 +453,8 @@ function format_bytes(float $bytes): string {
                                 <div class="sa-backup-date"><?php echo htmlspecialchars($backup['date'] ?? ''); ?></div>
                             </div>
                             <div class="sa-backup-actions">
-                                <button class="sa-btn sa-btn--secondary" onclick="rollbackBackup('<?php echo htmlspecialchars($backup['dir_name'] ?? ''); ?>')">Återställ</button>
-                                <button class="sa-btn sa-btn--danger" onclick="deleteBackup('<?php echo htmlspecialchars($backup['dir_name'] ?? ''); ?>')">Ta bort</button>
+                                <button class="sa-btn sa-btn--secondary" data-click="rollbackBackup" data-param="<?php echo htmlspecialchars($backup['dir_name'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">Återställ</button>
+                                <button class="sa-btn sa-btn--danger" data-click="deleteBackup" data-param="<?php echo htmlspecialchars($backup['dir_name'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">Ta bort</button>
                             </div>
                         </div>
                         <?php endforeach; ?>
@@ -516,7 +516,7 @@ function format_bytes(float $bytes): string {
                         <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;color:rgba(255,255,255,0.50);">Nytt lösenord</label>
                         <div style="display:flex;gap:0.5rem;">
                             <input type="password" id="new-customer-password" placeholder="Minst 8 tecken" style="flex:1;padding:0.5rem 0.75rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:0.375rem;color:white;font-size:0.875rem;">
-                            <button class="sa-btn sa-btn--success" onclick="changeCustomerPassword()">Ändra</button>
+                            <button class="sa-btn sa-btn--success" id="btn-change-password">Ändra</button>
                         </div>
                     </div>
                     <div id="password-result" style="margin-top: 0.75rem; font-size: 0.8125rem;"></div>
@@ -546,7 +546,7 @@ function format_bytes(float $bytes): string {
                         <span class="sa-value"><?php echo htmlspecialchars(defined('SMTP_USERNAME') ? SMTP_USERNAME : ''); ?></span>
                     </div>
                     <div style="margin-top: 1rem;">
-                        <button class="sa-btn sa-btn--success" onclick="testSmtp()" id="btn-smtp-test">Skicka testmail</button>
+                        <button class="sa-btn sa-btn--success" id="btn-smtp-test">Skicka testmail</button>
                     </div>
                     <?php else: ?>
                     <p style="font-size: 0.875rem; color: rgba(255,255,255,0.50);">SMTP är inte konfigurerat. Lägg till SMTP-inställningar i config.php.</p>
@@ -664,7 +664,7 @@ function format_bytes(float $bytes): string {
                     </div>
 
                     <div style="margin-top: 1.5rem;">
-                        <button class="sa-btn sa-btn--primary" onclick="saveConfig()" id="btn-save-config">Spara konfiguration</button>
+                        <button class="sa-btn sa-btn--primary" id="btn-save-config">Spara konfiguration</button>
                         <span id="config-result" style="margin-left: 1rem; font-size: 0.8125rem;"></span>
                     </div>
                 </div>
@@ -675,8 +675,8 @@ function format_bytes(float $bytes): string {
                 <div class="sa-panel__header">
                     <h2>Felloggar</h2>
                     <div style="display:flex;gap:0.5rem;">
-                        <button class="sa-btn sa-btn--secondary" onclick="refreshErrorLog()">Uppdatera</button>
-                        <button class="sa-btn sa-btn--danger" onclick="clearErrorLog()" id="btn-clear-log">Rensa</button>
+                        <button class="sa-btn sa-btn--secondary" id="btn-refresh-log">Uppdatera</button>
+                        <button class="sa-btn sa-btn--danger" id="btn-clear-log">Rensa</button>
                     </div>
                 </div>
                 <div class="sa-panel__body">
@@ -698,7 +698,7 @@ function format_bytes(float $bytes): string {
                     <p style="font-size: 0.875rem; color: rgba(255,255,255,0.50); margin-bottom: 1rem;">
                         Jämför core-filers status. Upptäcker om filer har ändrats manuellt eller saknas.
                     </p>
-                    <button class="sa-btn sa-btn--secondary" onclick="checkIntegrity()">Kontrollera filer</button>
+                    <button class="sa-btn sa-btn--secondary" id="btn-check-integrity">Kontrollera filer</button>
                     <div id="integrity-result" style="margin-top: 1rem;"></div>
                 </div>
             </div>
@@ -709,7 +709,7 @@ function format_bytes(float $bytes): string {
 
     <div class="sa-toast" id="sa-toast"></div>
 
-    <script>
+    <script <?php echo csp_nonce_attr(); ?>>
     const CSRF_TOKEN = '<?php echo htmlspecialchars($csrfToken, ENT_QUOTES); ?>';
     const API_URL = '/api/super';
 
@@ -969,6 +969,24 @@ function format_bytes(float $bytes): string {
             }
         }).catch(function() { showToast('Nätverksfel'); });
     }
+
+    // Event bindings (CSP-compliant)
+    var _bind = function(id, fn) { var el = document.getElementById(id); if (el) el.addEventListener('click', fn); };
+    _bind('btn-apply-update', applyUpdate);
+    _bind('btn-apply-update-2', applyUpdate);
+    _bind('btn-check-update', checkUpdate);
+    _bind('btn-change-password', changeCustomerPassword);
+    _bind('btn-smtp-test', testSmtp);
+    _bind('btn-save-config', saveConfig);
+    _bind('btn-refresh-log', refreshErrorLog);
+    _bind('btn-clear-log', clearErrorLog);
+    _bind('btn-check-integrity', checkIntegrity);
+    document.querySelectorAll('[data-click]').forEach(function(el) {
+        el.addEventListener('click', function() {
+            var fn = window[this.dataset.click];
+            if (typeof fn === 'function') fn(this.dataset.param);
+        });
+    });
     </script>
 </body>
 </html>

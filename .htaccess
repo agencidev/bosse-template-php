@@ -5,6 +5,10 @@
 RewriteEngine On
 RewriteBase /
 
+# HTTPS Redirect (först — innan alla andra regler)
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
 # Prioritera alltid PHP före HTML
 DirectoryIndex index.php index.htm index.html
 
@@ -77,14 +81,14 @@ RewriteRule ^(.+?)/?$ $1.php [L,QSA]
         Header set Pragma "no-cache"
     </FilesMatch>
 
-    # CSS & JS – alltid revalidera
+    # CSS & JS – lång cache (versionerade med ?v=VERSION)
     <FilesMatch "\.(css|js)$">
-        Header set Cache-Control "no-cache, must-revalidate"
+        Header set Cache-Control "public, max-age=2592000, immutable"
     </FilesMatch>
 
-    # Bilder – lätt cache (1 dag)
+    # Bilder – 30 dagars cache
     <FilesMatch "\.(jpg|jpeg|png|webp|svg|gif|ico)$">
-        Header set Cache-Control "public, max-age=86400"
+        Header set Cache-Control "public, max-age=2592000"
     </FilesMatch>
 
 </IfModule>
@@ -102,8 +106,8 @@ RewriteRule ^(.+?)/?$ $1.php [L,QSA]
     Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
     Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
 
-    # Content Security Policy
-    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://www.google-analytics.com https://raw.githubusercontent.com;"
+    # CSP is set dynamically from PHP (bootstrap.php -> security/csp.php)
+    # This allows nonce-based script-src instead of unsafe-inline
 
     # Remove server signature
     Header unset Server
@@ -134,14 +138,6 @@ RewriteRule ^data/(backups|tmp)/ - [F,L]
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
 </IfModule>
-
-
-############################################
-# HTTPS Redirect
-############################################
-
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 
 ############################################

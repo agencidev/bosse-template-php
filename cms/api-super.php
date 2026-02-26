@@ -314,7 +314,11 @@ function handle_save_config(): void {
     }
 
     if (function_exists('backup_config')) backup_config();
+    if (!function_exists('safe_config_replace')) {
+        require_once __DIR__ . '/helpers.php';
+    }
     $config = file_get_contents($configFile);
+    $failures = [];
 
     // Fält som kan uppdateras direkt
     $directFields = [
@@ -334,33 +338,40 @@ function handle_save_config(): void {
     foreach ($directFields as $inputKey => $constant) {
         if (!isset($input[$inputKey])) continue;
         $newValue = $input[$inputKey];
-        // Byt ut define-raden
         $pattern = "/define\('" . preg_quote($constant, '/') . "',\s*'[^']*'\);/";
         $replacement = "define('" . $constant . "', " . var_export($newValue, true) . ");";
-        $config = preg_replace($pattern, $replacement, $config);
+        $r = safe_config_replace($pattern, $replacement, $config, $constant);
+        $config = $r['config'];
+        if (!$r['success']) $failures[] = $constant;
     }
 
     // SMTP_PORT — sparas som heltal, inte sträng
     if (isset($input['smtp_port'])) {
         $smtpPort = (int)$input['smtp_port'];
-        $config = preg_replace("/define\('SMTP_PORT',\s*\d+\);/", "define('SMTP_PORT', " . $smtpPort . ");", $config);
+        $r = safe_config_replace("/define\('SMTP_PORT',\s*\d+\);/", "define('SMTP_PORT', " . $smtpPort . ");", $config, 'SMTP_PORT');
+        $config = $r['config'];
+        if (!$r['success']) $failures[] = 'SMTP_PORT';
     }
 
     // Lösenordsfält — bara uppdatera om icke-tomma
     if (!empty($input['smtp_password'])) {
-        $config = preg_replace(
+        $r = safe_config_replace(
             "/define\('SMTP_PASSWORD',\s*'[^']*'\);/",
             "define('SMTP_PASSWORD', " . var_export($input['smtp_password'], true) . ");",
-            $config
+            $config, 'SMTP_PASSWORD'
         );
+        $config = $r['config'];
+        if (!$r['success']) $failures[] = 'SMTP_PASSWORD';
     }
 
     if (!empty($input['github_token'])) {
-        $config = preg_replace(
+        $r = safe_config_replace(
             "/define\('GITHUB_TOKEN',\s*'[^']*'\);/",
             "define('GITHUB_TOKEN', " . var_export($input['github_token'], true) . ");",
-            $config
+            $config, 'GITHUB_TOKEN'
         );
+        $config = $r['config'];
+        if (!$r['success']) $failures[] = 'GITHUB_TOKEN';
     }
 
     // Add GitHub defines if missing in config.php
@@ -390,7 +401,12 @@ function handle_save_config(): void {
         @file_put_contents(ROOT_PATH . '/.site-url', rtrim($input['site_url'], '/'));
     }
 
-    echo json_encode(['success' => true]);
+    $response = ['success' => true];
+    if (!empty($failures)) {
+        $response['warnings'] = $failures;
+        $response['message'] = 'Kunde inte uppdatera: ' . implode(', ', $failures);
+    }
+    echo json_encode($response);
 }
 
 function handle_check_integrity(): void {

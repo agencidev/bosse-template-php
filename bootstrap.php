@@ -57,5 +57,9 @@ session_start();
 // Vary-header: se till att cacher (SiteGround SuperCacher) skiljer på inloggade/utloggade
 header('Vary: Cookie');
 
+// CSP nonce (innan output)
+require_once __DIR__ . '/security/csp.php';
+send_csp_header();
+
 // Ladda super admin (efter session start)
 require_once __DIR__ . '/security/super-admin.php';

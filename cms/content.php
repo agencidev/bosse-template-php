@@ -16,9 +16,14 @@ function get_content($key, $default = '') {
     if (!file_exists(CONTENT_FILE)) {
         return $default;
     }
-    
-    $content = json_decode(file_get_contents(CONTENT_FILE), true);
-    
+
+    $raw = file_get_contents(CONTENT_FILE);
+    $content = json_decode($raw, true);
+    if ($content === null && json_last_error() !== JSON_ERROR_NONE) {
+        error_log('JSON corruption in ' . CONTENT_FILE . ': ' . json_last_error_msg());
+        return $default;
+    }
+
     // Stöd för nested keys (t.ex. "hero.title")
     $keys = explode('.', $key);
     $value = $content;
@@ -38,15 +43,22 @@ function get_content($key, $default = '') {
  */
 function save_content($key, $value) {
     $content = [];
-    
+
     if (file_exists(CONTENT_FILE)) {
-        $content = json_decode(file_get_contents(CONTENT_FILE), true) ?? [];
+        $raw = file_get_contents(CONTENT_FILE);
+        $decoded = json_decode($raw, true);
+        if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+            error_log('JSON corruption in ' . CONTENT_FILE . ': ' . json_last_error_msg());
+            // Try to continue with empty content rather than losing the update
+        } else {
+            $content = $decoded ?? [];
+        }
     }
-    
+
     // Stöd för nested keys
     $keys = explode('.', $key);
     $temp = &$content;
-    
+
     foreach ($keys as $i => $k) {
         if ($i === count($keys) - 1) {
             $temp[$k] = $value;
@@ -57,8 +69,57 @@ function save_content($key, $value) {
             $temp = &$temp[$k];
         }
     }
-    
-    return file_put_contents(CONTENT_FILE, json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+
+    // Atomic write: write to temp file, then rename (unique name to prevent race condition)
+    $tmp = CONTENT_FILE . '.' . getmypid() . '.' . hrtime(true) . '.tmp';
+    $encoded = json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    if (file_put_contents($tmp, $encoded, LOCK_EX) === false) {
+        error_log('Failed to write temp file: ' . $tmp);
+        return false;
+    }
+    return rename($tmp, CONTENT_FILE);
+}
+
+/**
+ * Spara flera nycklar i en atomisk skrivning
+ * @param array $updates Associative array ['key' => 'value', ...]
+ */
+function save_content_bulk(array $updates) {
+    $content = [];
+
+    if (file_exists(CONTENT_FILE)) {
+        $raw = file_get_contents(CONTENT_FILE);
+        $decoded = json_decode($raw, true);
+        if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+            error_log('JSON corruption in ' . CONTENT_FILE . ': ' . json_last_error_msg());
+        } else {
+            $content = $decoded ?? [];
+        }
+    }
+
+    foreach ($updates as $key => $value) {
+        $keys = explode('.', $key);
+        $temp = &$content;
+        foreach ($keys as $i => $k) {
+            if ($i === count($keys) - 1) {
+                $temp[$k] = $value;
+            } else {
+                if (!isset($temp[$k]) || !is_array($temp[$k])) {
+                    $temp[$k] = [];
+                }
+                $temp = &$temp[$k];
+            }
+        }
+        unset($temp);
+    }
+
+    $tmp = CONTENT_FILE . '.' . getmypid() . '.' . hrtime(true) . '.tmp';
+    $encoded = json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    if (file_put_contents($tmp, $encoded, LOCK_EX) === false) {
+        error_log('Failed to write temp file: ' . $tmp);
+        return false;
+    }
+    return rename($tmp, CONTENT_FILE);
 }
 
 /**
@@ -76,7 +137,14 @@ function get_all_content() {
         return $cache;
     }
 
-    $cache = json_decode(file_get_contents(CONTENT_FILE), true) ?? [];
+    $raw = file_get_contents(CONTENT_FILE);
+    $decoded = json_decode($raw, true);
+    if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+        error_log('JSON corruption in ' . CONTENT_FILE . ': ' . json_last_error_msg());
+        $cache = [];
+        return $cache;
+    }
+    $cache = $decoded ?? [];
     return $cache;
 }
 
@@ -153,8 +221,29 @@ function editable_image($contentKey, $field, $defaultValue = '/assets/images/pla
     $safeAlt = htmlspecialchars($alt, ENT_QUOTES, 'UTF-8');
     $safeClassName = htmlspecialchars($className, ENT_QUOTES, 'UTF-8');
 
+    // Get width/height from content if stored, or detect from file
+    $widthKey = $field . '_width';
+    $heightKey = $field . '_height';
+    $imgWidth = isset($content[$contentKey][$widthKey]) ? (int)$content[$contentKey][$widthKey] : 0;
+    $imgHeight = isset($content[$contentKey][$heightKey]) ? (int)$content[$contentKey][$heightKey] : 0;
+
+    if ($imgWidth === 0 && $imgHeight === 0 && !empty($src)) {
+        $filePath = (defined('ROOT_PATH') ? ROOT_PATH : dirname(__DIR__)) . $src;
+        if (file_exists($filePath)) {
+            $size = @getimagesize($filePath);
+            if ($size !== false) {
+                $imgWidth = $size[0];
+                $imgHeight = $size[1];
+            }
+        }
+    }
+
+    $sizeAttrs = ($imgWidth > 0 && $imgHeight > 0)
+        ? ' width="' . $imgWidth . '" height="' . $imgHeight . '"'
+        : '';
+
     if (!$is_admin) {
-        echo '<img src="' . $safeSrc . '" alt="' . $safeAlt . '" class="' . $safeClassName . '" loading="lazy">';
+        echo '<img src="' . $safeSrc . '" alt="' . $safeAlt . '" class="' . $safeClassName . '"' . $sizeAttrs . ' loading="lazy">';
         return;
     }
 
@@ -164,7 +253,7 @@ function editable_image($contentKey, $field, $defaultValue = '/assets/images/pla
     echo '<img
         src="' . $safeSrc . '"
         alt="' . $safeAlt . '"
-        class="' . $safeClassName . '"
+        class="' . $safeClassName . '"' . $sizeAttrs . '
         data-editable-image="true"
         data-content-key="' . $safeContentKey . '"
         data-field="' . $safeField . '"

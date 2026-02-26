@@ -80,6 +80,30 @@ function backup_config(): bool {
 }
 
 /**
+ * Safe preg_replace for config.php — verifies the replacement succeeded
+ * Returns the modified string, or the original + logs a warning on failure.
+ *
+ * @param string $pattern  Regex pattern
+ * @param string $replacement  Replacement string
+ * @param string $subject  The config file contents
+ * @param string $constantName  Name of the constant (for logging)
+ * @return array ['config' => string, 'success' => bool]
+ */
+function safe_config_replace(string $pattern, string $replacement, string $subject, string $constantName = ''): array {
+    $result = preg_replace($pattern, $replacement, $subject, -1, $count);
+    if ($result === null) {
+        error_log("Config update FAILED (regex error) for {$constantName}: " . preg_last_error_msg());
+        return ['config' => $subject, 'success' => false];
+    }
+    if ($count === 0) {
+        // Pattern didn't match — could mean the value is already correct or config format changed
+        error_log("Config update NOTE: pattern did not match for {$constantName} (may already be correct)");
+        return ['config' => $subject, 'success' => true];
+    }
+    return ['config' => $result, 'success' => true];
+}
+
+/**
  * Kontrollera om POST-data överstiger PHP-gränser
  * @return string|null Felmeddelande om gränsen överskrids, annars null
  */

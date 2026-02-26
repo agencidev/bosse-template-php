@@ -12,6 +12,7 @@ class SmtpMailer {
     private string $password;
     private string $encryption;
     private int $timeout;
+    private bool $verifySsl;
     private $socket = null;
 
     public function __construct(
@@ -20,7 +21,8 @@ class SmtpMailer {
         string $username,
         string $password,
         string $encryption = 'ssl',
-        int $timeout = 30
+        int $timeout = 30,
+        bool $verifySsl = true
     ) {
         $this->host = $host;
         $this->port = $port;
@@ -28,6 +30,7 @@ class SmtpMailer {
         $this->password = $password;
         $this->encryption = strtolower($encryption);
         $this->timeout = $timeout;
+        $this->verifySsl = $verifySsl;
     }
 
     /**
@@ -159,13 +162,11 @@ class SmtpMailer {
             $address = 'ssl://' . $this->host;
         }
 
-        $context = stream_context_create([
-            'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-                'allow_self_signed' => true,
-            ],
-        ]);
+        $sslOptions = $this->verifySsl
+            ? ['verify_peer' => true, 'verify_peer_name' => true, 'allow_self_signed' => false]
+            : ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true];
+
+        $context = stream_context_create(['ssl' => $sslOptions]);
 
         $this->socket = @stream_socket_client(
             "{$address}:{$this->port}",
@@ -318,13 +319,16 @@ function send_mail(string $to, string $subject, string $body, array $options = [
     $from_name = $options['from_name'] ?? (defined('SITE_NAME') ? SITE_NAME : '');
     $from_email = $options['from_email'] ?? SMTP_USERNAME;
     $encryption = defined('SMTP_ENCRYPTION') ? SMTP_ENCRYPTION : 'ssl';
+    $verifySsl = defined('SMTP_VERIFY_SSL') ? (bool)SMTP_VERIFY_SSL : true;
 
     $mailer = new SmtpMailer(
         SMTP_HOST,
         (int)SMTP_PORT,
         SMTP_USERNAME,
         SMTP_PASSWORD,
-        $encryption
+        $encryption,
+        30,
+        $verifySsl
     );
 
     if ($html) {

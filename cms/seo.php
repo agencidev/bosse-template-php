@@ -425,7 +425,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
 
-        <script>
+        <script <?php echo csp_nonce_attr(); ?>>
         function updateCharCount(fieldId, limit) {
             const field = document.getElementById(fieldId);
             const countEl = document.getElementById(fieldId + '_count');

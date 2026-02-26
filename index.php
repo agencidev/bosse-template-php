@@ -32,13 +32,21 @@ header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
     
     <?php if (file_exists(__DIR__ . '/includes/fonts.php')) include __DIR__ . '/includes/fonts.php'; ?>
     <?php if (file_exists(__DIR__ . '/includes/analytics.php')) include __DIR__ . '/includes/analytics.php'; ?>
-    <?php if (file_exists(__DIR__ . '/assets/images/favicon.png')): ?>
+    <?php if (file_exists(__DIR__ . '/assets/images/favicon.ico')): ?>
+    <link rel="icon" href="/assets/images/favicon.ico" sizes="32x32">
+    <?php endif; ?>
+    <?php if (file_exists(__DIR__ . '/assets/images/favicon.svg')): ?>
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+    <?php elseif (file_exists(__DIR__ . '/assets/images/favicon.png')): ?>
     <link rel="icon" type="image/png" href="/assets/images/favicon.png">
     <?php endif; ?>
     <?php if (file_exists(__DIR__ . '/assets/images/apple-touch-icon.png')): ?>
     <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
     <?php endif; ?>
+    <link rel="preload" href="/assets/css/main.css?v=<?php echo BOSSE_VERSION; ?>" as="style">
     <link rel="stylesheet" href="/assets/css/main.css?v=<?php echo BOSSE_VERSION; ?>">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
     
     <?php 
     echo organizationSchema();
@@ -49,7 +57,7 @@ header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
     <?php include __DIR__ . '/includes/admin-bar.php'; ?>
     <?php include __DIR__ . '/includes/header.php'; ?>
     
-    <main>
+    <main id="main-content">
         <!-- Hero Section -->
         <section class="section section--white">
             <div class="container text-center">
@@ -107,7 +115,7 @@ header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
     
     <?php include __DIR__ . '/includes/footer.php'; ?>
     
-    <script src="/assets/js/cms.js?v=<?php echo BOSSE_VERSION; ?>"></script>
+    <script src="/assets/js/cms.js?v=<?php echo BOSSE_VERSION; ?>" defer></script>
     
     <?php if (is_logged_in()): ?>
         <!-- CSRF token för CMS -->

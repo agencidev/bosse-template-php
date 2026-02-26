@@ -125,8 +125,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'deactivate-sa') {
     exit;
 }
 
-// Handle logout FIRST beföre any other checks
-if (isset($_GET['action']) && $_GET['action'] === 'logout') {
+// Handle logout FIRST before any other checks (POST only for CSRF protection)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'logout') {
+    csrf_require();
     // Complete logout
     $_SESSION = array();
 
@@ -423,8 +424,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php else: ?>
         <!-- VANLIG INLOGGNING -->
         <div class="login-tabs">
-            <button type="button" class="login-tab active" onclick="switchTab('customer')">Kund</button>
-            <button type="button" class="login-tab" onclick="switchTab('agency')">PEYS</button>
+            <button type="button" class="login-tab active" data-tab="customer">Kund</button>
+            <button type="button" class="login-tab" data-tab="agency">PEYS</button>
         </div>
 
         <form method="POST">
@@ -453,7 +454,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         class="input"
                         required
                     >
-                    <button type="button" class="toggle-password" onclick="togglePassword()">
+                    <button type="button" class="toggle-password">
                         <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                         <svg id="eye-off-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
                     </button>
@@ -461,7 +462,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div class="forgot-password" id="forgot-link">
-                <a href="#" onclick="document.getElementById('forgot-modal').classList.add('active'); return false;">Glömt lösenord?</a>
+                <a href="#" id="forgot-link-trigger">Glömt lösenord?</a>
             </div>
 
             <?php if ($error): ?>
@@ -474,12 +475,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
 
         <?php if ($resetMode === 'forgot' || $resetSuccess || $resetError): ?>
-        <div class="forgot-modal active" id="forgot-modal" onclick="if(event.target===this)this.classList.remove('active')">
+        <div class="forgot-modal active" id="forgot-modal">
             <div class="forgot-modal-content">
                 <?php if ($resetSuccess): ?>
                     <h3>Skickat!</h3>
                     <p><?php echo htmlspecialchars($resetSuccess); ?></p>
-                    <button onclick="window.location='/admin'">OK</button>
+                    <button class="btn-redirect" data-href="/admin">OK</button>
                 <?php elseif ($resetMode === 'forgot'): ?>
                     <h3>Glömt lösenord?</h3>
                     <p>Ange din e-postadress så skickar vi en återställningslänk.</p>
@@ -491,12 +492,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <input type="email" name="reset_email" class="input" placeholder="din@epost.se" required style="margin-bottom:1rem;">
                         <button type="submit" class="button" style="margin-bottom:0.75rem;">Skicka återställningslänk</button>
                     </form>
-                    <button onclick="window.location='/admin'" style="background:none;border:none;color:rgba(255,255,255,0.50);cursor:pointer;font-size:0.8125rem;">Tillbaka till inloggning</button>
+                    <button class="btn-redirect" data-href="/admin" style="background:none;border:none;color:rgba(255,255,255,0.50);cursor:pointer;font-size:0.8125rem;">Tillbaka till inloggning</button>
                 <?php endif; ?>
             </div>
         </div>
         <?php else: ?>
-        <div class="forgot-modal" id="forgot-modal" onclick="if(event.target===this)this.classList.remove('active')">
+        <div class="forgot-modal" id="forgot-modal">
             <div class="forgot-modal-content">
                 <h3>Glömt lösenord?</h3>
                 <p>Ange din e-postadress så skickar vi en återställningslänk.</p>
@@ -505,12 +506,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="email" name="reset_email" class="input" placeholder="din@epost.se" required style="margin-bottom:1rem;">
                     <button type="submit" class="button" style="margin-bottom:0.75rem;">Skicka återställningslänk</button>
                 </form>
-                <button onclick="document.getElementById('forgot-modal').classList.remove('active')" style="background:none;border:none;color:rgba(255,255,255,0.50);cursor:pointer;font-size:0.8125rem;">Avbryt</button>
+                <button id="forgot-cancel" style="background:none;border:none;color:rgba(255,255,255,0.50);cursor:pointer;font-size:0.8125rem;">Avbryt</button>
             </div>
         </div>
         <?php endif; ?>
 
-        <script>
+        <script <?php echo csp_nonce_attr(); ?>>
         function togglePassword() {
             const input = document.getElementById('password');
             const eyeOn = document.getElementById('eye-icon');
@@ -527,14 +528,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         function switchTab(mode) {
             document.getElementById('login_mode').value = mode;
-            document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            const forgotLink = document.getElementById('forgot-link');
-            if (mode === 'agency') {
-                forgotLink.style.display = 'none';
-            } else {
-                forgotLink.style.display = 'block';
-            }
+            document.querySelectorAll('.login-tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelector('[data-tab="' + mode + '"]').classList.add('active');
+            var forgotLink = document.getElementById('forgot-link');
+            if (forgotLink) forgotLink.style.display = mode === 'agency' ? 'none' : 'block';
+        }
+
+        // Event bindings (CSP-compliant, no inline handlers)
+        document.querySelectorAll('[data-tab]').forEach(function(btn) {
+            btn.addEventListener('click', function() { switchTab(this.dataset.tab); });
+        });
+        document.querySelector('.toggle-password').addEventListener('click', togglePassword);
+        var forgotTrigger = document.getElementById('forgot-link-trigger');
+        if (forgotTrigger) {
+            forgotTrigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('forgot-modal').classList.add('active');
+            });
+        }
+        document.querySelectorAll('.forgot-modal').forEach(function(modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('active');
+            });
+        });
+        document.querySelectorAll('.btn-redirect').forEach(function(btn) {
+            btn.addEventListener('click', function() { window.location = this.dataset.href; });
+        });
+        var forgotCancel = document.getElementById('forgot-cancel');
+        if (forgotCancel) {
+            forgotCancel.addEventListener('click', function() {
+                document.getElementById('forgot-modal').classList.remove('active');
+            });
         }
         </script>
         <?php endif; ?>

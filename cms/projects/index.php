@@ -329,19 +329,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <span class="selected-count"><span id="selected-count">0</span> valda</span>
                     <button type="submit" name="bulk_action" value="publish" class="bulk-btn bulk-btn-publish">Publicera</button>
                     <button type="submit" name="bulk_action" value="unpublish" class="bulk-btn bulk-btn-unpublish">Avpublicera</button>
-                    <button type="submit" name="bulk_action" value="delete" class="bulk-btn bulk-btn-delete" onclick="return confirm('Är du säker på att du vill radera de valda inläggen?')">Radera</button>
+                    <button type="submit" name="bulk_action" value="delete" class="bulk-btn bulk-btn-delete" data-confirm="Är du säker på att du vill radera de valda inläggen?">Radera</button>
                 </div>
 
                 <!-- Select all -->
                 <div class="select-all-container">
-                    <input type="checkbox" id="select-all" class="bulk-checkbox" onchange="toggleSelectAll(this)">
+                    <input type="checkbox" id="select-all" class="bulk-checkbox">
                     <label for="select-all">Välj alla</label>
                 </div>
 
                 <div class="projects-list">
                     <?php foreach ($projects as $project): ?>
                         <div class="project-card">
-                            <input type="checkbox" name="selected[]" value="<?php echo htmlspecialchars($project['id'], ENT_QUOTES, 'UTF-8'); ?>" class="bulk-checkbox project-checkbox" onchange="updateBulkToolbar()">
+                            <input type="checkbox" name="selected[]" value="<?php echo htmlspecialchars($project['id'], ENT_QUOTES, 'UTF-8'); ?>" class="bulk-checkbox project-checkbox">
                             <div class="project-info">
                                 <?php if (!empty($project['coverImage'])): ?>
                                     <img src="<?php echo htmlspecialchars($project['coverImage'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?>" class="project-image">
@@ -377,7 +377,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
             <?php endforeach; ?>
 
-            <script>
+            <script <?php echo csp_nonce_attr(); ?>>
             function toggleSelectAll(checkbox) {
                 const checkboxes = document.querySelectorAll('.project-checkbox');
                 checkboxes.forEach(cb => cb.checked = checkbox.checked);
@@ -403,6 +403,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 selectAll.checked = checkboxes.length === allCheckboxes.length && allCheckboxes.length > 0;
                 selectAll.indeterminate = checkboxes.length > 0 && checkboxes.length < allCheckboxes.length;
             }
+
+            // Event bindings (CSP-compliant)
+            document.getElementById('select-all').addEventListener('change', function() { toggleSelectAll(this); });
+            document.querySelectorAll('.project-checkbox').forEach(function(cb) {
+                cb.addEventListener('change', updateBulkToolbar);
+            });
+            document.querySelectorAll('[data-confirm]').forEach(function(el) {
+                el.addEventListener('click', function(e) {
+                    if (!confirm(this.dataset.confirm)) e.preventDefault();
+                });
+            });
             </script>
         <?php endif; ?>
     </div>

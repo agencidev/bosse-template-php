@@ -178,7 +178,7 @@ if (!is_logged_in()) {
         </div>
     </div>
 
-    <script>
+    <script <?php echo csp_nonce_attr(); ?>>
         const responses = {
             default: 'Det är en bra fråga. Baserat på webbens nuvarande status ser allt stabilt ut. Om du vill att vi tittar närmare på något specifikt, rekommenderar jag att du kontaktar teamet så kan vi ta det därifrån.',
             struktur: 'Webbens struktur är välorganiserad med tydliga sidor och navigering. Alla huvudsidor är indexerade och tillgängliga. Om du upplever att något saknas eller kan förbättras, kan teamet titta på det som en del av det löpande arbetet.',

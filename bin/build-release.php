@@ -32,13 +32,15 @@ $updatableFiles = [
     'cms/helpers.php',
     'cms/projects/index.php', 'cms/projects/new.php', 'cms/projects/edit.php',
     'security/csrf.php', 'security/session.php', 'security/validation.php',
-    'security/super-admin.php', 'security/updater.php',
+    'security/super-admin.php', 'security/updater.php', 'security/csp.php',
     'seo/meta.php', 'seo/schema.php', 'seo/sitemap.php',
     'includes/admin-bar.php', 'includes/cookie-consent.php',
     'includes/mailer.php', 'includes/agenci-badge.php',
-    'assets/css/reset.css', 'assets/css/cms.css',
+    'assets/css/variables.css', 'assets/css/reset.css', 'assets/css/typography.css',
+    'assets/css/components.css', 'assets/css/cms.css', 'assets/css/main.css',
     'assets/js/cms.js',
     '.windsurfrules',
+    'bosse-health.php',
 ];
 
 // Hela mappar som ingar
@@ -67,6 +69,37 @@ if (!$version) {
 }
 
 echo "Bygger release v{$version}...\n";
+
+// --- CSS Concat: Bygg ihop alla CSS-filer till en main.css ---
+
+$cssDir = $templateRoot . '/assets/css';
+$cssOrder = ['variables.css', 'reset.css', 'typography.css', 'components.css', 'cms.css'];
+$mainCssContent = "/* Bosse CSS v{$version} — Auto-generated, do not edit */\n\n";
+
+foreach ($cssOrder as $cssFile) {
+    $cssPath = $cssDir . '/' . $cssFile;
+    if (file_exists($cssPath)) {
+        $mainCssContent .= "/* === {$cssFile} === */\n";
+        $mainCssContent .= file_get_contents($cssPath) . "\n\n";
+    }
+}
+
+// Append main.css utilities (without @import lines)
+$mainOriginal = file_get_contents($cssDir . '/main.css');
+$mainUtilities = preg_replace('/@import\s+url\([^)]+\);\s*/', '', $mainOriginal);
+$mainCssContent .= "/* === utilities === */\n" . trim($mainUtilities) . "\n\n";
+
+// Append overrides last
+$overridesPath = $cssDir . '/overrides.css';
+if (file_exists($overridesPath) && filesize($overridesPath) > 0) {
+    $mainCssContent .= "/* === overrides.css === */\n";
+    $mainCssContent .= file_get_contents($overridesPath) . "\n";
+}
+
+// Write concatenated CSS to temp location for ZIP inclusion
+$concatCssPath = $templateRoot . '/assets/css/main.built.css';
+file_put_contents($concatCssPath, $mainCssContent);
+echo "  CSS concat: " . count($cssOrder) . " filer + utilities + overrides → main.built.css\n";
 
 // --- Skapa dist-struktur ---
 
@@ -106,6 +139,12 @@ foreach ($updatableFiles as $file) {
     }
 }
 
+// Override main.css with concatenated version in the ZIP
+if (file_exists($concatCssPath)) {
+    $zip->addFile($concatCssPath, 'assets/css/main.css');
+    echo "  main.css ersatt med konkatenerad version i ZIP\n";
+}
+
 // Lagg till hela mappar
 foreach ($updatableDirs as $dir) {
     $dirPath = $templateRoot . '/' . $dir;
@@ -122,6 +161,11 @@ if (is_dir($migrationsDir)) {
 }
 
 $zip->close();
+
+// Cleanup temp CSS
+if (file_exists($concatCssPath)) {
+    @unlink($concatCssPath);
+}
 
 echo "  ZIP skapad: {$zipPath} ({$fileCount} filer)\n";
 

@@ -633,6 +633,6 @@ if (file_exists($updateLogFile)) {
         </div>
     </div>
     <?php include __DIR__ . '/../includes/agenci-badge.php'; ?>
-    <script>fetch('/dashboard?_auto_update=1').catch(function(){});</script>
+    <script <?php echo csp_nonce_attr(); ?>>fetch('/dashboard?_auto_update=1').catch(function(){});</script>
 </body>
 </html>
