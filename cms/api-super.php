@@ -374,6 +374,22 @@ function handle_save_config(): void {
         if (!$r['success']) $failures[] = 'GITHUB_TOKEN';
     }
 
+    // Add SMTP defines if missing in config.php
+    if (!empty($input['smtp_host'])) {
+        $hasSmtpHost = strpos($config, "define('SMTP_HOST'") !== false;
+        if (!$hasSmtpHost) {
+            $smtpBlock = "\n// SMTP\n";
+            $smtpBlock .= "define('SMTP_HOST', " . var_export($input['smtp_host'], true) . ");\n";
+            $smtpBlock .= "define('SMTP_PORT', " . (int)($input['smtp_port'] ?? 465) . ");\n";
+            $smtpBlock .= "define('SMTP_ENCRYPTION', " . var_export($input['smtp_encryption'] ?? 'ssl', true) . ");\n";
+            $smtpBlock .= "define('SMTP_USERNAME', " . var_export($input['smtp_username'] ?? '', true) . ");\n";
+            if (!empty($input['smtp_password'])) {
+                $smtpBlock .= "define('SMTP_PASSWORD', " . var_export($input['smtp_password'], true) . ");\n";
+            }
+            $config = rtrim($config) . "\n" . $smtpBlock;
+        }
+    }
+
     // Add GitHub defines if missing in config.php
     if (!empty($input['github_repo']) || !empty($input['github_token'])) {
         $hasGithubRepo = strpos($config, "define('GITHUB_REPO'") !== false;

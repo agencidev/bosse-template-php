@@ -96,9 +96,9 @@ function safe_config_replace(string $pattern, string $replacement, string $subje
         return ['config' => $subject, 'success' => false];
     }
     if ($count === 0) {
-        // Pattern didn't match — could mean the value is already correct or config format changed
-        error_log("Config update NOTE: pattern did not match for {$constantName} (may already be correct)");
-        return ['config' => $subject, 'success' => true];
+        // Pattern didn't match — constant missing or format changed
+        error_log("Config update WARNING: pattern did not match for {$constantName}");
+        return ['config' => $subject, 'success' => false];
     }
     return ['config' => $result, 'success' => true];
 }
