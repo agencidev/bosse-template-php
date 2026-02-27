@@ -210,6 +210,11 @@ $is_frontend = !$is_cms;
 body.has-admin-bar {
     padding-top: 3.5rem;
 }
+
+/* Hide legacy CMS link in site headers — admin bar provides dashboard access */
+.header__nav-link--admin {
+    display: none !important;
+}
 </style>
 
 <script <?php echo csp_nonce_attr(); ?>>
