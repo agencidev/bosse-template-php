@@ -18,7 +18,7 @@ Följande filer och mappar tillhör Bosse-ramverket och uppdateras automatiskt.
 - `includes/agenci-badge.php` — Powered by-badge
 
 ### Mappar du ALDRIG får ändra:
-- `cms/` — Hela CMS-systemet (admin, dashboard, API, projects) — undantag: `cms/extensions/`
+- `cms/` — Hela CMS-systemet (admin, dashboard, API, projects, tickets, support) — undantag: `cms/extensions/`
 - `security/` — Säkerhetsmoduler (session, CSRF, validering, updater)
 - `bin/` — Build-scripts
 - `templates/` — Systemmallar

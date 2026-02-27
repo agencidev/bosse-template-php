@@ -92,3 +92,5 @@ Använd ALLTID `editable_text()` och `editable_image()` för redigerbart innehå
 - `/admin` — Logga in
 - `/dashboard` — Översikt
 - `/projects` — Hantera inlägg
+- `/tickets` — Ärendehantering
+- `/support` — Skapa supportärende (skapar ticket direkt, inget SMTP krävs)

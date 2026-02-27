@@ -390,6 +390,10 @@ require_once __DIR__ . '/../seo/meta.php';
 ├── cms/                   # Admin-sidor
 │   ├── admin.php          # Inloggning
 │   ├── dashboard.php      # Översikt
+│   ├── support.php        # Supportärende (skapar ticket direkt)
+│   ├── tickets.php        # Ärendelista
+│   ├── ticket-single.php  # Enskilt ärende
+│   ├── tickets-db.php     # Ärende-databas (JSON)
 │   └── projects/          # Inlägg-hantering
 │       ├── index.php      # Lista inlägg
 │       ├── new.php        # Skapa inlägg
