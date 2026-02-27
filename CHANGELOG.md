@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.5.63
+- Fix: "Aktivera redigering" visades på /tickets och /media
+- Fix: Lösenordsbyte via super-admin fungerade inte (regex saknade semikolon)
+- Fix: triggerAI-knappen kraschade (undefined event)
+- Fix: Upload-ikon felplacerad i bildväljaren
+- Ny: Ögon-ikon för lösenordsfält i setup + super-admin
+- Ändrad: Container 48rem på support/seo/settings
+- Ändrad: Enhetlig tillbaka-knapp på media-sidan
+- Borttagen: AI-chattsida (ai-agent backend kvar)
+- Borttagen: Meta-formulär från SEO-sidan
+
 ## 1.5.62
 - Fix: Updater läser allowlist från ZIP:ens updater.php (löser chicken-and-egg vid nya filer)
 - Fix: Support skapar tickets direkt via ticket_create() — inget SMTP krävs
