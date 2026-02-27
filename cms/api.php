@@ -123,6 +123,7 @@ function handleUpload() {
     }
 
     $key = $_POST['key'] ?? '';
+    $field = $_POST['field'] ?? '';
     if (empty($key)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'Key is required']);
@@ -147,12 +148,15 @@ function handleUpload() {
         $optResult = optimize_image($upload_path);
         $url = '/uploads/' . $filename;
 
+        // Build full content key (e.g. "hero.image" for nested storage)
+        $fullKey = !empty($field) ? $key . '.' . $field : $key;
+
         // Spara URL + bilddimensioner i en atomisk skrivning
-        $updates = [$key => $url];
+        $updates = [$fullKey => $url];
         $imgSize = @getimagesize($upload_path);
         if ($imgSize !== false) {
-            $updates[$key . '_width'] = $imgSize[0];
-            $updates[$key . '_height'] = $imgSize[1];
+            $updates[$fullKey . '_width'] = $imgSize[0];
+            $updates[$fullKey . '_height'] = $imgSize[1];
         }
         save_content_bulk($updates);
 
