@@ -2,7 +2,6 @@
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../security/session.php';
 require_once __DIR__ . '/../security/csrf.php';
-require_once __DIR__ . '/../includes/mailer.php';
 
 if (!is_logged_in()) {
     header('Location: /cms/admin.php');
@@ -10,69 +9,29 @@ if (!is_logged_in()) {
 }
 
 $sent = false;
-$mail_error = '';
+$error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_require();
-
     $subject = trim($_POST['subject'] ?? '');
     $message = trim($_POST['message'] ?? '');
 
     if (empty($subject) || empty($message)) {
-        $mail_error = 'Ämne och meddelande krävs.';
+        $error = 'Ämne och meddelande krävs.';
     } else {
-        $admin_user = defined('ADMIN_USERNAME') ? ADMIN_USERNAME : 'admin';
-        $site_name = defined('SITE_NAME') ? SITE_NAME : 'Webbplats';
-        $safe_subject = htmlspecialchars($subject, ENT_QUOTES, 'UTF-8');
-        $safe_message = nl2br(htmlspecialchars($message, ENT_QUOTES, 'UTF-8'));
-        $timestamp = date('Y-m-d H:i:s');
-
-        $htmlBody = <<<HTML
-<!DOCTYPE html>
-<html lang="sv">
-<head><meta charset="UTF-8"></head>
-<body style="font-family: 'DM Sans', sans-serif; color: #18181b; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <h2 style="color: #379b83; border-bottom: 2px solid #379b83; padding-bottom: 10px;">Supportärende</h2>
-    <table style="width: 100%; border-collapse: collapse;">
-        <tr><td style="padding: 8px 0; font-weight: 600; width: 120px;">Admin:</td><td style="padding: 8px 0;">{$admin_user}</td></tr>
-        <tr><td style="padding: 8px 0; font-weight: 600;">Ämne:</td><td style="padding: 8px 0;">{$safe_subject}</td></tr>
-        <tr><td style="padding: 8px 0; font-weight: 600;">Tidpunkt:</td><td style="padding: 8px 0;">{$timestamp}</td></tr>
-    </table>
-    <h3 style="margin-top: 20px;">Meddelande</h3>
-    <div style="background: #f4f4f5; padding: 15px; border-radius: 8px; line-height: 1.6;">{$safe_message}</div>
-    <p style="color: #71717a; font-size: 12px; margin-top: 30px;">Skickat via supportformuläret på {$site_name}</p>
-</body>
-</html>
-HTML;
-
-        $contact_email = defined('CONTACT_EMAIL') ? CONTACT_EMAIL : '';
-        $mail_subject = '[Support] ' . $subject;
-
-        if (empty($contact_email)) {
-            $mail_error = 'Kontaktadressen är inte konfigurerad.';
-        } else {
-            $result = send_mail($contact_email, $mail_subject, $htmlBody, [
-                'html' => true,
+        try {
+            require_once __DIR__ . '/tickets-db.php';
+            $admin_user = defined('ADMIN_USERNAME') ? ADMIN_USERNAME : 'admin';
+            ticket_create([
+                'source' => 'admin',
+                'name' => $admin_user,
+                'subject' => $subject,
+                'message' => $message,
             ]);
-
-            if ($result) {
-                $sent = true;
-
-                // Save as ticket (non-blocking)
-                try {
-                    require_once __DIR__ . '/tickets-db.php';
-                    ticket_create([
-                        'source' => 'admin',
-                        'name' => $admin_user,
-                        'subject' => $subject,
-                        'message' => $message,
-                    ]);
-                } catch (\Throwable $e) {
-                    error_log('Ticket creation failed: ' . $e->getMessage());
-                }
-            } else {
-                $mail_error = 'Meddelandet kunde inte skickas. Kontrollera SMTP-inställningarna.';
-            }
+            $sent = true;
+        } catch (\Throwable $e) {
+            $error = 'Ärendet kunde inte skapas. Försök igen.';
+            error_log('Ticket creation failed: ' . $e->getMessage());
         }
     }
 }
@@ -205,7 +164,7 @@ HTML;
                 <div class="success-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
                 <h1 class="success-title">Tack!</h1>
                 <p class="success-text">
-                    Ditt meddelande har skickats. Vi återkommer så snart som möjligt.
+                    Ditt ärende har registrerats. Vi återkommer så snart som möjligt.
                 </p>
                 <a href="/dashboard" class="button-primary">
                     Tillbaka till dashboard
@@ -214,15 +173,15 @@ HTML;
         <?php else: ?>
             <a href="/dashboard" class="back-link">← Tillbaka</a>
 
-            <?php if (!empty($mail_error)): ?>
+            <?php if (!empty($error)): ?>
             <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 0.75rem; padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
-                <p style="color: #dc2626; font-size: 0.875rem; margin: 0;"><?php echo htmlspecialchars($mail_error); ?></p>
+                <p style="color: #dc2626; font-size: 0.875rem; margin: 0;"><?php echo htmlspecialchars($error); ?></p>
             </div>
             <?php endif; ?>
 
             <h1 class="title">Support</h1>
             <p class="subtitle">
-                Har du frågor eller behöver hjälp? Skicka ett meddelande så återkommer vi.
+                Skapa ett supportärende så återkommer vi.
             </p>
 
             <div class="form-card">
@@ -253,7 +212,7 @@ HTML;
                     </div>
 
                     <button type="submit" class="button-primary">
-                        Skicka meddelande
+                        Skicka ärende
                     </button>
                 </form>
             </div>

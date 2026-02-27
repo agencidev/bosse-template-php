@@ -383,6 +383,25 @@ function apply_update(string $zipPath): array {
         return $result;
     }
 
+    // Read allowlist from ZIP's updater to avoid chicken-and-egg problem
+    $zipUpdatableFiles = UPDATABLE_FILES;
+    $zipUpdatableDirs = UPDATABLE_DIRS;
+    $zipUpdaterContent = $zip->getFromName('security/updater.php');
+    if ($zipUpdaterContent !== false) {
+        if (preg_match("/UPDATABLE_FILES\s*=\s*\[([^\]]+)\]/s", $zipUpdaterContent, $m)) {
+            preg_match_all("/'([^']+)'/", $m[1], $files);
+            if (!empty($files[1])) {
+                $zipUpdatableFiles = $files[1];
+            }
+        }
+        if (preg_match("/UPDATABLE_DIRS\s*=\s*\[([^\]]+)\]/s", $zipUpdaterContent, $m)) {
+            preg_match_all("/'([^']+)'/", $m[1], $dirs);
+            if (!empty($dirs[1])) {
+                $zipUpdatableDirs = $dirs[1];
+            }
+        }
+    }
+
     // Extrahera bara godkända filer
     for ($i = 0; $i < $zip->numFiles; $i++) {
         $filename = $zip->getNameIndex($i);
@@ -403,8 +422,17 @@ function apply_update(string $zipPath): array {
             continue;
         }
 
-        // Kolla om filen far uppdateras
-        if (!is_updatable_file($filename)) {
+        // Kolla om filen far uppdateras (mot ZIP:ens allowlist)
+        $isUpdatable = in_array($filename, $zipUpdatableFiles, true);
+        if (!$isUpdatable) {
+            foreach ($zipUpdatableDirs as $dir) {
+                if (str_starts_with($filename, $dir . '/')) {
+                    $isUpdatable = true;
+                    break;
+                }
+            }
+        }
+        if (!$isUpdatable) {
             $result['skipped_files'][] = $filename . ' (inte i allowlist)';
             continue;
         }
