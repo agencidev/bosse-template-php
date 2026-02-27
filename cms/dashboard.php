@@ -456,7 +456,7 @@ if (file_exists($updateLogFile)) {
                 <span class="label">Redigera hemsidan</span>
             </a>
 
-            <a href="/cms/media" class="card">
+            <a href="/media" class="card">
                 <?php if ($mediaCount > 0): ?>
                 <span class="badge"><?php echo $mediaCount; ?></span>
                 <?php endif; ?>
