@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.64
+- Ny: Drag & drop i bildväljaren (utöver klick-upload)
+- Fix: Bilder visades dubbelt i mediabiblioteket (WebP-kopior filtreras)
+- Ändrad: Inläggssidan — bredare container (48rem), moderna bulk-knappar, pill-badges, dark theme
+
 ## 1.5.63
 - Fix: "Aktivera redigering" visades på /tickets och /media
 - Fix: Lösenordsbyte via super-admin fungerade inte (regex saknade semikolon)

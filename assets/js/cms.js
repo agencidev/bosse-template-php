@@ -470,11 +470,10 @@ async function openMediaLibraryModal(contentKey, field) {
   fileInput.style.display = 'none';
   uploadZone.onclick = function() { fileInput.click(); };
 
-  fileInput.addEventListener('change', async function(e) {
-    if (!e.target.files || !e.target.files[0]) return;
-    const file = e.target.files[0];
+  const uploadDefaultHTML = uploadZone.innerHTML;
 
-    // Re-fetch CSRF in case it changed
+  // Shared upload handler for both file input and drag & drop
+  async function handleUpload(file) {
     let freshCsrf = csrfToken;
     try {
       const tokenRes = await fetch('/cms/api.php?action=get&_t=' + Date.now());
@@ -500,13 +499,34 @@ async function openMediaLibraryModal(contentKey, field) {
         closeModal();
       } else {
         showNotification(data.error || 'Kunde inte ladda upp bild', 'error');
-        uploadZone.innerHTML = '<span style="color:rgba(255,255,255,0.5);font-size:0.875rem;font-family:DM Sans,sans-serif">Ladda upp ny bild</span>';
+        uploadZone.innerHTML = uploadDefaultHTML;
       }
     } catch(err) {
       showNotification('Nätverksfel vid uppladdning', 'error');
-      uploadZone.innerHTML = '<span style="color:rgba(255,255,255,0.5);font-size:0.875rem;font-family:DM Sans,sans-serif">Ladda upp ny bild</span>';
+      uploadZone.innerHTML = uploadDefaultHTML;
     }
     fileInput.value = '';
+  }
+
+  fileInput.addEventListener('change', function(e) {
+    if (!e.target.files || !e.target.files[0]) return;
+    handleUpload(e.target.files[0]);
+  });
+
+  // Drag & drop support
+  uploadZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.style.borderColor = 'rgba(55,155,131,0.6)';
+  });
+  uploadZone.addEventListener('dragleave', function() {
+    this.style.borderColor = 'rgba(255,255,255,0.15)';
+  });
+  uploadZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.style.borderColor = 'rgba(255,255,255,0.15)';
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleUpload(e.dataTransfer.files[0]);
+    }
   });
 
   // Image grid

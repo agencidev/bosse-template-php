@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 3rem 1.5rem;
         }
         .container {
-            max-width: 36rem;
+            max-width: 48rem;
             margin: 0 auto;
         }
         .back-link {
@@ -150,15 +150,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .project-card {
             background: rgba(255,255,255,0.05);
             border-radius: 1rem;
-            border: 1px solid rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.08);
             padding: 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: box-shadow 0.2s;
+            transition: border-color 0.2s;
         }
         .project-card:hover {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-color: rgba(255,255,255,0.2);
         }
         .project-info {
             display: flex;
@@ -187,10 +187,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: rgba(255,255,255,0.50);
         }
         .status-published {
-            color: #16a34a;
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: rgba(22,163,74,0.15);
+            color: #4ade80;
         }
         .status-draft {
-            color: #ca8a04;
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: rgba(202,138,4,0.15);
+            color: #fbbf24;
         }
         .project-actions {
             display: flex;
@@ -214,11 +226,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: rgba(255,255,255,0.15);
         }
         .button-delete {
-            background: #fef2f2;
-            color: #dc2626;
+            background: rgba(239,68,68,0.12);
+            color: rgba(255,255,255,0.7);
         }
         .button-delete:hover {
-            background: #fee2e2;
+            background: rgba(239,68,68,0.2);
+            color: white;
         }
         .bulk-toolbar {
             display: none;
@@ -247,25 +260,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transition: all 0.2s;
         }
         .bulk-btn-publish {
-            background: #22c55e;
-            color: white;
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.85);
         }
         .bulk-btn-publish:hover {
-            background: #16a34a;
+            background: rgba(255,255,255,0.15);
+            color: white;
         }
         .bulk-btn-unpublish {
-            background: #f59e0b;
-            color: white;
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.85);
         }
         .bulk-btn-unpublish:hover {
-            background: #d97706;
-        }
-        .bulk-btn-delete {
-            background: #ef4444;
+            background: rgba(255,255,255,0.15);
             color: white;
         }
+        .bulk-btn-delete {
+            background: rgba(239,68,68,0.15);
+            color: rgba(255,255,255,0.85);
+        }
         .bulk-btn-delete:hover {
-            background: #dc2626;
+            background: rgba(239,68,68,0.25);
+            color: white;
         }
         .bulk-checkbox {
             width: 1.25rem;
@@ -294,9 +310,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-bottom: 1rem;
         }
         .alert-success {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #166534;
+            background: rgba(22,163,74,0.12);
+            border: 1px solid rgba(22,163,74,0.25);
+            color: #4ade80;
         }
     </style>
 </head>
