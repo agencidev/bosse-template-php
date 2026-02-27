@@ -265,13 +265,12 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 10010;
+    z-index: 10000;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 1rem;
     animation: fadeIn 0.2s ease-out;
-    pointer-events: none;
 }
 
 @keyframes fadeIn {
@@ -291,7 +290,6 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
     max-height: 90vh;
     overflow-y: auto;
     animation: scaleIn 0.2s ease-out;
-    pointer-events: auto;
 }
 
 @keyframes scaleIn {

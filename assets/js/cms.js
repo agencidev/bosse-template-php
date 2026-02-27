@@ -406,7 +406,7 @@ async function openMediaLibraryModal(contentKey, field) {
     inset: '0',
     background: 'rgba(0,0,0,0.6)',
     backdropFilter: 'blur(4px)',
-    zIndex: '10003',
+    zIndex: '10002',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -624,7 +624,7 @@ function showNotification(message, type = 'info', options = {}) {
         display: flex;
         flex-direction: column;
         gap: 0.75rem;
-        z-index: 10002;
+        z-index: 10001;
         pointer-events: none;
       }
       .cms-toast {

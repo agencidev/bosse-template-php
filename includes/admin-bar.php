@@ -67,7 +67,7 @@ $is_frontend = !$is_cms;
     top: 0;
     left: 0;
     right: 0;
-    z-index: 10005;
+    z-index: 10000;
     height: 3.5rem;
     background: #033234;
     color: white;
@@ -209,10 +209,6 @@ $is_frontend = !$is_cms;
 
 body.has-admin-bar {
     padding-top: 3.5rem;
-}
-
-.has-admin-bar .header {
-    top: 3.5rem;
 }
 
 /* Hide legacy CMS link in site headers — admin bar provides dashboard access */
