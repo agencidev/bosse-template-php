@@ -45,6 +45,7 @@ $routes = [
     '/api/super' => '/cms/api-super.php',
     '/bosse-health' => '/bosse-health.php',
     '/projekt' => '/pages/projekt.php',
+    '/tickets' => '/cms/tickets.php',
 ];
 
 // Load custom routes from extensions (survives updates)
@@ -65,6 +66,21 @@ if (isset($routes[$uri])) {
     }
 
     require __DIR__ . $routes[$uri];
+    return true;
+}
+
+// Dynamic route: /tickets/{id}
+if (preg_match('#^/tickets/(\d+)/?$#', $uri, $matches)) {
+    $_GET['id'] = $matches[1];
+    $_SERVER['SCRIPT_NAME'] = '/cms/ticket-single.php';
+    $_SERVER['PHP_SELF'] = '/cms/ticket-single.php';
+
+    if ($query) {
+        parse_str($query, $extraParams);
+        $_GET = array_merge($_GET, $extraParams);
+    }
+
+    require __DIR__ . '/cms/ticket-single.php';
     return true;
 }
 

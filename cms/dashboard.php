@@ -51,6 +51,15 @@ if (file_exists($projectsFile)) {
     }
 }
 
+// Ticket count
+$ticketBadge = 0;
+try {
+    require_once __DIR__ . '/tickets-db.php';
+    $ticketBadge = is_super_admin() ? ticket_count_unresolved() : ticket_count_all();
+} catch (\Throwable $e) {
+    // tickets-db not yet available
+}
+
 // PHP-version
 $phpVersion = PHP_VERSION;
 $phpOk = version_compare($phpVersion, '8.1', '>=');
@@ -468,6 +477,18 @@ if (file_exists($updateLogFile)) {
                 <span class="label">Media</span>
             </a>
 
+            <a href="/tickets" class="card">
+                <?php if ($ticketBadge > 0): ?>
+                <span class="badge"><?php echo $ticketBadge; ?></span>
+                <?php endif; ?>
+                <div class="icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 9v.906a2.25 2.25 0 0 1-1.183 1.981l-6.478 3.488M2.25 9v.906a2.25 2.25 0 0 0 1.183 1.981l6.478 3.488m8.839 2.51-4.66-2.51m0 0-1.023-.55a2.25 2.25 0 0 0-2.134 0l-1.022.55m0 0-4.661 2.51m16.5 1.615a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V8.844a2.25 2.25 0 0 1 1.183-1.981l7.5-4.039a2.25 2.25 0 0 1 2.134 0l7.5 4.039a2.25 2.25 0 0 1 1.183 1.98V19.5Z" />
+                    </svg>
+                </div>
+                <span class="label">Ärenden</span>
+            </a>
+
             <a href="/cms/support" class="card">
                 <div class="icon">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -657,6 +678,24 @@ if (file_exists($updateLogFile)) {
         </div>
     </div>
     <?php include __DIR__ . '/../includes/agenci-badge.php'; ?>
-    <script <?php echo csp_nonce_attr(); ?>>fetch('/dashboard?_auto_update=1').catch(function(){});</script>
+    <script <?php echo csp_nonce_attr(); ?>>
+    fetch('/dashboard?_auto_update=1').catch(function(){});
+    <?php
+    // Pseudo-cron: trigger AI agent if >24h since last run and new tickets exist
+    try {
+        if (is_super_admin() && defined('ANTHROPIC_API_KEY') && ANTHROPIC_API_KEY !== '') {
+            $aiStateFile = DATA_PATH . '/ai-agent-state.json';
+            $aiLastRun = 0;
+            if (file_exists($aiStateFile)) {
+                $aiState = json_decode(file_get_contents($aiStateFile), true);
+                $aiLastRun = $aiState['timestamp'] ?? 0;
+            }
+            if ((time() - $aiLastRun) > 86400 && ticket_count_by_status('new') > 0) {
+                echo "fetch('/cms/api.php?action=ai-resolve',{method:'POST',headers:{'Content-Type':'application/json'}}).catch(function(){});";
+            }
+        }
+    } catch (\Throwable $e) { /* silently skip */ }
+    ?>
+    </script>
 </body>
 </html>

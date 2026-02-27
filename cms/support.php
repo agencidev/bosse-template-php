@@ -57,6 +57,19 @@ HTML;
 
             if ($result) {
                 $sent = true;
+
+                // Save as ticket (non-blocking)
+                try {
+                    require_once __DIR__ . '/tickets-db.php';
+                    ticket_create([
+                        'source' => 'admin',
+                        'name' => $admin_user,
+                        'subject' => $subject,
+                        'message' => $message,
+                    ]);
+                } catch (\Throwable $e) {
+                    error_log('Ticket creation failed: ' . $e->getMessage());
+                }
             } else {
                 $mail_error = 'Meddelandet kunde inte skickas. Kontrollera SMTP-inställningarna.';
             }

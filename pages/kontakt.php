@@ -107,6 +107,22 @@ HTML;
                 if ($sent) {
                     $success = true;
                     $_SESSION['contact_timestamps'][] = time();
+
+                    // Save as ticket (non-blocking)
+                    try {
+                        require_once __DIR__ . '/../cms/tickets-db.php';
+                        ticket_create([
+                            'source' => 'contact',
+                            'name' => $form_data['name'],
+                            'email' => $form_data['email'],
+                            'phone' => $form_data['phone'],
+                            'subject' => $form_data['subject'],
+                            'message' => $form_data['message'],
+                        ]);
+                    } catch (\Throwable $e) {
+                        error_log('Ticket creation failed: ' . $e->getMessage());
+                    }
+
                     // Rensa formulärdata vid lyckad sändning
                     $form_data = ['name' => '', 'email' => '', 'phone' => '', 'subject' => '', 'message' => ''];
                 } else {

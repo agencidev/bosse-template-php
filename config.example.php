@@ -41,6 +41,10 @@ define('HOURS_WEEKENDS', 'Stängt');
 // Environment
 define('ENVIRONMENT', 'production');
 
+// AI Agent (Claude API for automatic ticket resolution)
+define('ANTHROPIC_API_KEY', '');
+define('CRON_SECRET', '');
+
 // Agenci (satts vid installation, synlig bara i config.php)
 define('AGENCI_SUPER_ADMIN_TOKEN', ''); // Tom = inaktiverad
 define('AGENCI_UPDATE_URL', 'https://raw.githubusercontent.com/agencidev/bosse-updates/main');

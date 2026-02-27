@@ -12,14 +12,30 @@ require_once __DIR__ . '/content.php';
 
 header('Content-Type: application/json');
 
-// Kräv inloggning
+$action = $_GET['action'] ?? '';
+
+// ai-resolve supports cron token auth — check before session gate
+if ($action === 'ai-resolve') {
+    $cronToken = $_GET['cron_token'] ?? '';
+    $hasCronAuth = defined('CRON_SECRET') && CRON_SECRET !== '' && $cronToken !== ''
+        && hash_equals(CRON_SECRET, $cronToken);
+    $hasSuperAdmin = is_logged_in() && is_super_admin();
+
+    if (!$hasCronAuth && !$hasSuperAdmin) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'Forbidden']);
+        exit;
+    }
+    handleAiResolve();
+    exit;
+}
+
+// Kräv inloggning for all other actions
 if (!is_logged_in()) {
     http_response_code(401);
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);
     exit;
 }
-
-$action = $_GET['action'] ?? '';
 
 switch ($action) {
     case 'get':
@@ -48,6 +64,14 @@ switch ($action) {
 
     case 'media-select':
         handleMediaSelect();
+        break;
+
+    case 'ticket-list':
+        handleTicketList();
+        break;
+
+    case 'ticket-update':
+        handleTicketUpdate();
         break;
 
     default:
@@ -394,5 +418,104 @@ function handleMediaSelect() {
     } else {
         http_response_code(500);
         echo json_encode(['success' => false, 'error' => 'Failed to save content']);
+    }
+}
+
+/**
+ * List tickets (GET)
+ */
+function handleTicketList() {
+    require_once __DIR__ . '/tickets-db.php';
+
+    $superAdmin = is_super_admin();
+    $page = max(1, (int) ($_GET['page'] ?? 1));
+    $limit = 20;
+    $offset = ($page - 1) * $limit;
+
+    $filters = [];
+    if (!empty($_GET['status'])) $filters['status'] = $_GET['status'];
+    if ($superAdmin && !empty($_GET['source'])) $filters['source'] = $_GET['source'];
+    if ($superAdmin && !empty($_GET['category'])) $filters['category'] = $_GET['category'];
+
+    $result = ticket_list($filters, $limit, $offset);
+
+    // Strip sensitive fields for non-super admin
+    if (!$superAdmin) {
+        $result['tickets'] = array_map(function ($t) {
+            return [
+                'id' => $t['id'],
+                'subject' => $t['subject'],
+                'status' => $t['status'],
+                'created_at' => $t['created_at'],
+            ];
+        }, $result['tickets']);
+    }
+
+    echo json_encode(['success' => true, 'data' => $result]);
+}
+
+/**
+ * Update ticket (POST, requires super admin)
+ */
+function handleTicketUpdate() {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'error' => 'Method not allowed']);
+        exit;
+    }
+
+    if (!is_super_admin()) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'Super admin required']);
+        exit;
+    }
+
+    if (!csrf_verify_json()) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'CSRF validation failed']);
+        exit;
+    }
+
+    require_once __DIR__ . '/tickets-db.php';
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $id = (int) ($data['id'] ?? 0);
+
+    if ($id <= 0) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Ticket ID required']);
+        exit;
+    }
+
+    $updates = [];
+    if (isset($data['status'])) $updates['status'] = $data['status'];
+    if (isset($data['admin_notes'])) $updates['admin_notes'] = $data['admin_notes'];
+    if (isset($data['category'])) $updates['category'] = $data['category'];
+
+    $result = ticket_update($id, $updates);
+    echo json_encode(['success' => $result]);
+}
+
+/**
+ * AI resolve endpoint (supports cron token + super admin auth)
+ */
+function handleAiResolve() {
+    require_once __DIR__ . '/tickets-db.php';
+    require_once __DIR__ . '/ai-agent.php';
+
+    $ticketId = (int) ($_GET['ticket_id'] ?? 0);
+
+    if ($ticketId > 0) {
+        // Resolve single ticket
+        $result = ai_resolve_ticket($ticketId);
+        echo json_encode(['success' => $result['success'], 'message' => $result['message'], 'actions' => $result['actions'] ?? []]);
+    } else {
+        // Batch process new tickets
+        $processed = ai_process_new_tickets();
+        echo json_encode([
+            'success' => true,
+            'processed' => count($processed),
+            'details' => $processed,
+        ]);
     }
 }

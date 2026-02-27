@@ -31,6 +31,7 @@ define('ROOT_PATH', __DIR__);
 define('DATA_PATH', ROOT_PATH . '/data');
 define('UPLOADS_PATH', ROOT_PATH . '/uploads');
 define('ASSETS_PATH', ROOT_PATH . '/assets');
+define('TICKETS_DB_PATH', DATA_PATH . '/tickets.db');
 
 // Debug-läge
 define('DEBUG', ENVIRONMENT === 'development');

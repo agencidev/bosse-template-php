@@ -56,6 +56,12 @@ RewriteRule ^cookies/?$ pages/cookies.php [L]
 # /integritetspolicy -> /pages/integritetspolicy.php
 RewriteRule ^integritetspolicy/?$ pages/integritetspolicy.php [L]
 
+# /tickets -> /cms/tickets.php
+RewriteRule ^tickets/?$ cms/tickets.php [L]
+
+# /tickets/{id} -> /cms/ticket-single.php?id={id}
+RewriteRule ^tickets/(\d+)/?$ cms/ticket-single.php?id=$1 [QSA,L]
+
 # /projekt -> /pages/projekt.php
 RewriteRule ^projekt/?$ pages/projekt.php [L]
 

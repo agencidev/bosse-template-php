@@ -17,6 +17,7 @@ const UPDATABLE_FILES = [
     'cms/api.php', 'cms/api-super.php', 'cms/super-admin.php',
     'cms/seo.php', 'cms/support.php', 'cms/ai.php', 'cms/settings.php',
     'cms/helpers.php', 'cms/media.php',
+    'cms/tickets-db.php', 'cms/tickets.php', 'cms/ticket-single.php', 'cms/ai-agent.php',
     'cms/projects/index.php', 'cms/projects/new.php', 'cms/projects/edit.php',
     'security/csrf.php', 'security/session.php', 'security/validation.php',
     'security/super-admin.php', 'security/updater.php', 'security/csp.php',
