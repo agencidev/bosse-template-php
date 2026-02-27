@@ -38,6 +38,18 @@ switch ($action) {
         handleBackup();
         break;
 
+    case 'media-list':
+        handleMediaList();
+        break;
+
+    case 'media-delete':
+        handleMediaDelete();
+        break;
+
+    case 'media-select':
+        handleMediaSelect();
+        break;
+
     default:
         $customHandled = false;
         if (file_exists(__DIR__ . '/extensions/api-handlers.php')) {
@@ -239,4 +251,148 @@ function handleBackup() {
     // Rensa upp
     @unlink($tmpFile);
     exit;
+}
+
+/**
+ * Lista bilder i mediabiblioteket
+ */
+function handleMediaList() {
+    $allowedExt = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+    $images = [];
+
+    if (is_dir(UPLOADS_PATH)) {
+        $files = scandir(UPLOADS_PATH);
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') continue;
+            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            if (!in_array($ext, $allowedExt, true)) continue;
+
+            $fullPath = UPLOADS_PATH . '/' . $file;
+            if (!is_file($fullPath)) continue;
+
+            $images[] = [
+                'filename' => $file,
+                'url' => '/uploads/' . $file,
+                'size' => filesize($fullPath),
+                'modified' => filemtime($fullPath),
+            ];
+        }
+    }
+
+    // Sort newest first
+    usort($images, fn($a, $b) => $b['modified'] - $a['modified']);
+
+    echo json_encode([
+        'success' => true,
+        'images' => $images,
+        '_csrf' => csrf_token(),
+    ]);
+}
+
+/**
+ * Radera bild från mediabiblioteket
+ */
+function handleMediaDelete() {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'error' => 'Method not allowed']);
+        exit;
+    }
+
+    if (!csrf_verify_json()) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'CSRF validation failed']);
+        exit;
+    }
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $filename = $data['filename'] ?? '';
+
+    // Validate filename — no path traversal
+    if (empty($filename) || str_contains($filename, '/') || str_contains($filename, '\\') || str_contains($filename, '..')) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Invalid filename']);
+        exit;
+    }
+
+    $filePath = UPLOADS_PATH . '/' . $filename;
+    $realPath = realpath($filePath);
+    $realUploads = realpath(UPLOADS_PATH);
+
+    // Ensure file is inside uploads directory
+    if ($realPath === false || $realUploads === false || !str_starts_with($realPath, $realUploads . '/')) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'File not found']);
+        exit;
+    }
+
+    // Check if referenced
+    $referenced = false;
+    $contentFile = DATA_PATH . '/content.json';
+    $projectsFile = DATA_PATH . '/projects.json';
+    $rawJson = '';
+    if (file_exists($contentFile)) $rawJson .= file_get_contents($contentFile);
+    if (file_exists($projectsFile)) $rawJson .= file_get_contents($projectsFile);
+    if (str_contains($rawJson, $filename)) {
+        $referenced = true;
+    }
+
+    // Delete file
+    if (!@unlink($realPath)) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Could not delete file']);
+        exit;
+    }
+
+    // Delete WebP companion if it exists
+    $pathInfo = pathinfo($realPath);
+    $webpPath = $pathInfo['dirname'] . '/' . $pathInfo['filename'] . '.webp';
+    if (file_exists($webpPath)) {
+        @unlink($webpPath);
+    }
+
+    echo json_encode([
+        'success' => true,
+        'referenced' => $referenced,
+        '_csrf' => csrf_token(),
+    ]);
+}
+
+/**
+ * Välj befintlig bild från mediabiblioteket
+ */
+function handleMediaSelect() {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'error' => 'Method not allowed']);
+        exit;
+    }
+
+    if (!csrf_verify_json()) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'CSRF validation failed']);
+        exit;
+    }
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $key = $data['key'] ?? '';
+    $field = $data['field'] ?? '';
+    $url = $data['url'] ?? '';
+
+    if (empty($key) || empty($field) || empty($url)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'key, field and url are required']);
+        exit;
+    }
+
+    // Use save_content_bulk with dot-notation to update only the specific field
+    $fullKey = $key . '.' . $field;
+    $result = save_content_bulk([$fullKey => $url]);
+
+    if ($result) {
+        echo json_encode(['success' => true, '_csrf' => csrf_token()]);
+    } else {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Failed to save content']);
+    }
 }

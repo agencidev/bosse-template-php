@@ -32,6 +32,9 @@ RewriteRule ^admin/?$ cms/admin.php [L]
 # /dashboard -> /cms/dashboard.php
 RewriteRule ^dashboard/?$ cms/dashboard.php [L]
 
+# /media -> /cms/media.php
+RewriteRule ^media/?$ cms/media.php [L]
+
 # /setup -> /setup.php
 RewriteRule ^setup/?$ setup.php [L]
 

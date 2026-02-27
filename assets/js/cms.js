@@ -374,15 +374,232 @@ function initImageUpload() {
 }
 
 /**
- * Trigger image upload
+ * Trigger image upload — opens media library modal
  */
 function uploadImage(contentKey, field) {
   if (!window.CMS || !window.CMS.isEditMode) return;
-  
-  const input = document.getElementById('cms-image-upload');
-  input.dataset.contentKey = contentKey;
-  input.dataset.field = field;
-  input.click();
+  openMediaLibraryModal(contentKey, field);
+}
+
+/**
+ * Open media library modal for selecting or uploading images
+ */
+async function openMediaLibraryModal(contentKey, field) {
+  // Fetch images and CSRF token
+  let images = [];
+  let csrfToken = '';
+  try {
+    const res = await fetch('/cms/api.php?action=media-list&_t=' + Date.now());
+    const data = await res.json();
+    if (data.success) {
+      images = data.images || [];
+      csrfToken = data._csrf || '';
+    }
+  } catch (e) {
+    console.error('Failed to load media library:', e);
+  }
+
+  // Create overlay
+  const overlay = document.createElement('div');
+  Object.assign(overlay.style, {
+    position: 'fixed',
+    inset: '0',
+    background: 'rgba(0,0,0,0.6)',
+    backdropFilter: 'blur(4px)',
+    zIndex: '10002',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '1.5rem'
+  });
+
+  // Create panel
+  const panel = document.createElement('div');
+  Object.assign(panel.style, {
+    background: '#033234',
+    borderRadius: '1rem',
+    border: '1px solid rgba(255,255,255,0.12)',
+    maxWidth: '56rem',
+    width: '100%',
+    maxHeight: '85vh',
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+    boxShadow: '0 25px 50px rgba(0,0,0,0.4)'
+  });
+
+  // Header
+  const header = document.createElement('div');
+  Object.assign(header.style, {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '1rem 1.25rem',
+    borderBottom: '1px solid rgba(255,255,255,0.10)'
+  });
+  header.innerHTML = '<span style="font-size:1.125rem;font-weight:600;color:white;font-family:DM Sans,sans-serif">Välj bild</span>';
+  const closeBtn = document.createElement('button');
+  Object.assign(closeBtn.style, {
+    background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)',
+    fontSize: '1.5rem', cursor: 'pointer', lineHeight: '1', padding: '0.25rem'
+  });
+  closeBtn.innerHTML = '&times;';
+  closeBtn.onclick = closeModal;
+  header.appendChild(closeBtn);
+
+  // Upload zone
+  const uploadZone = document.createElement('div');
+  Object.assign(uploadZone.style, {
+    margin: '1rem 1.25rem 0.75rem',
+    padding: '1.25rem',
+    border: '2px dashed rgba(255,255,255,0.15)',
+    borderRadius: '0.75rem',
+    textAlign: 'center',
+    cursor: 'pointer',
+    transition: 'border-color 0.2s',
+    flexShrink: '0'
+  });
+  uploadZone.innerHTML = '<span style="color:rgba(255,255,255,0.5);font-size:0.875rem;font-family:DM Sans,sans-serif"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Ladda upp ny bild</span>';
+  uploadZone.onmouseenter = function() { this.style.borderColor = 'rgba(55,155,131,0.5)'; };
+  uploadZone.onmouseleave = function() { this.style.borderColor = 'rgba(255,255,255,0.15)'; };
+
+  // Hidden file input for upload within modal
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
+  fileInput.style.display = 'none';
+  uploadZone.onclick = function() { fileInput.click(); };
+
+  fileInput.addEventListener('change', async function(e) {
+    if (!e.target.files || !e.target.files[0]) return;
+    const file = e.target.files[0];
+
+    // Re-fetch CSRF in case it changed
+    let freshCsrf = csrfToken;
+    try {
+      const tokenRes = await fetch('/cms/api.php?action=get&_t=' + Date.now());
+      const tokenData = await tokenRes.json();
+      freshCsrf = tokenData._csrf || csrfToken;
+    } catch(err) {}
+
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('key', contentKey);
+    formData.append('field', field);
+    formData.append('csrf_token', freshCsrf);
+
+    uploadZone.innerHTML = '<span style="color:rgba(255,255,255,0.5);font-size:0.875rem;font-family:DM Sans,sans-serif">Laddar upp...</span>';
+
+    try {
+      const res = await fetch('/cms/api.php?action=upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.success) {
+        const img = document.querySelector('[data-content-key="' + contentKey + '"][data-field="' + field + '"]');
+        if (img) img.src = data.url;
+        showNotification('Bild uppladdad!', 'success');
+        closeModal();
+      } else {
+        showNotification(data.error || 'Kunde inte ladda upp bild', 'error');
+        uploadZone.innerHTML = '<span style="color:rgba(255,255,255,0.5);font-size:0.875rem;font-family:DM Sans,sans-serif">Ladda upp ny bild</span>';
+      }
+    } catch(err) {
+      showNotification('Nätverksfel vid uppladdning', 'error');
+      uploadZone.innerHTML = '<span style="color:rgba(255,255,255,0.5);font-size:0.875rem;font-family:DM Sans,sans-serif">Ladda upp ny bild</span>';
+    }
+    fileInput.value = '';
+  });
+
+  // Image grid
+  const gridWrap = document.createElement('div');
+  Object.assign(gridWrap.style, {
+    flex: '1',
+    overflowY: 'auto',
+    padding: '0 1.25rem 1.25rem'
+  });
+
+  const grid = document.createElement('div');
+  Object.assign(grid.style, {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+    gap: '0.75rem'
+  });
+
+  images.forEach(function(img) {
+    const thumb = document.createElement('div');
+    Object.assign(thumb.style, {
+      cursor: 'pointer',
+      borderRadius: '0.5rem',
+      overflow: 'hidden',
+      border: '2px solid transparent',
+      transition: 'border-color 0.2s',
+      background: 'rgba(255,255,255,0.05)'
+    });
+    thumb.onmouseenter = function() { this.style.borderColor = '#379b83'; };
+    thumb.onmouseleave = function() { this.style.borderColor = 'transparent'; };
+    thumb.innerHTML = '<img src="' + escapeHtml(img.url) + '" alt="' + escapeHtml(img.filename) + '" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block" loading="lazy">'
+      + '<div style="padding:0.375rem 0.5rem;font-size:0.6875rem;color:rgba(255,255,255,0.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:DM Sans,sans-serif">' + escapeHtml(img.filename) + '</div>';
+    thumb.onclick = function() {
+      selectExistingImage(img.url, contentKey, field, csrfToken);
+      closeModal();
+    };
+    grid.appendChild(thumb);
+  });
+
+  if (images.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:rgba(255,255,255,0.35);font-size:0.875rem;font-family:DM Sans,sans-serif">Inga bilder i biblioteket</div>';
+  }
+
+  gridWrap.appendChild(grid);
+
+  // Assemble
+  panel.appendChild(header);
+  panel.appendChild(uploadZone);
+  panel.appendChild(fileInput);
+  panel.appendChild(gridWrap);
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
+
+  // Close handlers
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) closeModal();
+  });
+  document.addEventListener('keydown', handleEsc);
+
+  function handleEsc(e) {
+    if (e.key === 'Escape') closeModal();
+  }
+
+  function closeModal() {
+    document.removeEventListener('keydown', handleEsc);
+    overlay.remove();
+  }
+}
+
+/**
+ * Select an existing image from the media library
+ */
+async function selectExistingImage(url, contentKey, field, csrfToken) {
+  try {
+    const res = await fetch('/cms/api.php?action=media-select', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      },
+      body: JSON.stringify({ key: contentKey, field: field, url: url })
+    });
+    const data = await res.json();
+    if (data.success) {
+      const img = document.querySelector('[data-content-key="' + contentKey + '"][data-field="' + field + '"]');
+      if (img) img.src = url;
+      showNotification('Bild vald!', 'success');
+    } else {
+      showNotification(data.error || 'Kunde inte spara bildval', 'error');
+    }
+  } catch (err) {
+    console.error('Select image error:', err);
+    showNotification('Kunde inte spara bildval', 'error');
+  }
 }
 
 /**

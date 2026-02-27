@@ -1,0 +1,314 @@
+<?php
+/**
+ * CMS Media Library — Dashboard page for managing uploaded images
+ * CORE-fil — skrivs över vid uppdatering
+ */
+
+require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../security/session.php';
+require_once __DIR__ . '/../security/csrf.php';
+
+// Require login
+if (!is_logged_in()) {
+    header('Location: /cms/admin.php');
+    exit;
+}
+
+// Scan uploads directory for images
+$allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+$images = [];
+$totalSize = 0;
+
+if (is_dir(UPLOADS_PATH)) {
+    $files = scandir(UPLOADS_PATH);
+    foreach ($files as $file) {
+        if ($file === '.' || $file === '..') continue;
+        $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowedExtensions, true)) continue;
+
+        $fullPath = UPLOADS_PATH . '/' . $file;
+        if (!is_file($fullPath)) continue;
+
+        $size = filesize($fullPath);
+        $totalSize += $size;
+        $images[] = [
+            'filename' => $file,
+            'url' => '/uploads/' . $file,
+            'size' => $size,
+            'modified' => filemtime($fullPath),
+        ];
+    }
+}
+
+// Sort newest first
+usort($images, fn($a, $b) => $b['modified'] - $a['modified']);
+
+$imageCount = count($images);
+
+// Check references in content.json and projects.json
+$contentRaw = '';
+$contentFile = DATA_PATH . '/content.json';
+if (file_exists($contentFile)) {
+    $contentRaw .= file_get_contents($contentFile);
+}
+$projectsFile = DATA_PATH . '/projects.json';
+if (file_exists($projectsFile)) {
+    $contentRaw .= file_get_contents($projectsFile);
+}
+
+// Format file size helper
+function format_size(int $bytes): string {
+    if ($bytes < 1024) return $bytes . ' B';
+    if ($bytes < 1024 * 1024) return round($bytes / 1024, 1) . ' KB';
+    return round($bytes / 1024 / 1024, 1) . ' MB';
+}
+
+$csrfToken = csrf_token();
+?>
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media — CMS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: #033234;
+            min-height: 100vh;
+            color: rgba(255,255,255,0.85);
+        }
+        .container {
+            max-width: 56rem;
+            margin: 0 auto;
+            padding: 3rem 1.5rem 5rem;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .header-left h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+        .header-left .stats {
+            font-size: 0.875rem;
+            color: rgba(255,255,255,0.5);
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #379b83; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 480px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+        .card {
+            position: relative;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .card:hover {
+            border-color: rgba(255,255,255,0.20);
+        }
+        .card[data-referenced="true"] {
+            border-color: rgba(55,155,131,0.4);
+        }
+        .card-thumb {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            display: block;
+            background: rgba(0,0,0,0.2);
+        }
+        .card-info {
+            padding: 0.625rem 0.75rem;
+        }
+        .card-filename {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.7);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .card-size {
+            font-size: 0.6875rem;
+            color: rgba(255,255,255,0.4);
+            margin-top: 0.125rem;
+        }
+        .card-actions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: none;
+        }
+        .card:hover .card-actions {
+            display: flex;
+            gap: 0.375rem;
+        }
+        .btn-delete {
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            border: none;
+            border-radius: 0.5rem;
+            color: #f87171;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-delete:hover {
+            background: rgba(239,68,68,0.3);
+        }
+        .ref-badge {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            font-size: 0.625rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            background: rgba(55,155,131,0.8);
+            color: white;
+            border-radius: 9999px;
+            backdrop-filter: blur(4px);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: rgba(255,255,255,0.4);
+        }
+        .empty-state svg {
+            width: 3rem;
+            height: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.4;
+        }
+        .empty-state p {
+            font-size: 0.9375rem;
+        }
+    </style>
+</head>
+<body>
+    <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <h1>Media</h1>
+                <p class="stats"><?php echo $imageCount; ?> bilder &middot; <?php echo format_size($totalSize); ?></p>
+            </div>
+            <a href="/dashboard" class="back-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+                Dashboard
+            </a>
+        </div>
+
+        <?php if ($imageCount === 0): ?>
+        <div class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z" />
+            </svg>
+            <p>Inga bilder uppladdade ännu.</p>
+        </div>
+        <?php else: ?>
+        <div class="grid">
+            <?php foreach ($images as $img):
+                $isReferenced = str_contains($contentRaw, $img['filename']);
+            ?>
+            <div class="card" data-referenced="<?php echo $isReferenced ? 'true' : 'false'; ?>">
+                <img class="card-thumb" src="<?php echo htmlspecialchars($img['url'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($img['filename'], ENT_QUOTES, 'UTF-8'); ?>" loading="lazy">
+                <?php if ($isReferenced): ?>
+                <span class="ref-badge">Används</span>
+                <?php endif; ?>
+                <div class="card-actions">
+                    <button class="btn-delete" data-filename="<?php echo htmlspecialchars($img['filename'], ENT_QUOTES, 'UTF-8'); ?>" data-referenced="<?php echo $isReferenced ? '1' : '0'; ?>" title="Radera">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                </div>
+                <div class="card-info">
+                    <div class="card-filename" title="<?php echo htmlspecialchars($img['filename'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($img['filename'], ENT_QUOTES, 'UTF-8'); ?></div>
+                    <div class="card-size"><?php echo format_size($img['size']); ?></div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <?php include __DIR__ . '/../includes/agenci-badge.php'; ?>
+
+    <script <?php echo csp_nonce_attr(); ?>>
+    (function() {
+        var csrfToken = <?php echo json_encode($csrfToken); ?>;
+
+        document.querySelectorAll('.btn-delete').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var filename = this.dataset.filename;
+                var isRef = this.dataset.referenced === '1';
+                var msg = isRef
+                    ? 'Denna bild används på hemsidan. Vill du verkligen radera "' + filename + '"?'
+                    : 'Vill du radera "' + filename + '"?';
+
+                if (!confirm(msg)) return;
+
+                var card = this.closest('.card');
+
+                fetch('/cms/api.php?action=media-delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                    },
+                    body: JSON.stringify({ filename: filename })
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        card.style.transition = 'opacity 0.3s, transform 0.3s';
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.95)';
+                        setTimeout(function() { card.remove(); }, 300);
+                        if (data._csrf) csrfToken = data._csrf;
+                    } else {
+                        alert('Kunde inte radera: ' + (data.error || 'Okänt fel'));
+                    }
+                })
+                .catch(function() {
+                    alert('Nätverksfel — försök igen.');
+                });
+            });
+        });
+    })();
+    </script>
+</body>
+</html>

@@ -29,7 +29,7 @@ $updatableFiles = [
     'cms/admin.php', 'cms/dashboard.php', 'cms/content.php',
     'cms/api.php', 'cms/api-super.php', 'cms/super-admin.php',
     'cms/seo.php', 'cms/support.php', 'cms/ai.php', 'cms/settings.php',
-    'cms/helpers.php',
+    'cms/helpers.php', 'cms/media.php',
     'cms/projects/index.php', 'cms/projects/new.php', 'cms/projects/edit.php',
     'security/csrf.php', 'security/session.php', 'security/validation.php',
     'security/super-admin.php', 'security/updater.php', 'security/csp.php',
