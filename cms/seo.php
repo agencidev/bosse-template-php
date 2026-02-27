@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 3rem 1.5rem;
         }
         .container {
-            max-width: 36rem;
+            max-width: 48rem;
             margin: 0 auto;
         }
         .back-link {
@@ -392,59 +392,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if ($error): ?>
         <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
-
-        <!-- Meta-redigerare -->
-        <div class="meta-card">
-            <h2 class="meta-card-title">Meta-information för startsidan</h2>
-            <form method="POST">
-                <?php echo csrf_field(); ?>
-
-                <div class="form-group">
-                    <label class="form-label" for="meta_title">Meta-titel</label>
-                    <input type="text" id="meta_title" name="meta_title" class="form-input"
-                           value="<?php echo htmlspecialchars($metaTitle); ?>"
-                           placeholder="Företagsnamn - Kort beskrivning"
-                           oninput="updateCharCount('meta_title', 60)">
-                    <div class="char-count" id="meta_title_count">
-                        <?php echo mb_strlen($metaTitle); ?>/60 tecken
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="meta_description">Meta-beskrivning</label>
-                    <textarea id="meta_description" name="meta_description" class="form-textarea"
-                              placeholder="En kort beskrivning av er verksamhet..."
-                              oninput="updateCharCount('meta_description', 160)"><?php echo htmlspecialchars($metaDescription); ?></textarea>
-                    <div class="char-count" id="meta_description_count">
-                        <?php echo mb_strlen($metaDescription); ?>/160 tecken
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Spara</button>
-
-            </form>
-        </div>
-
-        <script <?php echo csp_nonce_attr(); ?>>
-        function updateCharCount(fieldId, limit) {
-            const field = document.getElementById(fieldId);
-            const countEl = document.getElementById(fieldId + '_count');
-            const len = field.value.length;
-
-            countEl.textContent = len + '/' + limit + ' tecken';
-            countEl.className = 'char-count';
-
-            if (len > limit) {
-                countEl.classList.add('error');
-            } else if (len > limit * 0.9) {
-                countEl.classList.add('warning');
-            }
-        }
-
-        // Initial update
-        updateCharCount('meta_title', 60);
-        updateCharCount('meta_description', 160);
-        </script>
 
         <div class="grid">
             <div class="card">

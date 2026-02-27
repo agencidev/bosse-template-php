@@ -28,7 +28,7 @@ $updatableFiles = [
     'pages/projekt.php', 'pages/projekt-single.php', 'CLAUDE.md',
     'cms/admin.php', 'cms/dashboard.php', 'cms/content.php',
     'cms/api.php', 'cms/api-super.php', 'cms/super-admin.php',
-    'cms/seo.php', 'cms/support.php', 'cms/ai.php', 'cms/settings.php',
+    'cms/seo.php', 'cms/support.php', 'cms/settings.php',
     'cms/helpers.php', 'cms/media.php',
     'cms/tickets-db.php', 'cms/tickets.php', 'cms/ticket-single.php', 'cms/ai-agent.php',
     'cms/projects/index.php', 'cms/projects/new.php', 'cms/projects/edit.php',

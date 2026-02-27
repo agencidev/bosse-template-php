@@ -23,7 +23,7 @@ if (!function_exists('csp_nonce_attr')) {
 
 // Check if we're on frontend (not in CMS/dashboard)
 $uri = $_SERVER['REQUEST_URI'];
-$is_cms = preg_match('#^/(cms/|dashboard|admin|super-admin|seo|support|ai|projects|setup|api/|settings)#', $uri);
+$is_cms = preg_match('#^/(cms/|dashboard|admin|super-admin|seo|support|ai|projects|setup|api/|settings|tickets|media)#', $uri);
 $is_frontend = !$is_cms;
 ?>
 <div class="admin-bar">

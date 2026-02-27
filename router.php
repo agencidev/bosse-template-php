@@ -31,7 +31,6 @@ $routes = [
     '/admin' => '/cms/admin.php',
     '/dashboard' => '/cms/dashboard.php',
     '/media' => '/cms/media.php',
-    '/ai' => '/cms/ai.php',
     '/seo' => '/cms/seo.php',
     '/support' => '/cms/support.php',
     '/projects' => '/cms/projects/index.php',

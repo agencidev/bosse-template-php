@@ -96,8 +96,8 @@ if ($resetMode === 'reset' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $config = file_get_contents($configFile);
             $newHash = password_hash($newPassword, PASSWORD_BCRYPT);
             $config = preg_replace(
-                "/define\('ADMIN_PASSWORD_HASH',\s*'[^']*'\)/",
-                "define('ADMIN_PASSWORD_HASH', " . var_export($newHash, true) . ")",
+                "/define\('ADMIN_PASSWORD_HASH',\s*'[^']*'\);/",
+                "define('ADMIN_PASSWORD_HASH', " . var_export($newHash, true) . ");",
                 $config
             );
             file_put_contents($configFile, $config, LOCK_EX);

@@ -393,7 +393,7 @@ $aiActions = !empty($ticket['ai_actions']) ? json_decode($ticket['ai_actions'], 
                     </a>
                     <?php endif; ?>
 
-                    <button type="button" class="btn btn-ai" onclick="triggerAI(<?php echo $ticketId; ?>)">
+                    <button type="button" class="btn btn-ai" onclick="triggerAI(event, <?php echo $ticketId; ?>)">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
                         Låt AI hantera
                     </button>
@@ -407,9 +407,9 @@ $aiActions = !empty($ticket['ai_actions']) ? json_decode($ticket['ai_actions'], 
 
     <?php if ($superAdmin): ?>
     <script <?php echo csp_nonce_attr(); ?>>
-    function triggerAI(ticketId) {
+    function triggerAI(e, ticketId) {
         if (!confirm('Vill du att AI:n analyserar och försöker lösa detta ärende?')) return;
-        var btn = event.target.closest('.btn-ai');
+        var btn = e.target.closest('.btn-ai');
         btn.textContent = 'AI jobbar...';
         btn.disabled = true;
         fetch('/cms/api.php?action=ai-resolve&ticket_id=' + ticketId, {

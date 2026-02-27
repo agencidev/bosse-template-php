@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 3rem 1.5rem;
         }
         .container {
-            max-width: 36rem;
+            max-width: 48rem;
             margin: 0 auto;
         }
         .back-link {

@@ -88,31 +88,24 @@ $csrfToken = csrf_token();
             padding: 3rem 1.5rem 5rem;
         }
         .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
             margin-bottom: 2rem;
-            flex-wrap: wrap;
-            gap: 1rem;
         }
-        .header-left h1 {
+        .header h1 {
             font-size: 1.75rem;
             font-weight: 700;
             color: white;
             margin-bottom: 0.25rem;
         }
-        .header-left .stats {
+        .header .stats {
             font-size: 0.875rem;
             color: rgba(255,255,255,0.5);
         }
         .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.375rem;
+            display: inline-block;
             color: rgba(255,255,255,0.5);
             text-decoration: none;
             font-size: 0.875rem;
-            font-weight: 500;
+            margin-bottom: 1rem;
             transition: color 0.2s;
         }
         .back-link:hover { color: #379b83; }
@@ -222,15 +215,10 @@ $csrfToken = csrf_token();
 <body>
     <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
     <div class="container">
+        <a href="/dashboard" class="back-link">&larr; Tillbaka</a>
         <div class="header">
-            <div class="header-left">
-                <h1>Media</h1>
-                <p class="stats"><?php echo $imageCount; ?> bilder &middot; <?php echo format_size($totalSize); ?></p>
-            </div>
-            <a href="/dashboard" class="back-link">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
-                Dashboard
-            </a>
+            <h1>Media</h1>
+            <p class="stats"><?php echo $imageCount; ?> bilder &middot; <?php echo format_size($totalSize); ?></p>
         </div>
 
         <?php if ($imageCount === 0): ?>

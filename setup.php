@@ -1531,6 +1531,30 @@ $saved = $_SESSION['setup_data'] ?? [];
             .form-actions .btn { width: 100%; justify-content: center; }
             .complete-actions { flex-direction: column; }
         }
+
+        .password-wrapper {
+            position: relative;
+        }
+        .password-wrapper input {
+            padding-right: 2.75rem;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 0.625rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: rgba(255,255,255,0.4);
+            padding: 0.25rem;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+        }
+        .password-toggle:hover {
+            color: rgba(255,255,255,0.7);
+        }
     </style>
 </head>
 <body>
@@ -1610,8 +1634,13 @@ $saved = $_SESSION['setup_data'] ?? [];
 
                 <div class="form-group">
                     <label for="admin_password">Lösenord *</label>
-                    <input type="password" id="admin_password" name="admin_password" required minlength="8"
-                           placeholder="Minst 8 tecken" autocomplete="new-password">
+                    <div class="password-wrapper">
+                        <input type="password" id="admin_password" name="admin_password" required minlength="8"
+                               placeholder="Minst 8 tecken" autocomplete="new-password">
+                        <button type="button" class="password-toggle" data-target="admin_password" aria-label="Visa lösenord">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
                     <div class="password-strength">
                         <div class="password-strength-bar" id="strength-bar"></div>
                     </div>
@@ -1620,8 +1649,13 @@ $saved = $_SESSION['setup_data'] ?? [];
 
                 <div class="form-group">
                     <label for="admin_password_confirm">Bekräfta lösenord *</label>
-                    <input type="password" id="admin_password_confirm" name="admin_password_confirm" required minlength="8"
-                           placeholder="Upprepa lösenord" autocomplete="new-password">
+                    <div class="password-wrapper">
+                        <input type="password" id="admin_password_confirm" name="admin_password_confirm" required minlength="8"
+                               placeholder="Upprepa lösenord" autocomplete="new-password">
+                        <button type="button" class="password-toggle" data-target="admin_password_confirm" aria-label="Visa lösenord">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="section-divider">
@@ -2143,8 +2177,13 @@ $saved = $_SESSION['setup_data'] ?? [];
 
                 <div class="form-group">
                     <label for="admin_password">Lösenord *</label>
-                    <input type="password" id="admin_password" name="admin_password" required minlength="8"
-                           placeholder="Minst 8 tecken" autocomplete="new-password">
+                    <div class="password-wrapper">
+                        <input type="password" id="admin_password" name="admin_password" required minlength="8"
+                               placeholder="Minst 8 tecken" autocomplete="new-password">
+                        <button type="button" class="password-toggle" data-target="admin_password" aria-label="Visa lösenord">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
                     <div class="password-strength">
                         <div class="password-strength-bar" id="strength-bar"></div>
                     </div>
@@ -2153,8 +2192,13 @@ $saved = $_SESSION['setup_data'] ?? [];
 
                 <div class="form-group">
                     <label for="admin_password_confirm">Bekräfta lösenord *</label>
-                    <input type="password" id="admin_password_confirm" name="admin_password_confirm" required minlength="8"
-                           placeholder="Upprepa lösenord" autocomplete="new-password">
+                    <div class="password-wrapper">
+                        <input type="password" id="admin_password_confirm" name="admin_password_confirm" required minlength="8"
+                               placeholder="Upprepa lösenord" autocomplete="new-password">
+                        <button type="button" class="password-toggle" data-target="admin_password_confirm" aria-label="Visa lösenord">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="form-actions">
@@ -2431,6 +2475,19 @@ $saved = $_SESSION['setup_data'] ?? [];
         updatePreview();
         updateFontPreview();
     }
+
+    // Password visibility toggle
+    document.querySelectorAll('.password-toggle').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var input = document.getElementById(this.dataset.target);
+            if (!input) return;
+            var isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            this.innerHTML = isPassword
+                ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+                : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+        });
+    });
     </script>
 </body>
 </html>
