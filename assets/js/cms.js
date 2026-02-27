@@ -354,7 +354,7 @@ function initImageUpload() {
         
         if (data.success) {
           // Update image src
-          const img = document.querySelector(`[data-content-key="${contentKey}"][data-field="${field}"]`);
+          const img = document.querySelector(`img[data-content-key="${contentKey}"][data-field="${field}"]`);
           if (img) {
             img.src = data.url;
           }
@@ -494,7 +494,7 @@ async function openMediaLibraryModal(contentKey, field) {
       const res = await fetch('/cms/api.php?action=upload', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
-        const img = document.querySelector('[data-content-key="' + contentKey + '"][data-field="' + field + '"]');
+        const img = document.querySelector('img[data-content-key="' + contentKey + '"][data-field="' + field + '"]');
         if (img) img.src = data.url;
         showNotification('Bild uppladdad!', 'success');
         closeModal();
@@ -590,7 +590,7 @@ async function selectExistingImage(url, contentKey, field, csrfToken) {
     });
     const data = await res.json();
     if (data.success) {
-      const img = document.querySelector('[data-content-key="' + contentKey + '"][data-field="' + field + '"]');
+      const img = document.querySelector('img[data-content-key="' + contentKey + '"][data-field="' + field + '"]');
       if (img) img.src = url;
       showNotification('Bild vald!', 'success');
     } else {
