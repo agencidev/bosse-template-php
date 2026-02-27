@@ -38,6 +38,9 @@ define('SOCIAL_LINKEDIN', 'https://linkedin.com/company/foretagsnamn');
 define('HOURS_WEEKDAYS', '08:00 - 17:00');
 define('HOURS_WEEKENDS', 'Stängt');
 
+// Content Security Policy — aktivera när ALLA inline-scripts har nonce
+// define('CSP_ENABLED', true);
+
 // Environment
 define('ENVIRONMENT', 'production');
 

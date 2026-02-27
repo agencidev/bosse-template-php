@@ -30,6 +30,11 @@ function send_csp_header(): void {
         return;
     }
 
+    // Only send CSP header if explicitly enabled in config
+    if (!defined('CSP_ENABLED') || !CSP_ENABLED) {
+        return;
+    }
+
     $nonce = csp_nonce();
 
     $directives = [
