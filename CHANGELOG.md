@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.65
+- Fix: Cookie-banner kontrast (#b3b3b3 → #d4d4d4) — uppfyller WCAG AA 4.5:1
+- Fix: Lösenordshash korrumperades av preg_replace (admin.php + api-super.php)
+- Ny: Relaterade inlägg på projekt-singelsidan (samma kategori, max 3)
+- Ny: Lösenordsbyte i CMS-inställningar (/settings)
+- Ny: Bulk-optimering av bilder i mediabiblioteket
+
 ## 1.5.64
 - Ny: Drag & drop i bildväljaren (utöver klick-upload)
 - Fix: Bilder visades dubbelt i mediabiblioteket (WebP-kopior filtreras)

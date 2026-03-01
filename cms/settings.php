@@ -444,6 +444,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $currentConfig['smtp_username'] = $smtpUsername;
             }
         }
+    } elseif ($section === 'password') {
+        $currentPassword = $_POST['current_password'] ?? '';
+        $newPassword = $_POST['new_password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
+
+        if (!defined('ADMIN_PASSWORD_HASH') || !password_verify($currentPassword, ADMIN_PASSWORD_HASH)) {
+            $error = 'Nuvarande lösenord är felaktigt.';
+        } elseif (strlen($newPassword) < 8) {
+            $error = 'Nytt lösenord måste vara minst 8 tecken.';
+        } elseif ($newPassword !== $confirmPassword) {
+            $error = 'Lösenorden matchar inte.';
+        } else {
+            $configPath = ROOT_PATH . '/config.php';
+            if (file_exists($configPath)) {
+                if (function_exists('backup_config')) backup_config();
+                $config = file_get_contents($configPath);
+                $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
+                $escaped = addcslashes($newHash, "'\\");
+                $config = preg_replace(
+                    "/define\('ADMIN_PASSWORD_HASH',\s*'[^']*'\);/",
+                    "define('ADMIN_PASSWORD_HASH', '" . $escaped . "');",
+                    $config
+                );
+                file_put_contents($configPath, $config, LOCK_EX);
+                $success = 'Lösenord uppdaterat! Använd det nya lösenordet vid nästa inloggning.';
+            }
+        }
     }
 }
 
@@ -1018,6 +1045,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
 
                     <button type="submit" class="btn btn-primary">Spara</button>
+                </form>
+            </div>
+
+            <!-- Password -->
+            <div class="card">
+                <h2 class="card-title">Byt lösenord</h2>
+                <form method="POST">
+                    <?php echo csrf_field(); ?>
+                    <input type="hidden" name="section" value="password">
+
+                    <div class="form-group">
+                        <label class="form-label" for="current_password">Nuvarande lösenord</label>
+                        <input type="password" id="current_password" name="current_password" class="form-input"
+                               autocomplete="current-password" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="new_password">Nytt lösenord</label>
+                            <input type="password" id="new_password" name="new_password" class="form-input"
+                                   autocomplete="new-password" minlength="8" required>
+                            <p class="hint">Minst 8 tecken</p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="confirm_password">Bekräfta lösenord</label>
+                            <input type="password" id="confirm_password" name="confirm_password" class="form-input"
+                                   autocomplete="new-password" minlength="8" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Byt lösenord</button>
                 </form>
             </div>
 

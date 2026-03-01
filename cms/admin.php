@@ -95,9 +95,10 @@ if ($resetMode === 'reset' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             if (function_exists('backup_config')) backup_config();
             $config = file_get_contents($configFile);
             $newHash = password_hash($newPassword, PASSWORD_BCRYPT);
+            $replacement = "define('ADMIN_PASSWORD_HASH', " . var_export($newHash, true) . ");";
             $config = preg_replace(
                 "/define\('ADMIN_PASSWORD_HASH',\s*'[^']*'\);/",
-                "define('ADMIN_PASSWORD_HASH', " . var_export($newHash, true) . ");",
+                addcslashes($replacement, '\\$'),
                 $config
             );
             file_put_contents($configFile, $config, LOCK_EX);

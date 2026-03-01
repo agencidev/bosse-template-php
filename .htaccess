@@ -56,6 +56,15 @@ RewriteRule ^cookies/?$ pages/cookies.php [L]
 # /integritetspolicy -> /pages/integritetspolicy.php
 RewriteRule ^integritetspolicy/?$ pages/integritetspolicy.php [L]
 
+# /projects -> /cms/projects/index.php
+RewriteRule ^projects/?$ cms/projects/index.php [L]
+
+# /projects/new -> /cms/projects/new.php
+RewriteRule ^projects/new/?$ cms/projects/new.php [QSA,L]
+
+# /projects/edit -> /cms/projects/edit.php
+RewriteRule ^projects/edit/?$ cms/projects/edit.php [QSA,L]
+
 # /tickets -> /cms/tickets.php
 RewriteRule ^tickets/?$ cms/tickets.php [L]
 

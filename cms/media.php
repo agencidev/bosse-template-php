@@ -206,6 +206,7 @@ $csrfToken = csrf_token();
             border-radius: 9999px;
             backdrop-filter: blur(4px);
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
@@ -228,7 +229,15 @@ $csrfToken = csrf_token();
         <a href="/dashboard" class="back-link">&larr; Tillbaka</a>
         <div class="header">
             <h1>Media</h1>
-            <p class="stats"><?php echo $imageCount; ?> bilder &middot; <?php echo format_size($totalSize); ?></p>
+            <div style="display:flex;align-items:center;gap:1rem;margin-top:0.25rem;">
+                <p class="stats"><?php echo $imageCount; ?> bilder &middot; <?php echo format_size($totalSize); ?></p>
+                <?php if ($imageCount > 0): ?>
+                <button id="btn-optimize-all" style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.375rem 0.75rem;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:0.5rem;color:rgba(255,255,255,0.7);font-size:0.8125rem;font-family:inherit;cursor:pointer;transition:background 0.2s,border-color 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.12)';this.style.borderColor='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.borderColor='rgba(255,255,255,0.15)'">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Optimera alla
+                </button>
+                <?php endif; ?>
+            </div>
         </div>
 
         <?php if ($imageCount === 0): ?>
@@ -268,6 +277,50 @@ $csrfToken = csrf_token();
     <script <?php echo csp_nonce_attr(); ?>>
     (function() {
         var csrfToken = <?php echo json_encode($csrfToken); ?>;
+
+        var btnOptimize = document.getElementById('btn-optimize-all');
+        if (btnOptimize) {
+            btnOptimize.addEventListener('click', function() {
+                if (!confirm('Vill du optimera alla bilder? Detta komprimerar och skapar WebP-kopior.')) return;
+
+                var btn = this;
+                var originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Optimerar...';
+
+                fetch('/cms/api.php?action=media-optimize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        if (data._csrf) csrfToken = data._csrf;
+                        var savedMB = (data.saved_bytes / 1024 / 1024).toFixed(1);
+                        var msg = data.optimized_count + ' bilder optimerade';
+                        if (data.saved_bytes > 0) msg += ', ' + savedMB + ' MB sparat';
+                        if (data.skipped_count > 0) msg += ' (' + data.skipped_count + ' redan optimerade)';
+                        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ' + msg;
+                        btn.style.borderColor = 'rgba(55,155,131,0.6)';
+                        btn.style.color = '#379b83';
+                        setTimeout(function() { location.reload(); }, 2000);
+                    } else {
+                        alert('Fel: ' + (data.error || 'Okänt fel'));
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }
+                })
+                .catch(function() {
+                    alert('Nätverksfel — försök igen.');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
+            });
+        }
 
         document.querySelectorAll('.btn-delete').forEach(function(btn) {
             btn.addEventListener('click', function() {

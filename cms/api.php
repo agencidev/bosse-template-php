@@ -66,6 +66,10 @@ switch ($action) {
         handleMediaSelect();
         break;
 
+    case 'media-optimize':
+        handleMediaOptimize();
+        break;
+
     case 'ticket-list':
         handleTicketList();
         break;
@@ -275,6 +279,60 @@ function handleBackup() {
     // Rensa upp
     @unlink($tmpFile);
     exit;
+}
+
+/**
+ * Bulk-optimera alla bilder i uploads
+ */
+function handleMediaOptimize() {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'error' => 'Method not allowed']);
+        exit;
+    }
+
+    if (!csrf_verify_json()) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'CSRF validation failed']);
+        exit;
+    }
+
+    $optimizableExt = ['jpg', 'jpeg', 'png', 'gif'];
+    $optimizedCount = 0;
+    $skippedCount = 0;
+    $savedBytes = 0;
+
+    if (is_dir(UPLOADS_PATH)) {
+        $files = scandir(UPLOADS_PATH);
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') continue;
+            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            if (!in_array($ext, $optimizableExt, true)) continue;
+
+            $fullPath = UPLOADS_PATH . '/' . $file;
+            if (!is_file($fullPath)) continue;
+
+            $sizeBefore = filesize($fullPath);
+            $result = optimize_image($fullPath);
+
+            if ($result['optimized']) {
+                clearstatcache(true, $fullPath);
+                $sizeAfter = filesize($fullPath);
+                $savedBytes += max(0, $sizeBefore - $sizeAfter);
+                $optimizedCount++;
+            } else {
+                $skippedCount++;
+            }
+        }
+    }
+
+    echo json_encode([
+        'success' => true,
+        'optimized_count' => $optimizedCount,
+        'skipped_count' => $skippedCount,
+        'saved_bytes' => $savedBytes,
+        '_csrf' => csrf_token(),
+    ]);
 }
 
 /**

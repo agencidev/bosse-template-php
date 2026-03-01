@@ -200,7 +200,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 
 .cookie-banner-text {
     font-size: 0.875rem;
-    color: #b3b3b3;
+    color: #d4d4d4;
     line-height: 1.6;
     margin: 0 0 1.5rem 0;
 }
@@ -341,7 +341,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 
 .cookie-modal-description {
     font-size: 0.875rem;
-    color: #b3b3b3;
+    color: #d4d4d4;
     line-height: 1.6;
     margin: 0 0 1.5rem 0;
 }
@@ -378,7 +378,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 
 .cookie-chevron {
     transition: transform 0.2s;
-    color: #b3b3b3;
+    color: #d4d4d4;
 }
 
 .cookie-category-toggle.active .cookie-chevron {
@@ -388,7 +388,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 .cookie-category-content {
     padding: 0 1.25rem 1rem 1.25rem;
     font-size: 0.875rem;
-    color: #b3b3b3;
+    color: #d4d4d4;
     line-height: 1.6;
 }
 
@@ -472,7 +472,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 .cookie-info-content {
     padding: 0 1.25rem 1rem 1.25rem;
     font-size: 0.875rem;
-    color: #b3b3b3;
+    color: #d4d4d4;
     line-height: 1.6;
 }
 

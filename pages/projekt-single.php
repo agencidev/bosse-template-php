@@ -315,6 +315,71 @@ function projectSchema($project) {
         font-weight: 500;
     }
 
+    .related-projects {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: var(--section-padding, 4rem) 1.5rem;
+    }
+
+    .related-projects__title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--color-foreground, #18181b);
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .related-projects__grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    .related-projects__card {
+        background: var(--color-background, #fff);
+        border-radius: var(--radius-lg, 1rem);
+        overflow: hidden;
+        border: 1px solid var(--color-gray-200, #e5e5e5);
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .related-projects__card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .related-projects__image {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .related-projects__body {
+        padding: 1.25rem;
+        flex: 1;
+    }
+
+    .related-projects__card-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--color-foreground, #18181b);
+        margin-bottom: 0.5rem;
+    }
+
+    .related-projects__summary {
+        font-size: 0.875rem;
+        color: var(--color-gray-500, #737373);
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
     @media (max-width: 768px) {
         .projekt-single__title {
             font-size: 1.875rem;
@@ -327,6 +392,10 @@ function projectSchema($project) {
 
         .projekt-single__summary {
             font-size: 1.125rem;
+        }
+
+        .related-projects__grid {
+            grid-template-columns: 1fr;
         }
     }
     </style>
@@ -420,6 +489,43 @@ function projectSchema($project) {
                 </div>
             </div>
         </article>
+
+        <?php
+        // Related projects (same category, published, exclude current)
+        $related = [];
+        $currentCategory = $project['category'] ?? '';
+        if ($currentCategory !== '') {
+            foreach ($projects as $rp) {
+                if (($rp['id'] ?? '') === ($project['id'] ?? '')) continue;
+                if (($rp['status'] ?? '') !== 'published') continue;
+                if (($rp['category'] ?? '') !== $currentCategory) continue;
+                $related[] = $rp;
+                if (count($related) >= 3) break;
+            }
+        }
+        ?>
+        <?php if (!empty($related)): ?>
+        <section class="related-projects">
+            <h2 class="related-projects__title">Fler inom <?php echo htmlspecialchars($currentCategory, ENT_QUOTES, 'UTF-8'); ?></h2>
+            <div class="related-projects__grid">
+                <?php foreach ($related as $rp): ?>
+                <a href="/projekt/<?php echo htmlspecialchars($rp['slug'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" class="related-projects__card">
+                    <?php if (!empty($rp['coverImage'])): ?>
+                    <img src="<?php echo htmlspecialchars($rp['coverImage'], ENT_QUOTES, 'UTF-8'); ?>"
+                         alt="<?php echo htmlspecialchars($rp['title'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                         class="related-projects__image" loading="lazy">
+                    <?php endif; ?>
+                    <div class="related-projects__body">
+                        <h3 class="related-projects__card-title"><?php echo htmlspecialchars($rp['title'] ?? '', ENT_QUOTES, 'UTF-8'); ?></h3>
+                        <?php if (!empty($rp['summary'])): ?>
+                        <p class="related-projects__summary"><?php echo htmlspecialchars($rp['summary'], ENT_QUOTES, 'UTF-8'); ?></p>
+                        <?php endif; ?>
+                    </div>
+                </a>
+                <?php endforeach; ?>
+            </div>
+        </section>
+        <?php endif; ?>
     </main>
 
     <?php include __DIR__ . '/../includes/footer.php'; ?>
