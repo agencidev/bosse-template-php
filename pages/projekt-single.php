@@ -104,8 +104,6 @@ function projectSchema($project) {
     );
     ?>
 
-    <?php if (file_exists(__DIR__ . '/../includes/fonts.php')) include __DIR__ . '/../includes/fonts.php'; ?>
-    <?php if (file_exists(__DIR__ . '/../includes/analytics.php')) include __DIR__ . '/../includes/analytics.php'; ?>
     <?php if (file_exists(__DIR__ . '/../assets/images/favicon.png')): ?>
     <link rel="icon" type="image/png" href="/assets/images/favicon.png">
     <?php endif; ?>
@@ -113,6 +111,11 @@ function projectSchema($project) {
     <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
     <?php endif; ?>
     <link rel="stylesheet" href="/assets/css/main.css?v=<?php echo BOSSE_VERSION; ?>">
+    <?php if (!empty($project['coverImage'])): ?>
+    <link rel="preload" as="image" href="<?php echo htmlspecialchars($project['coverImage'], ENT_QUOTES, 'UTF-8'); ?>">
+    <?php endif; ?>
+    <?php if (file_exists(__DIR__ . '/../includes/fonts.php')) include __DIR__ . '/../includes/fonts.php'; ?>
+    <?php if (file_exists(__DIR__ . '/../includes/analytics.php')) include __DIR__ . '/../includes/analytics.php'; ?>
 
     <?php echo projectSchema($project); ?>
 
@@ -456,7 +459,7 @@ function projectSchema($project) {
                 <?php if (!empty($project['coverImage'])): ?>
                     <img src="<?php echo htmlspecialchars($project['coverImage'], ENT_QUOTES, 'UTF-8'); ?>"
                          alt="<?php echo htmlspecialchars($project['title'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                         class="projekt-single__cover">
+                         class="projekt-single__cover" fetchpriority="high">
                 <?php endif; ?>
 
                 <div class="projekt-single__content">
@@ -530,7 +533,7 @@ function projectSchema($project) {
 
     <?php include __DIR__ . '/../includes/footer.php'; ?>
 
-    <script src="/assets/js/cms.js?v=<?php echo BOSSE_VERSION; ?>"></script>
+    <script src="/assets/js/cms.js?v=<?php echo BOSSE_VERSION; ?>" defer></script>
 
     <?php if (is_logged_in()): ?>
         <form style="display: none;">

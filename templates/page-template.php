@@ -9,9 +9,13 @@ require_once __DIR__ . '/../security/session.php';
 require_once __DIR__ . '/../cms/content.php';
 require_once __DIR__ . '/../seo/meta.php';
 
-// Prevent caching to ensure admin bar updates correctly
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-header('Pragma: no-cache');
+if ($_SERVER['REQUEST_METHOD'] === 'POST' || is_logged_in()) {
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+} else {
+    header('Cache-Control: public, max-age=300, must-revalidate');
+    header_remove('Pragma');
+}
 ?>
 <!DOCTYPE html>
 <html lang="sv">
@@ -26,7 +30,6 @@ header('Pragma: no-cache');
     );
     ?>
 
-    <?php if (file_exists(__DIR__ . '/../includes/fonts.php')) include __DIR__ . '/../includes/fonts.php'; ?>
     <?php if (file_exists(__DIR__ . '/../assets/images/favicon.ico')): ?>
     <link rel="icon" href="/assets/images/favicon.ico" sizes="32x32">
     <?php endif; ?>
@@ -38,8 +41,8 @@ header('Pragma: no-cache');
     <?php if (file_exists(__DIR__ . '/../assets/images/apple-touch-icon.png')): ?>
     <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
     <?php endif; ?>
-    <link rel="preload" href="/assets/css/main.css?v=<?php echo BOSSE_VERSION; ?>" as="style">
     <link rel="stylesheet" href="/assets/css/main.css?v=<?php echo BOSSE_VERSION; ?>">
+    <?php if (file_exists(__DIR__ . '/../includes/fonts.php')) include __DIR__ . '/../includes/fonts.php'; ?>
 </head>
 <body>
     <?php include __DIR__ . '/../includes/admin-bar.php'; ?>

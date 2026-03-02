@@ -9,7 +9,15 @@
         <div class="footer__content">
             <div class="footer__section">
                 <div class="footer__logo">
-                    <img src="/assets/images/logo-light.png" alt="<?php echo SITE_NAME; ?>" class="footer__logo-img">
+                    <?php
+                    $footerLogoPath = __DIR__ . '/../assets/images/logo-light.png';
+                    $footerLogoW = 160; $footerLogoH = 40;
+                    if (file_exists($footerLogoPath)) {
+                        $dims = @getimagesize($footerLogoPath);
+                        if ($dims) { $footerLogoW = $dims[0]; $footerLogoH = $dims[1]; }
+                    }
+                    ?>
+                    <img src="/assets/images/logo-light.png" alt="<?php echo SITE_NAME; ?>" class="footer__logo-img" width="<?php echo $footerLogoW; ?>" height="<?php echo $footerLogoH; ?>">
                 </div>
                 <?php editable_text('footer.description', 'Din partner för digitala lösningar', 'p', 'footer__text'); ?>
             </div>

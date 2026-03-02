@@ -14,22 +14,41 @@ Se `.rules/ai-rules.md` → "CORE vs SAFE" för komplett lista.
 
 ## ⚠️ KRITISKT — Läs först!
 
-**När du skapar inlägg/nyheter/event:**
-- **ALDRIG** hårdkoda i PHP-filer (index.php etc.)
-- **ALLTID** lägg till i `data/projects.json`
+### STOPP! Inlägg/nyheter/event/projekt — MÅSTE gå via `data/projects.json`
 
+**ALDRIG** skapa inlägg genom att:
+- Hårdkoda HTML/PHP i `index.php` eller andra PHP-filer
+- Skapa nya PHP-filer för enskilda inlägg
+- Lägga innehåll i `data/content.json` (det är för sidinnehåll, INTE inlägg)
+
+**ALLTID** följ dessa steg exakt:
+
+1. **Läs** `data/projects.json` med Read-verktyget
+2. **Lägg till** ett nytt objekt i arrayen med ALLA obligatoriska fält (se nedan)
+3. **Skriv tillbaka** hela arrayen till `data/projects.json`
+4. **Verifiera** att filen är giltig JSON (`php -r "json_decode(file_get_contents('data/projects.json')) ?: exit(1);"`)
+
+**Obligatoriska fält** (saknas något visas inlägget INTE korrekt):
 ```json
 {
-  "id": "event-namn-2026",
-  "title": "Event-namn",
-  "slug": "event-namn",
-  "category": "Event",
-  "summary": "Kort beskrivning",
+  "id": "unikt-id-2026",
+  "title": "Titel på inlägget",
+  "slug": "url-vänlig-slug",
+  "category": "Projekt|Blogg|Nyhet|Event",
+  "summary": "Kort beskrivning (visas i listvy)",
+  "content": "Fullständig text (HTML tillåtet)",
   "status": "published",
   "coverImage": "/uploads/bild.jpg",
-  "createdAt": "2026-02-14 18:00:00"
+  "gallery": [],
+  "createdAt": "2026-03-02 12:00:00"
 }
 ```
+
+**Viktigt:**
+- `status` MÅSTE vara `"published"` för att synas publikt (på `/projekt`)
+- `slug` MÅSTE vara unik — den blir URL:en (`/projekt/min-slug`)
+- `id` MÅSTE vara unik — används av CMS:et för redigering
+- Inlägget syns automatiskt i CMS-admin (`/projects`) och publikt (`/projekt`) — ingen extra konfiguration behövs
 
 ## Snabbref
 

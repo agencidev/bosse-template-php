@@ -10,7 +10,15 @@
         <div class="header__content">
             <div class="header__logo">
                 <a href="/">
-                    <img src="/assets/images/logo-dark.png" alt="<?php echo SITE_NAME; ?>" class="header__logo-img">
+                    <?php
+                    $logoPath = __DIR__ . '/../assets/images/logo-dark.png';
+                    $logoW = 160; $logoH = 40;
+                    if (file_exists($logoPath)) {
+                        $dims = @getimagesize($logoPath);
+                        if ($dims) { $logoW = $dims[0]; $logoH = $dims[1]; }
+                    }
+                    ?>
+                    <img src="/assets/images/logo-dark.png" alt="<?php echo SITE_NAME; ?>" class="header__logo-img" width="<?php echo $logoW; ?>" height="<?php echo $logoH; ?>">
                 </a>
             </div>
             
