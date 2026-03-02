@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.67
+- Fix: GitHub-push failade om GITHUB_REPO sparades som full URL (normaliseras nu till org/name)
+- Fix: GITHUB_REPO normaliseras vid sparning i super-admin (tar bort https://github.com/ och .git)
+
 ## 1.5.66
 - Fix: Self-heal — updater laddar ner och extraherar saknade core-filer automatiskt
 - Fix: Projekt som uppdaterades från gamla versioner saknade cms/media.php, tickets, ai-agent

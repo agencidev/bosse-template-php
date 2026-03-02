@@ -945,6 +945,20 @@ function cleanup_old_data(): void {
 }
 
 /**
+ * Normalisera GITHUB_REPO till "org/name"-format
+ * Hanterar: full URL, .git-suffix, trailing slashes
+ */
+function normalize_github_repo(string $repo): string {
+    // Ta bort full URL-prefix
+    $repo = preg_replace('#^https?://github\.com/#', '', $repo);
+    // Ta bort .git-suffix
+    $repo = preg_replace('#\.git$#', '', $repo);
+    // Ta bort trailing slash
+    $repo = rtrim($repo, '/');
+    return $repo;
+}
+
+/**
  * HTTP-anrop till GitHub API
  */
 function github_api(string $method, string $endpoint, array $data = []): array {
@@ -1017,7 +1031,7 @@ function push_to_github(array $updatedFiles, string $version): array {
         return ['success' => false, 'message' => 'GitHub ej konfigurerat — hoppar över push'];
     }
 
-    $repo = GITHUB_REPO;
+    $repo = normalize_github_repo(GITHUB_REPO);
     $rootPath = defined('ROOT_PATH') ? ROOT_PATH : dirname(__DIR__);
 
     // Filtrera bort filer som inte finns på disk
