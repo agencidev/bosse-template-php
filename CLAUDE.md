@@ -8,7 +8,7 @@ Se `.rules/brand-guide.md` för varumärkesguide (färger, typsnitt, tonalitet).
 Dessa filer/mappar tillhör Bosse-ramverket och skrivs över vid uppdatering:
 `bootstrap.php`, `router.php`, `setup.php`, `bosse-health.php`, `cms/`, `security/`, `bin/`, `seo/`, `includes/admin-bar.php`, `includes/cookie-consent.php`, `includes/mailer.php`, `assets/css/variables.css`, `assets/css/components.css`, `assets/js/cms.js`
 
-**Du får ändra:** `index.php` (startsidan), `pages/errors/` (felsidor), `assets/css/overrides.css`, `includes/header.php`, `includes/footer.php`, sidor i `pages/`, `cms/extensions/routes.php`, `data/content.json`, `data/projects.json`, `uploads/`
+**Du får ändra:** `index.php` (startsidan), `pages/errors/` (felsidor), `assets/css/overrides.css`, `assets/css/projekt-custom.css`, `assets/css/projekt-single-custom.css`, `includes/header.php`, `includes/footer.php`, sidor i `pages/`, `cms/extensions/routes.php`, `data/content.json`, `data/projects.json`, `uploads/`
 
 Se `.rules/ai-rules.md` → "CORE vs SAFE" för komplett lista.
 
@@ -45,10 +45,11 @@ Se `.rules/ai-rules.md` → "CORE vs SAFE" för komplett lista.
 ```
 
 **Viktigt:**
-- `status` MÅSTE vara `"published"` för att synas publikt (på `/projekt`)
-- `slug` MÅSTE vara unik — den blir URL:en (`/projekt/min-slug`)
+- `status` MÅSTE vara `"published"` för att synas publikt
+- `slug` MÅSTE vara unik — den blir URL:en (`/projekt/min-slug` eller `/blogg/min-slug`)
 - `id` MÅSTE vara unik — används av CMS:et för redigering
-- Inlägget syns automatiskt i CMS-admin (`/projects`) och publikt (`/projekt`) — ingen extra konfiguration behövs
+- `category` styr vilken URL inlägget visas på: `"Projekt"` → `/projekt`, `"Blogg"` → `/blogg`
+- Inlägget syns automatiskt i CMS-admin (`/projects`) och publikt — ingen extra konfiguration behövs
 
 ## Snabbref
 
@@ -72,6 +73,7 @@ När du skapar nya sidor (om-oss.php, tjanster.php etc.):
 ### CSS-ändringar
 - **Skriv alltid i:** `assets/css/overrides.css`
 - **Ändra ALDRIG:** `variables.css` eller `components.css`
+- **Egen design för projekt/blogg:** Skapa `assets/css/projekt-custom.css` (listvy) eller `assets/css/projekt-single-custom.css` (enskild vy) — ersätter default-styles helt, överlever uppdateringar
 
 ### Innehåll
 - **Sidinnehåll:** `data/content.json`
@@ -104,8 +106,12 @@ Använd ALLTID `editable_text()` och `editable_image()` för redigerbart innehå
 ### Publika sidor
 - `/` — Huvudsida (`index.php` i rot)
 - `/kontakt` — Kontaktformulär (`pages/kontakt.php`)
-- `/projekt` — Projekt-lista (`pages/projekt.php`)
+- `/projekt` — Projekt med kategori "Projekt" (`pages/projekt.php`)
 - `/projekt/{slug}` — Enskilt projekt (`pages/projekt-single.php`)
+- `/blogg` — Inlägg med kategori "Blogg" (`pages/projekt.php` via routes)
+- `/blogg/{slug}` — Enskilt blogginlägg (`pages/projekt-single.php` via routes)
+
+**Routing:** `/blogg`-URL:er routas via `cms/extensions/routes.php` → front-controller i `index.php`. Samma PHP-filer, kontextväxling via URL-prefix.
 
 ### CMS-admin (kräver inloggning)
 - `/admin` — Logga in
