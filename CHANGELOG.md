@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.5.68
+- Fix: Version-bump så GitHub-push-fixen (v1.5.67) faktiskt aktiveras på alla projekt
+
 ## 1.5.67
 - Fix: GitHub-push failade om GITHUB_REPO sparades som full URL (normaliseras nu till org/name)
 - Fix: GITHUB_REPO normaliseras vid sparning i super-admin (tar bort https://github.com/ och .git)
