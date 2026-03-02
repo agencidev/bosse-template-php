@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.66
+- Fix: Self-heal — updater laddar ner och extraherar saknade core-filer automatiskt
+- Fix: Projekt som uppdaterades från gamla versioner saknade cms/media.php, tickets, ai-agent
+
 ## 1.5.65
 - Fix: Cookie-banner kontrast (#b3b3b3 → #d4d4d4) — uppfyller WCAG AA 4.5:1
 - Fix: Lösenordshash korrumperades av preg_replace (admin.php + api-super.php)
