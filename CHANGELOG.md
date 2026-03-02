@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.5.70
+- Perf: Async Google Fonts — eliminerar 470ms render-block (preload+onload)
+- Perf: Smart caching — 5 min browser-cache för publika besökare, no-cache för inloggade
+- Perf: CLS-prevention — width/height på logotyper via getimagesize()
+- Perf: LCP-preload + fetchpriority="high" på projekt-cover
+- Perf: defer på cms.js (5 sidor saknade det)
+- Perf: Optimerad head-ordning — main.css först, fonts async efter
+- Perf: Bort med redundant preload + dns-prefetch
+- Docs: Skärpt CLAUDE.md-regel för inlägg via projects.json
+
 ## 1.5.69
 - Fix: Lösenordshash i settings.php korrumperades av preg_replace (samma bugg som fixades i admin.php i v1.5.65)
 
