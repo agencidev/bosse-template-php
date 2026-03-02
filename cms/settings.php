@@ -460,11 +460,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (file_exists($configPath)) {
                 if (function_exists('backup_config')) backup_config();
                 $config = file_get_contents($configPath);
-                $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
-                $escaped = addcslashes($newHash, "'\\");
+                $newHash = password_hash($newPassword, PASSWORD_BCRYPT);
+                $replacement = "define('ADMIN_PASSWORD_HASH', " . var_export($newHash, true) . ");";
                 $config = preg_replace(
                     "/define\('ADMIN_PASSWORD_HASH',\s*'[^']*'\);/",
-                    "define('ADMIN_PASSWORD_HASH', '" . $escaped . "');",
+                    addcslashes($replacement, '\\$'),
                     $config
                 );
                 file_put_contents($configPath, $config, LOCK_EX);

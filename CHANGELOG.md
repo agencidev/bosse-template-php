@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.5.69
+- Fix: Lösenordshash i settings.php korrumperades av preg_replace (samma bugg som fixades i admin.php i v1.5.65)
+
 ## 1.5.68
 - Fix: Version-bump så GitHub-push-fixen (v1.5.67) faktiskt aktiveras på alla projekt
 
