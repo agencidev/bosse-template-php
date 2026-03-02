@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.5.72
+- Feat: CSS opt-out för projekt/blogg — skapa `assets/css/projekt-custom.css` eller `projekt-single-custom.css` för egen design som överlever uppdateringar
+
 ## 1.5.71
 - Design: Stramare kortdesign — 5px border-radius, 3-kolumns grid, ingen hover-shadow
 - Design: Borttagen filter-UI på projekt/blogg-listor

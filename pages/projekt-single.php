@@ -125,6 +125,9 @@ function projectSchema($project) {
 
     <?php echo projectSchema($project); ?>
 
+    <?php if (file_exists(__DIR__ . '/../assets/css/projekt-single-custom.css')): ?>
+    <link rel="stylesheet" href="/assets/css/projekt-single-custom.css?v=<?php echo BOSSE_VERSION; ?>">
+    <?php else: ?>
     <style>
     .projekt-single {
         padding: var(--section-padding, 4rem) 0;
@@ -408,6 +411,7 @@ function projectSchema($project) {
         }
     }
     </style>
+    <?php endif; ?>
 </head>
 <body>
     <?php include __DIR__ . '/../includes/admin-bar.php'; ?>

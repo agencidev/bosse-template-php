@@ -65,6 +65,9 @@ $projects = array_filter($projects, fn($p) => isset($p['category']) && strtolowe
     <?php if (file_exists(__DIR__ . '/../includes/fonts.php')) include __DIR__ . '/../includes/fonts.php'; ?>
     <?php if (file_exists(__DIR__ . '/../includes/analytics.php')) include __DIR__ . '/../includes/analytics.php'; ?>
 
+    <?php if (file_exists(__DIR__ . '/../assets/css/projekt-custom.css')): ?>
+    <link rel="stylesheet" href="/assets/css/projekt-custom.css?v=<?php echo BOSSE_VERSION; ?>">
+    <?php else: ?>
     <style>
     .projekt-hero {
         padding: var(--section-padding, 4rem) 0;
@@ -182,6 +185,7 @@ $projects = array_filter($projects, fn($p) => isset($p['category']) && strtolowe
         }
     }
     </style>
+    <?php endif; ?>
 </head>
 <body>
     <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
