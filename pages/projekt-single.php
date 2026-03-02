@@ -62,7 +62,7 @@ if (!$project) {
 }
 
 // Schema.org för projektet
-function projectSchema($project) {
+function projectSchema($project, $_uri_prefix = '/projekt') {
     $schema = [
         '@context' => 'https://schema.org',
         '@type' => 'Article',
@@ -127,7 +127,7 @@ function projectSchema($project) {
     <?php if (file_exists(__DIR__ . '/../includes/fonts.php')) include __DIR__ . '/../includes/fonts.php'; ?>
     <?php if (file_exists(__DIR__ . '/../includes/analytics.php')) include __DIR__ . '/../includes/analytics.php'; ?>
 
-    <?php echo projectSchema($project); ?>
+    <?php echo projectSchema($project, $_uri_prefix); ?>
 
     <?php if (file_exists(__DIR__ . '/../assets/css/projekt-single-custom.css')): ?>
     <link rel="stylesheet" href="/assets/css/projekt-single-custom.css?v=<?php echo BOSSE_VERSION; ?>">

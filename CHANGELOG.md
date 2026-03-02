@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.5.74
+- Fix: $_uri_prefix undefined i projectSchema() — variabel passas nu som parameter istället för implicit scope
+
 ## 1.5.73
 - Feat: Routing för alla kategorier — /nyheter (Nyhet) och /event (Event) med tillbaka-länkar
 
