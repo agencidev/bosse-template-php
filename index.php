@@ -25,9 +25,13 @@ if ($_fc_uri !== '' && $_fc_uri !== '/') {
         $_fc_routes = include __DIR__ . '/cms/extensions/routes.php';
     }
     if (is_array($_fc_routes)) {
+        // Resolve route path (handles both relative and absolute paths)
+        $_fc_resolve = function($path) {
+            return file_exists($path) ? $path : __DIR__ . $path;
+        };
         // Static route match
         if (isset($_fc_routes[$_fc_uri])) {
-            require __DIR__ . $_fc_routes[$_fc_uri];
+            require $_fc_resolve($_fc_routes[$_fc_uri]);
             exit;
         }
         // Dynamic pattern match (e.g. /blogg/{slug})
@@ -39,7 +43,7 @@ if ($_fc_uri !== '' && $_fc_uri !== '/') {
                             $_GET[$_fc_param] = $_fc_matches[$_fc_index];
                         }
                     }
-                    $_fc_target = __DIR__ . $_fc_pattern[1];
+                    $_fc_target = $_fc_resolve($_fc_pattern[1]);
                     if (file_exists($_fc_target)) {
                         require $_fc_target;
                         exit;

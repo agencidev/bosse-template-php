@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.75
+- Fix: router.php — stöd för `__patterns` (blogg/nyheter/event-sluggar fungerar nu i PHP dev-server)
+- Fix: router.php + index.php — robust path-resolution, hanterar absoluta sökvägar i custom routes utan att dubbla `__DIR__`
+
 ## 1.5.74
 - Fix: $_uri_prefix undefined i projectSchema() — variabel passas nu som parameter istället för implicit scope
 

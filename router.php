@@ -48,9 +48,20 @@ $routes = [
 ];
 
 // Load custom routes from extensions (survives updates)
+$customPatterns = [];
 if (file_exists(__DIR__ . '/cms/extensions/routes.php')) {
     $custom = include __DIR__ . '/cms/extensions/routes.php';
-    if (is_array($custom)) $routes = array_merge($routes, $custom);
+    if (is_array($custom)) {
+        $customPatterns = $custom['__patterns'] ?? [];
+        unset($custom['__patterns']);
+        $routes = array_merge($routes, $custom);
+    }
+}
+
+// Resolve route file path (handles both relative and absolute paths)
+function resolveRoutePath($target) {
+    if (file_exists($target)) return $target;
+    return __DIR__ . $target;
 }
 
 // Check if route exists
@@ -64,8 +75,30 @@ if (isset($routes[$uri])) {
         parse_str($query, $_GET);
     }
 
-    require __DIR__ . $routes[$uri];
+    require resolveRoutePath($routes[$uri]);
     return true;
+}
+
+// Dynamic patterns from custom routes (e.g. /blogg/{slug}, /nyheter/{slug})
+foreach ($customPatterns as $pattern) {
+    if (preg_match($pattern[0], $uri, $matches)) {
+        if (isset($pattern[2]) && is_array($pattern[2])) {
+            foreach ($pattern[2] as $param => $index) {
+                $_GET[$param] = $matches[$index];
+            }
+        }
+        $_SERVER['SCRIPT_NAME'] = $pattern[1];
+        $_SERVER['PHP_SELF'] = $pattern[1];
+
+        if ($query) {
+            $_SERVER['QUERY_STRING'] = $query;
+            parse_str($query, $extraParams);
+            $_GET = array_merge($_GET, $extraParams);
+        }
+
+        require resolveRoutePath($pattern[1]);
+        return true;
+    }
 }
 
 // Dynamic route: /tickets/{id}
