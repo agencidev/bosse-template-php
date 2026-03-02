@@ -14,6 +14,12 @@ require_once __DIR__ . '/../seo/schema.php';
 // Hämta slug från URL
 $slug = trim($_GET['slug'] ?? '');
 
+// Context detection based on URL prefix
+$_uri_prefix = '/' . explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'))[0];
+$_back = ($_uri_prefix === '/blogg')
+    ? ['url' => '/blogg',   'sv' => 'Tillbaka till bloggen', 'en' => 'Back to blog']
+    : ['url' => '/projekt', 'sv' => 'Tillbaka till projekt', 'en' => 'Back to projects'];
+
 // Hämta projekt
 $projects_file = __DIR__ . '/../data/projects.json';
 $projects = [];
@@ -74,7 +80,7 @@ function projectSchema($project) {
         ],
         'mainEntityOfPage' => [
             '@type' => 'WebPage',
-            '@id' => SITE_URL . '/projekt/' . ($project['slug'] ?? '')
+            '@id' => SITE_URL . $_uri_prefix . '/' . ($project['slug'] ?? '')
         ]
     ];
 
@@ -152,7 +158,7 @@ function projectSchema($project) {
         color: white;
         font-size: 0.75rem;
         font-weight: 600;
-        border-radius: var(--radius-md, 0.5rem);
+        border-radius: 5px;
         margin-bottom: 1rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -176,7 +182,7 @@ function projectSchema($project) {
 
     .projekt-single__status {
         padding: 0.25rem 0.75rem;
-        border-radius: var(--radius-md, 0.5rem);
+        border-radius: 5px;
         font-size: 0.75rem;
         font-weight: 600;
     }
@@ -195,7 +201,7 @@ function projectSchema($project) {
         width: 100%;
         max-height: 500px;
         object-fit: cover;
-        border-radius: var(--radius-lg, 1rem);
+        border-radius: 5px;
         margin-bottom: 3rem;
     }
 
@@ -250,7 +256,7 @@ function projectSchema($project) {
     .projekt-single__body img {
         max-width: 100%;
         height: auto;
-        border-radius: var(--radius-md, 0.5rem);
+        border-radius: 5px;
         margin: 2rem 0;
     }
 
@@ -265,7 +271,7 @@ function projectSchema($project) {
         width: 100%;
         height: 200px;
         object-fit: cover;
-        border-radius: var(--radius-md, 0.5rem);
+        border-radius: 5px;
         cursor: pointer;
         transition: transform 0.3s;
     }
@@ -295,7 +301,7 @@ function projectSchema($project) {
     .projekt-single__admin-bar {
         background: #fef3c7;
         border: 1px solid #fde68a;
-        border-radius: var(--radius-md, 0.5rem);
+        border-radius: 5px;
         padding: 1rem 1.5rem;
         margin-bottom: 2rem;
         display: flex;
@@ -312,7 +318,7 @@ function projectSchema($project) {
         padding: 0.5rem 1rem;
         background: #18181b;
         color: white;
-        border-radius: var(--radius-md, 0.5rem);
+        border-radius: 5px;
         text-decoration: none;
         font-size: 0.875rem;
         font-weight: 500;
@@ -340,7 +346,7 @@ function projectSchema($project) {
 
     .related-projects__card {
         background: var(--color-background, #fff);
-        border-radius: var(--radius-lg, 1rem);
+        border-radius: 5px;
         overflow: hidden;
         border: 1px solid var(--color-gray-200, #e5e5e5);
         text-decoration: none;
@@ -410,11 +416,11 @@ function projectSchema($project) {
     <main id="main-content">
         <article class="projekt-single">
             <div class="container">
-                <a href="/projekt" class="projekt-single__back">
+                <a href="<?php echo $_back['url']; ?>" class="projekt-single__back">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    Tillbaka till projekt
+                    <?php echo $_back['sv']; ?>
                 </a>
 
                 <?php if (is_logged_in()): ?>
@@ -512,7 +518,7 @@ function projectSchema($project) {
             <h2 class="related-projects__title">Fler inom <?php echo htmlspecialchars($currentCategory, ENT_QUOTES, 'UTF-8'); ?></h2>
             <div class="related-projects__grid">
                 <?php foreach ($related as $rp): ?>
-                <a href="/projekt/<?php echo htmlspecialchars($rp['slug'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" class="related-projects__card">
+                <a href="<?php echo $_uri_prefix; ?>/<?php echo htmlspecialchars($rp['slug'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" class="related-projects__card">
                     <?php if (!empty($rp['coverImage'])): ?>
                     <img src="<?php echo htmlspecialchars($rp['coverImage'], ENT_QUOTES, 'UTF-8'); ?>"
                          alt="<?php echo htmlspecialchars($rp['title'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"

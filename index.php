@@ -17,6 +17,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || is_logged_in()) {
     header('Cache-Control: public, max-age=300, must-revalidate');
     header_remove('Pragma');
 }
+// Front controller for custom routes (fallback from .htaccess)
+$_fc_uri = '/' . trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+if ($_fc_uri !== '' && $_fc_uri !== '/') {
+    $_fc_routes = [];
+    if (file_exists(__DIR__ . '/cms/extensions/routes.php')) {
+        $_fc_routes = include __DIR__ . '/cms/extensions/routes.php';
+    }
+    if (is_array($_fc_routes)) {
+        // Static route match
+        if (isset($_fc_routes[$_fc_uri])) {
+            require __DIR__ . $_fc_routes[$_fc_uri];
+            exit;
+        }
+        // Dynamic pattern match (e.g. /blogg/{slug})
+        if (isset($_fc_routes['__patterns'])) {
+            foreach ($_fc_routes['__patterns'] as $_fc_pattern) {
+                if (preg_match($_fc_pattern[0], $_fc_uri, $_fc_matches)) {
+                    if (isset($_fc_pattern[2]) && is_array($_fc_pattern[2])) {
+                        foreach ($_fc_pattern[2] as $_fc_param => $_fc_index) {
+                            $_GET[$_fc_param] = $_fc_matches[$_fc_index];
+                        }
+                    }
+                    $_fc_target = __DIR__ . $_fc_pattern[1];
+                    if (file_exists($_fc_target)) {
+                        require $_fc_target;
+                        exit;
+                    }
+                }
+            }
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="sv">

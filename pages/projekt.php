@@ -29,15 +29,17 @@ usort($projects, function($a, $b) {
     return strtotime($dateB) - strtotime($dateA);
 });
 
-// Kategorifil­trering (valfri GET-parameter)
-$category_filter = isset($_GET['kategori']) ? trim($_GET['kategori']) : '';
-if (!empty($category_filter)) {
-    $projects = array_filter($projects, fn($p) => isset($p['category']) && strtolower($p['category']) === strtolower($category_filter));
-}
+// Context detection based on URL prefix
+$_uri_prefix = '/' . explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'))[0];
 
-// Hämta unika kategorier för filtrering
-$categories = array_unique(array_filter(array_map(fn($p) => $p['category'] ?? '', $all_projects)));
-sort($categories);
+$_ctx_map = [
+    '/blogg'   => ['category' => 'Blogg',   'title_sv' => 'Blogg',          'title_en' => 'Blog',          'base_url' => '/blogg'],
+    '/projekt' => ['category' => 'Projekt',  'title_sv' => 'Våra projekt',   'title_en' => 'Our projects',   'base_url' => '/projekt'],
+];
+$_ctx = $_ctx_map[$_uri_prefix] ?? $_ctx_map['/projekt'];
+
+// Filter by context category
+$projects = array_filter($projects, fn($p) => isset($p['category']) && strtolower($p['category']) === strtolower($_ctx['category']));
 ?>
 <!DOCTYPE html>
 <html lang="sv">
@@ -47,8 +49,8 @@ sort($categories);
 
     <?php
     generateMeta(
-        get_content('projekt.meta_title', 'Projekt - ' . SITE_NAME),
-        get_content('projekt.meta_description', 'Se våra senaste projekt och case studies'),
+        $_ctx['title_sv'] . ' - ' . SITE_NAME,
+        $_ctx['category'] === 'Blogg' ? 'Läs våra senaste blogginlägg' : 'Se våra senaste projekt och case studies',
         '/assets/images/og-image.jpg'
     );
     ?>
@@ -84,43 +86,16 @@ sort($categories);
         margin: 0 auto;
     }
 
-    .projekt-filter {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-        justify-content: center;
-        margin-top: 2rem;
-    }
-
-    .projekt-filter a {
-        padding: 0.5rem 1rem;
-        border-radius: var(--radius-md, 0.5rem);
-        background: white;
-        color: var(--color-gray-600, #525252);
-        text-decoration: none;
-        font-size: 0.875rem;
-        font-weight: 500;
-        border: 1px solid var(--color-gray-200, #e5e5e5);
-        transition: all 0.2s;
-    }
-
-    .projekt-filter a:hover,
-    .projekt-filter a.active {
-        background: var(--color-primary, #8b5cf6);
-        color: white;
-        border-color: var(--color-primary, #8b5cf6);
-    }
-
     .projekt-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
         gap: 2rem;
         padding: var(--section-padding, 4rem) 0;
     }
 
     .projekt-card {
         background: white;
-        border-radius: var(--radius-lg, 1rem);
+        border-radius: 5px;
         overflow: hidden;
         border: 1px solid var(--color-gray-200, #e5e5e5);
         transition: all 0.3s;
@@ -130,7 +105,7 @@ sort($categories);
 
     .projekt-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
+        box-shadow: none;
     }
 
     .projekt-card__image {
@@ -151,7 +126,7 @@ sort($categories);
         color: var(--color-gray-600, #525252);
         font-size: 0.75rem;
         font-weight: 600;
-        border-radius: var(--radius-md, 0.5rem);
+        border-radius: 5px;
         margin-bottom: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.025em;
@@ -191,6 +166,12 @@ sort($categories);
         margin-bottom: 1.5rem;
     }
 
+    @media (max-width: 1024px) {
+        .projekt-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
     @media (max-width: 768px) {
         .projekt-hero h1 {
             font-size: 2rem;
@@ -210,20 +191,8 @@ sort($categories);
         <!-- Hero Section -->
         <section class="projekt-hero">
             <div class="container">
-                <?php editable_text('projekt', 'title', 'Våra projekt', 'h1'); ?>
-                <?php editable_text('projekt', 'description', 'Utforska våra senaste projekt och se vad vi kan hjälpa dig med', 'p'); ?>
-
-                <?php if (!empty($categories)): ?>
-                <div class="projekt-filter">
-                    <a href="/projekt" class="<?php echo empty($category_filter) ? 'active' : ''; ?>">Alla</a>
-                    <?php foreach ($categories as $cat): ?>
-                        <a href="/projekt?kategori=<?php echo urlencode($cat); ?>"
-                           class="<?php echo strtolower($cat) === strtolower($category_filter) ? 'active' : ''; ?>">
-                            <?php echo htmlspecialchars($cat, ENT_QUOTES, 'UTF-8'); ?>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
+                <h1><?php echo htmlspecialchars($_ctx['title_sv'], ENT_QUOTES, 'UTF-8'); ?></h1>
+                <p><?php echo $_ctx['category'] === 'Blogg' ? 'Läs våra senaste inlägg och artiklar' : 'Utforska våra senaste projekt och se vad vi kan hjälpa dig med'; ?></p>
             </div>
         </section>
 
@@ -232,7 +201,7 @@ sort($categories);
             <div class="container">
                 <?php if (empty($projects)): ?>
                     <div class="projekt-empty">
-                        <p>Inga projekt att visa just nu.</p>
+                        <p><?php echo $_ctx['category'] === 'Blogg' ? 'Inga blogginlägg att visa just nu.' : 'Inga projekt att visa just nu.'; ?></p>
                         <?php if (is_logged_in()): ?>
                             <a href="/cms/projects/new" class="button button--primary">Skapa ditt första projekt</a>
                         <?php endif; ?>
@@ -240,7 +209,7 @@ sort($categories);
                 <?php else: ?>
                     <div class="projekt-grid">
                         <?php foreach ($projects as $project): ?>
-                            <a href="/projekt/<?php echo htmlspecialchars($project['slug'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" class="projekt-card">
+                            <a href="<?php echo $_ctx['base_url']; ?>/<?php echo htmlspecialchars($project['slug'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" class="projekt-card">
                                 <?php if (!empty($project['coverImage'])): ?>
                                     <img src="<?php echo htmlspecialchars($project['coverImage'], ENT_QUOTES, 'UTF-8'); ?>"
                                          alt="<?php echo htmlspecialchars($project['title'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"

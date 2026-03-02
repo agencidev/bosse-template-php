@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.71
+- Design: Stramare kortdesign — 5px border-radius, 3-kolumns grid, ingen hover-shadow
+- Design: Borttagen filter-UI på projekt/blogg-listor
+- Feat: Kategoribaserade URL:er — /blogg visar blogginlägg, /projekt visar projekt
+- Feat: Dynamiska tillbaka-länkar och schema.org baserat på URL-prefix
+- Feat: Front-controller i index.php för custom routes via cms/extensions/routes.php
+
 ## 1.5.70
 - Perf: Async Google Fonts — eliminerar 470ms render-block (preload+onload)
 - Perf: Smart caching — 5 min browser-cache för publika besökare, no-cache för inloggade
