@@ -108,10 +108,14 @@ Använd ALLTID `editable_text()` och `editable_image()` för redigerbart innehå
 - `/kontakt` — Kontaktformulär (`pages/kontakt.php`)
 - `/projekt` — Projekt med kategori "Projekt" (`pages/projekt.php`)
 - `/projekt/{slug}` — Enskilt projekt (`pages/projekt-single.php`)
-- `/blogg` — Inlägg med kategori "Blogg" (`pages/projekt.php` via routes)
-- `/blogg/{slug}` — Enskilt blogginlägg (`pages/projekt-single.php` via routes)
+- `/blogg` — Inlägg med kategori "Blogg" (via routes)
+- `/blogg/{slug}` — Enskilt blogginlägg (via routes)
+- `/nyheter` — Inlägg med kategori "Nyhet" (via routes)
+- `/nyheter/{slug}` — Enskild nyhet (via routes)
+- `/event` — Inlägg med kategori "Event" (via routes)
+- `/event/{slug}` — Enskilt event (via routes)
 
-**Routing:** `/blogg`-URL:er routas via `cms/extensions/routes.php` → front-controller i `index.php`. Samma PHP-filer, kontextväxling via URL-prefix.
+**Routing:** Alla kategori-URL:er utom `/projekt` routas via `cms/extensions/routes.php` → front-controller i `index.php`. Samma PHP-filer (`pages/projekt.php` + `pages/projekt-single.php`), kontextväxling via URL-prefix.
 
 ### CMS-admin (kräver inloggning)
 - `/admin` — Logga in

@@ -5,9 +5,13 @@
  * Dynamic patterns: '__patterns' => [regex, target, params]
  */
 return [
-    '/blogg' => '/pages/projekt.php',
+    '/blogg'    => '/pages/projekt.php',
+    '/nyheter'  => '/pages/projekt.php',
+    '/event'    => '/pages/projekt.php',
 
     '__patterns' => [
-        ['#^/blogg/([a-z0-9-]+)/?$#', '/pages/projekt-single.php', ['slug' => 1]],
+        ['#^/blogg/([a-z0-9-]+)/?$#',   '/pages/projekt-single.php', ['slug' => 1]],
+        ['#^/nyheter/([a-z0-9-]+)/?$#', '/pages/projekt-single.php', ['slug' => 1]],
+        ['#^/event/([a-z0-9-]+)/?$#',   '/pages/projekt-single.php', ['slug' => 1]],
     ],
 ];

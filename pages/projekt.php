@@ -33,8 +33,10 @@ usort($projects, function($a, $b) {
 $_uri_prefix = '/' . explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'))[0];
 
 $_ctx_map = [
-    '/blogg'   => ['category' => 'Blogg',   'title_sv' => 'Blogg',          'title_en' => 'Blog',          'base_url' => '/blogg'],
-    '/projekt' => ['category' => 'Projekt',  'title_sv' => 'Våra projekt',   'title_en' => 'Our projects',   'base_url' => '/projekt'],
+    '/blogg'   => ['category' => 'Blogg',   'title_sv' => 'Blogg',        'title_en' => 'Blog',         'base_url' => '/blogg'],
+    '/projekt' => ['category' => 'Projekt',  'title_sv' => 'Våra projekt', 'title_en' => 'Our projects', 'base_url' => '/projekt'],
+    '/nyheter' => ['category' => 'Nyhet',    'title_sv' => 'Nyheter',      'title_en' => 'News',         'base_url' => '/nyheter'],
+    '/event'   => ['category' => 'Event',    'title_sv' => 'Event',        'title_en' => 'Events',       'base_url' => '/event'],
 ];
 $_ctx = $_ctx_map[$_uri_prefix] ?? $_ctx_map['/projekt'];
 

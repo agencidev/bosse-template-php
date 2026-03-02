@@ -16,9 +16,13 @@ $slug = trim($_GET['slug'] ?? '');
 
 // Context detection based on URL prefix
 $_uri_prefix = '/' . explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'))[0];
-$_back = ($_uri_prefix === '/blogg')
-    ? ['url' => '/blogg',   'sv' => 'Tillbaka till bloggen', 'en' => 'Back to blog']
-    : ['url' => '/projekt', 'sv' => 'Tillbaka till projekt', 'en' => 'Back to projects'];
+$_back_map = [
+    '/blogg'   => ['url' => '/blogg',   'sv' => 'Tillbaka till bloggen', 'en' => 'Back to blog'],
+    '/projekt' => ['url' => '/projekt', 'sv' => 'Tillbaka till projekt', 'en' => 'Back to projects'],
+    '/nyheter' => ['url' => '/nyheter', 'sv' => 'Tillbaka till nyheter', 'en' => 'Back to news'],
+    '/event'   => ['url' => '/event',   'sv' => 'Tillbaka till event',   'en' => 'Back to events'],
+];
+$_back = $_back_map[$_uri_prefix] ?? $_back_map['/projekt'];
 
 // Hämta projekt
 $projects_file = __DIR__ . '/../data/projects.json';

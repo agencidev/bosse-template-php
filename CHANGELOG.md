@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.5.73
+- Feat: Routing för alla kategorier — /nyheter (Nyhet) och /event (Event) med tillbaka-länkar
+
 ## 1.5.72
 - Feat: CSS opt-out för projekt/blogg — skapa `assets/css/projekt-custom.css` eller `projekt-single-custom.css` för egen design som överlever uppdateringar
 
