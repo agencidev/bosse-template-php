@@ -48,7 +48,7 @@ Se `.rules/ai-rules.md` → "CORE vs SAFE" för komplett lista.
 - `status` MÅSTE vara `"published"` för att synas publikt
 - `slug` MÅSTE vara unik — den blir URL:en (`/inlagg/min-slug`)
 - `id` MÅSTE vara unik — används av CMS:et för redigering
-- `category` styr vilken URL inlägget visas på: `"Inlägg"` → `/inlagg`. Extra kategorier (t.ex. "Blogg" → `/blogg`) skapas via CMS-admin (`/categories`)
+- `category` styr vilken URL inlägget visas på: `"Inlägg"` → `/inlagg`. Extra kategorier konfigureras per projekt (se "Kategori- och innehållssidor" nedan)
 - Inlägget syns automatiskt i CMS-admin (`/projects`) och publikt — ingen extra konfiguration behövs
 
 ## Snabbref
@@ -103,19 +103,58 @@ Använd ALLTID `editable_text()` och `editable_image()` för redigerbart innehå
 }
 ```
 
+### Kategori- och innehållssidor
+
+Bosse har ett inbyggt system för att skapa kategorisidor (blogg, nyheter, event, portfolio etc.). Alla kategorier använder samma PHP-filer (`pages/inlagg.php` + `pages/inlagg-single.php`) men med olika URL-prefix och filter.
+
+**Default:** `/inlagg` finns alltid (hanteras av `.htaccess`). Extra kategorier konfigureras per projekt genom att redigera **2 filer**:
+
+#### Steg 1: `cms/extensions/categories.php` — Definiera kategorin
+```php
+return [
+    '/inlagg' => ['category' => 'Inlägg', 'title_sv' => 'Inlägg', 'title_en' => 'Posts', 'base_url' => '/inlagg'],
+    '/happenings' => ['category' => 'Event', 'title_sv' => 'Event', 'title_en' => 'Events', 'base_url' => '/happenings'],
+    '/blogg' => ['category' => 'Blogg', 'title_sv' => 'Blogg', 'title_en' => 'Blog', 'base_url' => '/blogg'],
+];
+```
+
+#### Steg 2: `cms/extensions/routes.php` — Lägg till routes
+```php
+return [
+    '/happenings' => '/pages/inlagg.php',
+    '/blogg' => '/pages/inlagg.php',
+    '__patterns' => [
+        ['/^\/happenings\/([a-z0-9-]+)$/', '/pages/inlagg-single.php', ['slug']],
+        ['/^\/blogg\/([a-z0-9-]+)$/', '/pages/inlagg-single.php', ['slug']],
+    ],
+];
+```
+
+#### Resultat
+- Listvy: `/happenings` visar alla inlägg med `"category": "Event"`
+- Enskild: `/happenings/mitt-event` visar detalj
+- CMS-dropdown i "Skapa inlägg" uppdateras automatiskt med nya kategorier
+
+#### Exempelprompts som triggar detta
+- "Skapa en eventsida som heter happenings" → skapar `/happenings` + `/happenings/{slug}`
+- "Lägg till kategorierna Event och Nyhet" → lägger till båda i categories.php + routes.php
+- "Jag vill ha en blogg på /blogg och portfolio på /projekt" → skapar båda
+- "Ta bort kategorin Blogg" → tar bort från categories.php + routes.php
+
+**Viktigt:** `category`-värdet i `categories.php` MÅSTE matcha `category`-fältet i `data/projects.json`. Exakt match, case-sensitive.
+
 ### Publika sidor
 - `/` — Huvudsida (`index.php` i rot)
 - `/kontakt` — Kontaktformulär (`pages/kontakt.php`)
 - `/inlagg` — Alla inlägg (`pages/inlagg.php`)
 - `/inlagg/{slug}` — Enskilt inlägg (`pages/inlagg-single.php`)
-- Extra kategorisidor (t.ex. `/blogg`, `/nyheter`) skapas via CMS-admin (`/categories`)
+- Extra kategorisidor (t.ex. `/blogg`, `/happenings`) konfigureras per projekt (se ovan)
 
-**Routing:** `/inlagg` hanteras av `.htaccess`. Extra kategorisidor routas via `cms/extensions/routes.php` (auto-genererat av CMS). Samma PHP-filer (`pages/inlagg.php` + `pages/inlagg-single.php`), kontextväxling via URL-prefix.
+**Routing:** `/inlagg` hanteras av `.htaccess`. Extra kategorisidor routas via `cms/extensions/routes.php`. Samma PHP-filer, kontextväxling via URL-prefix.
 
 ### CMS-admin (kräver inloggning)
 - `/admin` — Logga in
 - `/dashboard` — Översikt
 - `/projects` — Hantera inlägg
-- `/categories` — Hantera kategorisidor
 - `/tickets` — Ärendehantering
 - `/support` — Skapa supportärende (skapar ticket direkt, inget SMTP krävs)
