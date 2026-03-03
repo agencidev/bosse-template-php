@@ -43,7 +43,8 @@ $routes = [
     '/super-admin' => '/cms/super-admin.php',
     '/api/super' => '/cms/api-super.php',
     '/bosse-health' => '/bosse-health.php',
-    '/projekt' => '/pages/projekt.php',
+    '/inlagg' => '/pages/inlagg.php',
+    '/categories' => '/cms/categories.php',
     '/tickets' => '/cms/tickets.php',
 ];
 
@@ -116,11 +117,11 @@ if (preg_match('#^/tickets/(\d+)/?$#', $uri, $matches)) {
     return true;
 }
 
-// Dynamic route: /projekt/{slug}
-if (preg_match('#^/projekt/([a-z0-9-]+)/?$#', $uri, $matches)) {
+// Dynamic route: /inlagg/{slug}
+if (preg_match('#^/inlagg/([a-z0-9-]+)/?$#', $uri, $matches)) {
     $_GET['slug'] = $matches[1];
-    $_SERVER['SCRIPT_NAME'] = '/pages/projekt-single.php';
-    $_SERVER['PHP_SELF'] = '/pages/projekt-single.php';
+    $_SERVER['SCRIPT_NAME'] = '/pages/inlagg-single.php';
+    $_SERVER['PHP_SELF'] = '/pages/inlagg-single.php';
 
     // Preserve additional query string
     if ($query) {
@@ -128,7 +129,7 @@ if (preg_match('#^/projekt/([a-z0-9-]+)/?$#', $uri, $matches)) {
         $_GET = array_merge($_GET, $extraParams);
     }
 
-    require __DIR__ . '/pages/projekt-single.php';
+    require __DIR__ . '/pages/inlagg-single.php';
     return true;
 }
 

@@ -1,7 +1,7 @@
 <?php
 /**
- * Enskilt projekt (publik)
- * Visar ett projekt baserat på slug
+ * Enskilt inlägg (publik)
+ * Visar ett inlägg baserat på slug
  */
 
 require_once __DIR__ . '/../bootstrap.php';
@@ -22,10 +22,7 @@ $_categories_file = __DIR__ . '/../cms/extensions/categories.php';
 $_ctx_map = file_exists($_categories_file) ? (require $_categories_file) : [];
 if (empty($_ctx_map) || !is_array($_ctx_map)) {
     $_ctx_map = [
-        '/blogg'   => ['category' => 'Blogg',   'title_sv' => 'Blogg',        'title_en' => 'Blog',         'base_url' => '/blogg'],
-        '/projekt' => ['category' => 'Projekt',  'title_sv' => 'Våra projekt', 'title_en' => 'Our projects', 'base_url' => '/projekt'],
-        '/nyheter' => ['category' => 'Nyhet',    'title_sv' => 'Nyheter',      'title_en' => 'News',         'base_url' => '/nyheter'],
-        '/event'   => ['category' => 'Event',    'title_sv' => 'Event',        'title_en' => 'Events',       'base_url' => '/event'],
+        '/inlagg' => ['category' => 'Inlägg', 'title_sv' => 'Inlägg', 'title_en' => 'Posts', 'base_url' => '/inlagg'],
     ];
 }
 
@@ -39,13 +36,10 @@ foreach ($_ctx_map as $prefix => $ctx) {
 }
 if (empty($_back_map)) {
     $_back_map = [
-        '/blogg'   => ['url' => '/blogg',   'sv' => 'Tillbaka till bloggen', 'en' => 'Back to blog'],
-        '/projekt' => ['url' => '/projekt', 'sv' => 'Tillbaka till projekt', 'en' => 'Back to projects'],
-        '/nyheter' => ['url' => '/nyheter', 'sv' => 'Tillbaka till nyheter', 'en' => 'Back to news'],
-        '/event'   => ['url' => '/event',   'sv' => 'Tillbaka till event',   'en' => 'Back to events'],
+        '/inlagg' => ['url' => '/inlagg', 'sv' => 'Tillbaka till inlägg', 'en' => 'Back to posts'],
     ];
 }
-$_back = $_back_map[$_uri_prefix] ?? $_back_map['/projekt'];
+$_back = $_back_map[$_uri_prefix] ?? $_back_map['/inlagg'];
 
 // Hämta projekt
 $projects_file = __DIR__ . '/../data/projects.json';
@@ -85,7 +79,7 @@ if (!$project) {
 }
 
 // Schema.org för projektet
-function projectSchema($project, $_uri_prefix = '/projekt') {
+function projectSchema($project, $_uri_prefix = '/inlagg') {
     $schema = [
         '@context' => 'https://schema.org',
         '@type' => 'Article',
@@ -152,9 +146,9 @@ function projectSchema($project, $_uri_prefix = '/projekt') {
 
     <?php echo projectSchema($project, $_uri_prefix); ?>
 
-    <link rel="stylesheet" href="/assets/css/projekt-single-default.css?v=<?php echo BOSSE_VERSION; ?>">
-    <?php if (file_exists(__DIR__ . '/../assets/css/projekt-single-custom.css') && filesize(__DIR__ . '/../assets/css/projekt-single-custom.css') > 50): ?>
-    <link rel="stylesheet" href="/assets/css/projekt-single-custom.css?v=<?php echo BOSSE_VERSION; ?>">
+    <link rel="stylesheet" href="/assets/css/inlagg-single-default.css?v=<?php echo BOSSE_VERSION; ?>">
+    <?php if (file_exists(__DIR__ . '/../assets/css/inlagg-single-custom.css') && filesize(__DIR__ . '/../assets/css/inlagg-single-custom.css') > 50): ?>
+    <link rel="stylesheet" href="/assets/css/inlagg-single-custom.css?v=<?php echo BOSSE_VERSION; ?>">
     <?php endif; ?>
 </head>
 <body>

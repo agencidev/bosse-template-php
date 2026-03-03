@@ -1,7 +1,7 @@
 <?php
 /**
- * Projekt-lista (publik)
- * Visar alla publicerade projekt från data/projects.json
+ * Inlägg-lista (publik)
+ * Visar alla publicerade inlägg från data/projects.json
  */
 
 require_once __DIR__ . '/../bootstrap.php';
@@ -37,13 +37,10 @@ $_categories_file = __DIR__ . '/../cms/extensions/categories.php';
 $_ctx_map = file_exists($_categories_file) ? (require $_categories_file) : [];
 if (empty($_ctx_map) || !is_array($_ctx_map)) {
     $_ctx_map = [
-        '/blogg'   => ['category' => 'Blogg',   'title_sv' => 'Blogg',        'title_en' => 'Blog',         'base_url' => '/blogg'],
-        '/projekt' => ['category' => 'Projekt',  'title_sv' => 'Våra projekt', 'title_en' => 'Our projects', 'base_url' => '/projekt'],
-        '/nyheter' => ['category' => 'Nyhet',    'title_sv' => 'Nyheter',      'title_en' => 'News',         'base_url' => '/nyheter'],
-        '/event'   => ['category' => 'Event',    'title_sv' => 'Event',        'title_en' => 'Events',       'base_url' => '/event'],
+        '/inlagg' => ['category' => 'Inlägg', 'title_sv' => 'Inlägg', 'title_en' => 'Posts', 'base_url' => '/inlagg'],
     ];
 }
-$_ctx = $_ctx_map[$_uri_prefix] ?? $_ctx_map['/projekt'];
+$_ctx = $_ctx_map[$_uri_prefix] ?? $_ctx_map['/inlagg'];
 
 // Filter by context category
 $projects = array_filter($projects, fn($p) => isset($p['category']) && strtolower($p['category']) === strtolower($_ctx['category']));
@@ -72,9 +69,9 @@ $projects = array_filter($projects, fn($p) => isset($p['category']) && strtolowe
     <?php if (file_exists(__DIR__ . '/../includes/fonts.php')) include __DIR__ . '/../includes/fonts.php'; ?>
     <?php if (file_exists(__DIR__ . '/../includes/analytics.php')) include __DIR__ . '/../includes/analytics.php'; ?>
 
-    <link rel="stylesheet" href="/assets/css/projekt-default.css?v=<?php echo BOSSE_VERSION; ?>">
-    <?php if (file_exists(__DIR__ . '/../assets/css/projekt-custom.css') && filesize(__DIR__ . '/../assets/css/projekt-custom.css') > 50): ?>
-    <link rel="stylesheet" href="/assets/css/projekt-custom.css?v=<?php echo BOSSE_VERSION; ?>">
+    <link rel="stylesheet" href="/assets/css/inlagg-default.css?v=<?php echo BOSSE_VERSION; ?>">
+    <?php if (file_exists(__DIR__ . '/../assets/css/inlagg-custom.css') && filesize(__DIR__ . '/../assets/css/inlagg-custom.css') > 50): ?>
+    <link rel="stylesheet" href="/assets/css/inlagg-custom.css?v=<?php echo BOSSE_VERSION; ?>">
     <?php endif; ?>
 </head>
 <body>

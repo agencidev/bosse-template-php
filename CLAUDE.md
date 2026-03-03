@@ -8,7 +8,7 @@ Se `.rules/brand-guide.md` för varumärkesguide (färger, typsnitt, tonalitet).
 Dessa filer/mappar tillhör Bosse-ramverket och skrivs över vid uppdatering:
 `bootstrap.php`, `router.php`, `setup.php`, `bosse-health.php`, `cms/`, `security/`, `bin/`, `seo/`, `includes/admin-bar.php`, `includes/cookie-consent.php`, `includes/mailer.php`, `assets/css/variables.css`, `assets/css/components.css`, `assets/js/cms.js`
 
-**Du får ändra:** `index.php` (startsidan), `pages/errors/` (felsidor), `assets/css/overrides.css`, `assets/css/projekt-custom.css`, `assets/css/projekt-single-custom.css`, `includes/header.php`, `includes/footer.php`, sidor i `pages/`, `cms/extensions/routes.php`, `data/content.json`, `data/projects.json`, `uploads/`
+**Du får ändra:** `index.php` (startsidan), `pages/errors/` (felsidor), `assets/css/overrides.css`, `assets/css/inlagg-custom.css`, `assets/css/inlagg-single-custom.css`, `includes/header.php`, `includes/footer.php`, sidor i `pages/`, `cms/extensions/routes.php`, `data/content.json`, `data/projects.json`, `uploads/`
 
 Se `.rules/ai-rules.md` → "CORE vs SAFE" för komplett lista.
 
@@ -34,7 +34,7 @@ Se `.rules/ai-rules.md` → "CORE vs SAFE" för komplett lista.
   "id": "unikt-id-2026",
   "title": "Titel på inlägget",
   "slug": "url-vänlig-slug",
-  "category": "Projekt|Blogg|Nyhet|Event",
+  "category": "Inlägg",
   "summary": "Kort beskrivning (visas i listvy)",
   "content": "Fullständig text (HTML tillåtet)",
   "status": "published",
@@ -46,9 +46,9 @@ Se `.rules/ai-rules.md` → "CORE vs SAFE" för komplett lista.
 
 **Viktigt:**
 - `status` MÅSTE vara `"published"` för att synas publikt
-- `slug` MÅSTE vara unik — den blir URL:en (`/projekt/min-slug` eller `/blogg/min-slug`)
+- `slug` MÅSTE vara unik — den blir URL:en (`/inlagg/min-slug`)
 - `id` MÅSTE vara unik — används av CMS:et för redigering
-- `category` styr vilken URL inlägget visas på: `"Projekt"` → `/projekt`, `"Blogg"` → `/blogg`
+- `category` styr vilken URL inlägget visas på: `"Inlägg"` → `/inlagg`. Extra kategorier (t.ex. "Blogg" → `/blogg`) skapas via CMS-admin (`/categories`)
 - Inlägget syns automatiskt i CMS-admin (`/projects`) och publikt — ingen extra konfiguration behövs
 
 ## Snabbref
@@ -73,7 +73,7 @@ När du skapar nya sidor (om-oss.php, tjanster.php etc.):
 ### CSS-ändringar
 - **Skriv alltid i:** `assets/css/overrides.css`
 - **Ändra ALDRIG:** `variables.css` eller `components.css`
-- **Egen design för projekt/blogg:** Skapa `assets/css/projekt-custom.css` (listvy) eller `assets/css/projekt-single-custom.css` (enskild vy) — ersätter default-styles helt, överlever uppdateringar
+- **Egen design för inlägg:** Skapa `assets/css/inlagg-custom.css` (listvy) eller `assets/css/inlagg-single-custom.css` (enskild vy) — ersätter default-styles helt, överlever uppdateringar
 
 ### Innehåll
 - **Sidinnehåll:** `data/content.json`
@@ -94,7 +94,7 @@ Använd ALLTID `editable_text()` och `editable_image()` för redigerbart innehå
   "id": "unikt-id",
   "title": "Titel",
   "slug": "url-slug",
-  "category": "Projekt|Blogg|Nyhet|Event",
+  "category": "Inlägg",
   "summary": "Kort beskrivning",
   "content": "Fullständig text",
   "status": "published|draft",
@@ -106,20 +106,16 @@ Använd ALLTID `editable_text()` och `editable_image()` för redigerbart innehå
 ### Publika sidor
 - `/` — Huvudsida (`index.php` i rot)
 - `/kontakt` — Kontaktformulär (`pages/kontakt.php`)
-- `/projekt` — Projekt med kategori "Projekt" (`pages/projekt.php`)
-- `/projekt/{slug}` — Enskilt projekt (`pages/projekt-single.php`)
-- `/blogg` — Inlägg med kategori "Blogg" (via routes)
-- `/blogg/{slug}` — Enskilt blogginlägg (via routes)
-- `/nyheter` — Inlägg med kategori "Nyhet" (via routes)
-- `/nyheter/{slug}` — Enskild nyhet (via routes)
-- `/event` — Inlägg med kategori "Event" (via routes)
-- `/event/{slug}` — Enskilt event (via routes)
+- `/inlagg` — Alla inlägg (`pages/inlagg.php`)
+- `/inlagg/{slug}` — Enskilt inlägg (`pages/inlagg-single.php`)
+- Extra kategorisidor (t.ex. `/blogg`, `/nyheter`) skapas via CMS-admin (`/categories`)
 
-**Routing:** Alla kategori-URL:er utom `/projekt` routas via `cms/extensions/routes.php` → front-controller i `index.php`. Samma PHP-filer (`pages/projekt.php` + `pages/projekt-single.php`), kontextväxling via URL-prefix.
+**Routing:** `/inlagg` hanteras av `.htaccess`. Extra kategorisidor routas via `cms/extensions/routes.php` (auto-genererat av CMS). Samma PHP-filer (`pages/inlagg.php` + `pages/inlagg-single.php`), kontextväxling via URL-prefix.
 
 ### CMS-admin (kräver inloggning)
 - `/admin` — Logga in
 - `/dashboard` — Översikt
 - `/projects` — Hantera inlägg
+- `/categories` — Hantera kategorisidor
 - `/tickets` — Ärendehantering
 - `/support` — Skapa supportärende (skapar ticket direkt, inget SMTP krävs)
