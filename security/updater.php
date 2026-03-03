@@ -9,7 +9,6 @@ const UPDATABLE_FILES = [
     'bootstrap.php', 'router.php', 'setup.php', 'includes/version.php',
     '.htaccess', '.user.ini',
     'seo/robots.php', 'public/site.webmanifest',
-    'pages/inlagg.php', 'pages/inlagg-single.php',
     'assets/css/inlagg-default.css', 'assets/css/inlagg-single-default.css',
     'cms/categories.php',
     'CLAUDE.md',
@@ -45,6 +44,7 @@ const PROTECTED_FILES = [
     'cms/extensions/categories.php', 'cms/extensions/routes.php',
     'assets/css/main.css', 'assets/css/components.css',
     'includes/header.php', 'includes/footer.php', 'includes/fonts.php',
+    'pages/inlagg.php', 'pages/inlagg-single.php',
     'index.php', 'pages/kontakt.php', 'pages/cookies.php', 'pages/integritetspolicy.php',
     'pages/errors/403.php', 'pages/errors/404.php', 'pages/errors/500.php',
 ];
