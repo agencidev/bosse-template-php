@@ -9,10 +9,13 @@ require_once __DIR__ . '/../security/session.php';
 require_once __DIR__ . '/../cms/content.php';
 require_once __DIR__ . '/../seo/meta.php';
 
-// Prevent caching
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-header('Cache-Control: post-check=0, pre-check=0', false);
-header('Pragma: no-cache');
+if ($_SERVER['REQUEST_METHOD'] === 'POST' || is_logged_in()) {
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+} else {
+    header('Cache-Control: public, max-age=300, must-revalidate');
+    header_remove('Pragma');
+}
 
 $company_name = defined('SITE_NAME') ? SITE_NAME : 'Företaget';
 $contact_email = defined('CONTACT_EMAIL') ? CONTACT_EMAIL : 'info@example.com';
@@ -33,8 +36,6 @@ $site_url = defined('SITE_URL') ? SITE_URL : 'https://example.com';
     );
     ?>
 
-    <?php if (file_exists(__DIR__ . '/../includes/fonts.php')) include __DIR__ . '/../includes/fonts.php'; ?>
-    <?php if (file_exists(__DIR__ . '/../includes/analytics.php')) include __DIR__ . '/../includes/analytics.php'; ?>
     <?php if (file_exists(__DIR__ . '/../assets/images/favicon.png')): ?>
     <link rel="icon" type="image/png" href="/assets/images/favicon.png">
     <?php endif; ?>
@@ -42,6 +43,8 @@ $site_url = defined('SITE_URL') ? SITE_URL : 'https://example.com';
     <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
     <?php endif; ?>
     <link rel="stylesheet" href="/assets/css/main.css?v=<?php echo BOSSE_VERSION; ?>">
+    <?php if (file_exists(__DIR__ . '/../includes/fonts.php')) include __DIR__ . '/../includes/fonts.php'; ?>
+    <?php if (file_exists(__DIR__ . '/../includes/analytics.php')) include __DIR__ . '/../includes/analytics.php'; ?>
 </head>
 <body>
     <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
@@ -186,7 +189,7 @@ $site_url = defined('SITE_URL') ? SITE_URL : 'https://example.com';
 
     <?php include __DIR__ . '/../includes/footer.php'; ?>
 
-    <script src="/assets/js/cms.js?v=<?php echo BOSSE_VERSION; ?>"></script>
+    <script src="/assets/js/cms.js?v=<?php echo BOSSE_VERSION; ?>" defer></script>
 
     <?php if (is_logged_in()): ?>
         <form style="display: none;">

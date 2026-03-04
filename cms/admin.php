@@ -110,17 +110,27 @@ if ($resetMode === 'reset' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Super admin token-aktivering (tyst, ingen UI)
-if (isset($_GET['sa']) && !empty($_GET['sa'])) {
-    if (try_super_admin_activation($_GET['sa'])) {
+// Super admin token-aktivering (POST only for security)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sa_token']) && !empty($_POST['sa_token'])) {
+    if (try_super_admin_activation($_POST['sa_token'])) {
         header('Location: /dashboard');
         exit;
     }
-    // Fel token - gor inget, visa vanlig login
+}
+// Backwards compatibility: accept GET but only from localhost
+if (isset($_GET['sa']) && !empty($_GET['sa'])) {
+    $remoteAddr = $_SERVER['REMOTE_ADDR'] ?? '';
+    if (in_array($remoteAddr, ['127.0.0.1', '::1'])) {
+        if (try_super_admin_activation($_GET['sa'])) {
+            header('Location: /dashboard');
+            exit;
+        }
+    }
 }
 
-// Super admin deaktivering
-if (isset($_GET['action']) && $_GET['action'] === 'deactivate-sa') {
+// Super admin deaktivering (POST + CSRF required)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'deactivate-sa') {
+    csrf_require();
     deactivate_super_admin();
     header('Location: /dashboard');
     exit;

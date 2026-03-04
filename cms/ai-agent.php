@@ -124,8 +124,9 @@ function ai_agent_should_run(): bool {
     $state = json_decode(file_get_contents($stateFile), true);
     $lastRun = $state['timestamp'] ?? 0;
 
-    // More than 24 hours since last run and there are new tickets
-    if ((time() - $lastRun) > 86400 && ticket_count_by_status('new') > 0) {
+    // Configurable cooldown (default 4 hours)
+    $cooldownSeconds = defined('AI_AGENT_COOLDOWN') ? AI_AGENT_COOLDOWN : 14400;
+    if ((time() - $lastRun) > $cooldownSeconds && ticket_count_by_status('new') > 0) {
         return true;
     }
 
@@ -240,7 +241,7 @@ function build_user_message(array $ticket): string {
 
 function call_claude_api(string $systemPrompt, string $userMessage): array {
     $apiKey = ANTHROPIC_API_KEY;
-    $model = 'claude-sonnet-4-20250514';
+    $model = 'claude-sonnet-4-6';
 
     $body = json_encode([
         'model' => $model,

@@ -1,5 +1,49 @@
 # Changelog
 
+## 1.5.75
+- Fix: router.php — stöd för `__patterns` (blogg/nyheter/event-sluggar fungerar nu i PHP dev-server)
+- Fix: router.php + index.php — robust path-resolution, hanterar absoluta sökvägar i custom routes utan att dubbla `__DIR__`
+
+## 1.5.74
+- Fix: $_uri_prefix undefined i projectSchema() — variabel passas nu som parameter istället för implicit scope
+
+## 1.5.73
+- Feat: Routing för alla kategorier — /nyheter (Nyhet) och /event (Event) med tillbaka-länkar
+
+## 1.5.72
+- Feat: CSS opt-out för projekt/blogg — skapa `assets/css/projekt-custom.css` eller `projekt-single-custom.css` för egen design som överlever uppdateringar
+
+## 1.5.71
+- Design: Stramare kortdesign — 5px border-radius, 3-kolumns grid, ingen hover-shadow
+- Design: Borttagen filter-UI på projekt/blogg-listor
+- Feat: Kategoribaserade URL:er — /blogg visar blogginlägg, /projekt visar projekt
+- Feat: Dynamiska tillbaka-länkar och schema.org baserat på URL-prefix
+- Feat: Front-controller i index.php för custom routes via cms/extensions/routes.php
+
+## 1.5.70
+- Perf: Async Google Fonts — eliminerar 470ms render-block (preload+onload)
+- Perf: Smart caching — 5 min browser-cache för publika besökare, no-cache för inloggade
+- Perf: CLS-prevention — width/height på logotyper via getimagesize()
+- Perf: LCP-preload + fetchpriority="high" på projekt-cover
+- Perf: defer på cms.js (5 sidor saknade det)
+- Perf: Optimerad head-ordning — main.css först, fonts async efter
+- Perf: Bort med redundant preload + dns-prefetch
+- Docs: Skärpt CLAUDE.md-regel för inlägg via projects.json
+
+## 1.5.69
+- Fix: Lösenordshash i settings.php korrumperades av preg_replace (samma bugg som fixades i admin.php i v1.5.65)
+
+## 1.5.68
+- Fix: Version-bump så GitHub-push-fixen (v1.5.67) faktiskt aktiveras på alla projekt
+
+## 1.5.67
+- Fix: GitHub-push failade om GITHUB_REPO sparades som full URL (normaliseras nu till org/name)
+- Fix: GITHUB_REPO normaliseras vid sparning i super-admin (tar bort https://github.com/ och .git)
+
+## 1.5.66
+- Fix: Self-heal — updater laddar ner och extraherar saknade core-filer automatiskt
+- Fix: Projekt som uppdaterades från gamla versioner saknade cms/media.php, tickets, ai-agent
+
 ## 1.5.65
 - Fix: Cookie-banner kontrast (#b3b3b3 → #d4d4d4) — uppfyller WCAG AA 4.5:1
 - Fix: Lösenordshash korrumperades av preg_replace (admin.php + api-super.php)

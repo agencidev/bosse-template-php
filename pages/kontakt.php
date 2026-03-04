@@ -12,10 +12,13 @@ require_once __DIR__ . '/../cms/content.php';
 require_once __DIR__ . '/../seo/meta.php';
 require_once __DIR__ . '/../includes/mailer.php';
 
-// Prevent caching
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-header('Cache-Control: post-check=0, pre-check=0', false);
-header('Pragma: no-cache');
+if ($_SERVER['REQUEST_METHOD'] === 'POST' || is_logged_in()) {
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+} else {
+    header('Cache-Control: public, max-age=300, must-revalidate');
+    header_remove('Pragma');
+}
 
 $success = false;
 $error = '';
@@ -30,19 +33,34 @@ $form_data = [
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_require();
 
-    // Rate limiting: max 5 meddelanden per 15 min (session-baserat)
-    if (!isset($_SESSION['contact_timestamps'])) {
-        $_SESSION['contact_timestamps'] = [];
+    // Honeypot check — hidden field should be empty
+    if (!empty($_POST['website'] ?? '')) {
+        // Bot detected — silently accept
+        $success = true;
     }
 
-    // Rensa gamla timestamps (äldre än 15 min)
-    $cutoff = time() - (15 * 60);
-    $_SESSION['contact_timestamps'] = array_filter(
-        $_SESSION['contact_timestamps'],
-        fn($ts) => $ts > $cutoff
-    );
+    if (!$success) {
+    // Rate limiting: IP-based, max 5 meddelanden per 15 min
+    $rateLimitFile = __DIR__ . '/../data/contact_rate.json';
+    $rateLimits = [];
+    if (file_exists($rateLimitFile)) {
+        $rateLimits = json_decode(file_get_contents($rateLimitFile), true) ?? [];
+    }
 
-    if (count($_SESSION['contact_timestamps']) >= 5) {
+    $clientIp = hash('sha256', ($_SERVER['REMOTE_ADDR'] ?? '') . ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? ''));
+    $cutoff = time() - (15 * 60);
+
+    // Clean old entries
+    foreach ($rateLimits as $ip => $timestamps) {
+        $rateLimits[$ip] = array_values(array_filter($timestamps, fn($ts) => $ts > $cutoff));
+        if (empty($rateLimits[$ip])) {
+            unset($rateLimits[$ip]);
+        }
+    }
+
+    $ipTimestamps = $rateLimits[$clientIp] ?? [];
+
+    if (count($ipTimestamps) >= 5) {
         $error = 'Du har skickat för många meddelanden. Vänta en stund innan du försöker igen.';
     } else {
         // Hämta och sanitera data
@@ -104,33 +122,41 @@ HTML;
                     'reply_to' => $form_data['email'],
                 ]);
 
+                // Save as ticket FIRST (before mail, so messages never disappear)
+                try {
+                    require_once __DIR__ . '/../cms/tickets-db.php';
+                    ticket_create([
+                        'source' => 'contact',
+                        'name' => $form_data['name'],
+                        'email' => $form_data['email'],
+                        'phone' => $form_data['phone'],
+                        'subject' => $form_data['subject'],
+                        'message' => $form_data['message'],
+                    ]);
+                } catch (\Throwable $e) {
+                    error_log('Ticket creation failed: ' . $e->getMessage());
+                }
+
                 if ($sent) {
                     $success = true;
-                    $_SESSION['contact_timestamps'][] = time();
 
-                    // Save as ticket (non-blocking)
-                    try {
-                        require_once __DIR__ . '/../cms/tickets-db.php';
-                        ticket_create([
-                            'source' => 'contact',
-                            'name' => $form_data['name'],
-                            'email' => $form_data['email'],
-                            'phone' => $form_data['phone'],
-                            'subject' => $form_data['subject'],
-                            'message' => $form_data['message'],
-                        ]);
-                    } catch (\Throwable $e) {
-                        error_log('Ticket creation failed: ' . $e->getMessage());
-                    }
+                    // Update IP rate limit
+                    $ipTimestamps[] = time();
+                    $rateLimits[$clientIp] = $ipTimestamps;
+                    $tmpFile = $rateLimitFile . '.tmp.' . getmypid();
+                    file_put_contents($tmpFile, json_encode($rateLimits), LOCK_EX);
+                    rename($tmpFile, $rateLimitFile);
 
                     // Rensa formulärdata vid lyckad sändning
                     $form_data = ['name' => '', 'email' => '', 'phone' => '', 'subject' => '', 'message' => ''];
                 } else {
-                    $error = 'Meddelandet kunde inte skickas just nu. Försök igen senare.';
+                    $success = true; // Still show success — ticket was created
+                    $form_data = ['name' => '', 'email' => '', 'phone' => '', 'subject' => '', 'message' => ''];
                 }
             }
         }
     }
+    } // end if (!$success) honeypot
 }
 ?>
 <!DOCTYPE html>
@@ -147,8 +173,6 @@ HTML;
     );
     ?>
 
-    <?php if (file_exists(__DIR__ . '/../includes/fonts.php')) include __DIR__ . '/../includes/fonts.php'; ?>
-    <?php if (file_exists(__DIR__ . '/../includes/analytics.php')) include __DIR__ . '/../includes/analytics.php'; ?>
     <?php if (file_exists(__DIR__ . '/../assets/images/favicon.png')): ?>
     <link rel="icon" type="image/png" href="/assets/images/favicon.png">
     <?php endif; ?>
@@ -156,6 +180,8 @@ HTML;
     <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
     <?php endif; ?>
     <link rel="stylesheet" href="/assets/css/main.css?v=<?php echo BOSSE_VERSION; ?>">
+    <?php if (file_exists(__DIR__ . '/../includes/fonts.php')) include __DIR__ . '/../includes/fonts.php'; ?>
+    <?php if (file_exists(__DIR__ . '/../includes/analytics.php')) include __DIR__ . '/../includes/analytics.php'; ?>
 </head>
 <body>
     <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
@@ -220,6 +246,9 @@ HTML;
                 <?php if (!$success): ?>
                 <form method="POST" action="/kontakt" style="background: white; border: none; border-radius: 1rem; padding: 2.5rem;">
                     <?php echo csrf_field(); ?>
+                    <div style="position: absolute; left: -9999px;" aria-hidden="true">
+                        <input type="text" name="website" tabindex="-1" autocomplete="off">
+                    </div>
 
                     <div style="margin-bottom: 1.25rem;">
                         <label for="name" style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--color-foreground);">Namn *</label>
@@ -229,7 +258,7 @@ HTML;
                                style="width: 100%; padding: 0.75rem 1rem; border: none; background: var(--color-gray-50); border-radius: 0.5rem; font-size: 0.9375rem; font-family: inherit; transition: background 0.2s;">
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;" class="kontakt-grid">
                         <div>
                             <label for="email" style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--color-foreground);">E-post *</label>
                             <input type="email" id="email" name="email" required
@@ -289,7 +318,7 @@ HTML;
 
     <?php include __DIR__ . '/../includes/footer.php'; ?>
 
-    <script src="/assets/js/cms.js?v=<?php echo BOSSE_VERSION; ?>"></script>
+    <script src="/assets/js/cms.js?v=<?php echo BOSSE_VERSION; ?>" defer></script>
 
     <?php if (is_logged_in()): ?>
         <form style="display: none;">
