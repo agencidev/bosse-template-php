@@ -98,6 +98,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $slug = generateSlug($title);
 
+        // Ensure slug uniqueness (exclude current project)
+        $existingSlugs = array_column(
+            array_filter($projects, fn($p) => $p['id'] !== $id),
+            'slug'
+        );
+        $baseSlug = $slug;
+        $counter = 1;
+        while (in_array($slug, $existingSlugs)) {
+            $slug = $baseSlug . '-' . (++$counter);
+        }
+
         // Handle cover image upload
         $coverImage = $projects[$projectIndex]['coverImage'] ?? '';
         if (isset($_FILES['cover_image']) && $_FILES['cover_image']['error'] === UPLOAD_ERR_OK) {
@@ -113,7 +124,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     mkdir($uploadDir, 0755, true);
                 }
 
-                $ext = pathinfo($_FILES['cover_image']['name'], PATHINFO_EXTENSION);
+                $mimeToExt = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
+                $ext = $mimeToExt[$mime] ?? 'jpg';
                 $filename = $slug . '-' . time() . '.' . $ext;
                 $destPath = $uploadDir . $filename;
 
@@ -136,7 +148,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $projects[$projectIndex]['coverImage'] = $coverImage;
         $projects[$projectIndex]['updatedAt'] = date('Y-m-d H:i:s');
 
-        file_put_contents($projects_file, json_encode($projects, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+        $tmp = $projects_file . '.tmp.' . getmypid();
+        file_put_contents($tmp, json_encode($projects, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+        rename($tmp, $projects_file);
 
         header('Location: /cms/projects/');
         exit;

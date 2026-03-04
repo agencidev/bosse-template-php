@@ -49,11 +49,7 @@ function websiteSchema() {
         "@type" => "WebSite",
         "name" => SITE_NAME,
         "url" => SITE_URL,
-        "potentialAction" => [
-            "@type" => "SearchAction",
-            "target" => SITE_URL . "/search?q={search_term_string}",
-            "query-input" => "required name=search_term_string"
-        ]
+        "description" => defined('SITE_DESCRIPTION') ? SITE_DESCRIPTION : ''
     ];
 
     echo '<script type="application/ld+json" ' . csp_nonce_attr() . '>';
@@ -88,25 +84,35 @@ function localBusinessSchema($businessType = 'LocalBusiness', $address = [], $ge
         ];
     }
 
-    // Öppettider från config
+    // Opening hours from config — parse "HH:MM-HH:MM" format
     if (defined('HOURS_WEEKDAYS') && HOURS_WEEKDAYS) {
-        $schema['openingHoursSpecification'] = [
-            [
-                "@type" => "OpeningHoursSpecification",
-                "dayOfWeek" => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-                "opens" => "",
-                "closes" => "",
-                "description" => HOURS_WEEKDAYS
-            ]
-        ];
-        if (defined('HOURS_WEEKENDS') && HOURS_WEEKENDS && strtolower(HOURS_WEEKENDS) !== 'stängt') {
-            $schema['openingHoursSpecification'][] = [
-                "@type" => "OpeningHoursSpecification",
-                "dayOfWeek" => ["Saturday", "Sunday"],
-                "opens" => "",
-                "closes" => "",
-                "description" => HOURS_WEEKENDS
+        $parseHours = function($str) {
+            if (preg_match('/(\d{1,2}[:.]\d{2})\s*[-–]\s*(\d{1,2}[:.]\d{2})/', $str, $m)) {
+                return ['opens' => str_replace('.', ':', $m[1]), 'closes' => str_replace('.', ':', $m[2])];
+            }
+            return null;
+        };
+        $weekdayHours = $parseHours(HOURS_WEEKDAYS);
+        if ($weekdayHours) {
+            $schema['openingHoursSpecification'] = [
+                [
+                    "@type" => "OpeningHoursSpecification",
+                    "dayOfWeek" => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                    "opens" => $weekdayHours['opens'],
+                    "closes" => $weekdayHours['closes']
+                ]
             ];
+            if (defined('HOURS_WEEKENDS') && HOURS_WEEKENDS && strtolower(HOURS_WEEKENDS) !== 'stängt') {
+                $weekendHours = $parseHours(HOURS_WEEKENDS);
+                if ($weekendHours) {
+                    $schema['openingHoursSpecification'][] = [
+                        "@type" => "OpeningHoursSpecification",
+                        "dayOfWeek" => ["Saturday", "Sunday"],
+                        "opens" => $weekendHours['opens'],
+                        "closes" => $weekendHours['closes']
+                    ];
+                }
+            }
         }
     }
 

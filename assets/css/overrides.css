@@ -11,3 +11,10 @@
  * .button--primary { border-radius: 0; background: linear-gradient(...); }
  * .card { box-shadow: none; border: 2px solid #000; }
  */
+
+/* Fix #39: Kontaktformulär — responsiv grid */
+@media (max-width: 640px) {
+  .kontakt-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

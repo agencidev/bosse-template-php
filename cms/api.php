@@ -134,12 +134,14 @@ function handleUpdate() {
     // Uppdatera section (value är ett objekt med fields)
     $content[$key] = $value;
 
-    // Spara hela content-filen med fillåsning
-    if (file_put_contents(CONTENT_FILE, json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX)) {
-        // Invalidera content-cache
+    // Atomic write: tmp file + rename
+    $encoded = json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    $tmp = CONTENT_FILE . '.tmp.' . getmypid();
+    if (file_put_contents($tmp, $encoded, LOCK_EX) !== false && rename($tmp, CONTENT_FILE)) {
         clear_content_cache();
         echo json_encode(['success' => true, '_version' => time()]);
     } else {
+        @unlink($tmp);
         http_response_code(500);
         echo json_encode(['success' => false, 'error' => 'Failed to save content']);
     }

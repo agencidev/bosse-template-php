@@ -113,23 +113,23 @@ if ($_fc_uri !== '' && $_fc_uri !== '/') {
         <!-- Features Section -->
         <section class="section section--gray">
             <div class="container">
-                <?php editable_text('features.title', 'Våra tjänster', 'h2', 'text-center'); ?>
-                <?php editable_text('features.description', 'Vi erbjuder kompletta lösningar för ditt företag', 'p', 'text-center mb-4'); ?>
+                <?php editable_text('features', 'title', 'Våra tjänster', 'h2', 'text-center'); ?>
+                <?php editable_text('features', 'description', 'Vi erbjuder kompletta lösningar för ditt företag', 'p', 'text-center mb-4'); ?>
                 
                 <div class="grid grid--3" style="margin-top: 3rem;">
                     <div class="card">
-                        <?php editable_text('features.feature1.title', 'Tjänst 1', 'h3', 'card__title'); ?>
-                        <?php editable_text('features.feature1.description', 'Beskrivning av tjänst 1', 'p', 'card__text'); ?>
+                        <?php editable_text('features_feature1', 'title', 'Tjänst 1', 'h3', 'card__title'); ?>
+                        <?php editable_text('features_feature1', 'description', 'Beskrivning av tjänst 1', 'p', 'card__text'); ?>
                     </div>
-                    
+
                     <div class="card">
-                        <?php editable_text('features.feature2.title', 'Tjänst 2', 'h3', 'card__title'); ?>
-                        <?php editable_text('features.feature2.description', 'Beskrivning av tjänst 2', 'p', 'card__text'); ?>
+                        <?php editable_text('features_feature2', 'title', 'Tjänst 2', 'h3', 'card__title'); ?>
+                        <?php editable_text('features_feature2', 'description', 'Beskrivning av tjänst 2', 'p', 'card__text'); ?>
                     </div>
-                    
+
                     <div class="card">
-                        <?php editable_text('features.feature3.title', 'Tjänst 3', 'h3', 'card__title'); ?>
-                        <?php editable_text('features.feature3.description', 'Beskrivning av tjänst 3', 'p', 'card__text'); ?>
+                        <?php editable_text('features_feature3', 'title', 'Tjänst 3', 'h3', 'card__title'); ?>
+                        <?php editable_text('features_feature3', 'description', 'Beskrivning av tjänst 3', 'p', 'card__text'); ?>
                     </div>
                 </div>
             </div>
@@ -138,8 +138,8 @@ if ($_fc_uri !== '' && $_fc_uri !== '/') {
         <!-- CTA Section -->
         <section class="section section--white">
             <div class="container text-center">
-                <?php editable_text('cta.title', 'Redo att komma igång?', 'h2'); ?>
-                <?php editable_text('cta.description', 'Kontakta oss idag för en kostnadsfri konsultation', 'p', 'text-lg'); ?>
+                <?php editable_text('cta', 'title', 'Redo att komma igång?', 'h2'); ?>
+                <?php editable_text('cta', 'description', 'Kontakta oss idag för en kostnadsfri konsultation', 'p', 'text-lg'); ?>
                 
                 <a href="/kontakt" class="button button--primary" style="margin-top: 2rem;">
                     <?php echo get_content('cta.button_text', 'Kontakta oss'); ?>

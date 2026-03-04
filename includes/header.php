@@ -22,14 +22,14 @@
                 </a>
             </div>
             
-            <nav class="header__nav">
+            <nav id="main-nav" class="header__nav" aria-label="Huvudnavigation">
                 <a href="/" class="header__nav-link">Hem</a>
                 <a href="/om-oss" class="header__nav-link">Om oss</a>
                 <a href="/tjanster" class="header__nav-link">Tjänster</a>
                 <a href="/kontakt" class="header__nav-link">Kontakt</a>
             </nav>
             
-            <button class="header__mobile-toggle" aria-label="Toggle menu">
+            <button class="header__mobile-toggle" aria-label="Öppna meny" aria-expanded="false" aria-controls="main-nav">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -128,10 +128,62 @@
 @media (max-width: 768px) {
     .header__nav {
         display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: white;
+        padding: 1rem var(--container-padding, 1rem);
+        box-shadow: var(--shadow-md, 0 4px 6px rgba(0,0,0,0.1));
+        gap: 0;
+        z-index: 99;
     }
-    
+
+    .header__nav.is-open {
+        display: flex;
+    }
+
+    .header__nav-link {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--color-gray-200, #e5e7eb);
+    }
+
+    .header__nav-link:last-child {
+        border-bottom: none;
+    }
+
     .header__mobile-toggle {
         display: flex;
     }
+
+    .header__mobile-toggle[aria-expanded="true"] span:nth-child(1) {
+        transform: rotate(45deg) translate(4px, 4px);
+    }
+    .header__mobile-toggle[aria-expanded="true"] span:nth-child(2) {
+        opacity: 0;
+    }
+    .header__mobile-toggle[aria-expanded="true"] span:nth-child(3) {
+        transform: rotate(-45deg) translate(4px, -4px);
+    }
+
+    .header {
+        position: relative;
+    }
 }
 </style>
+
+<script>
+(function() {
+    var toggle = document.querySelector('.header__mobile-toggle');
+    var nav = document.getElementById('main-nav');
+    if (!toggle || !nav) return;
+
+    toggle.addEventListener('click', function() {
+        var expanded = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!expanded));
+        toggle.setAttribute('aria-label', expanded ? 'Öppna meny' : 'Stäng meny');
+        nav.classList.toggle('is-open');
+    });
+})();
+</script>

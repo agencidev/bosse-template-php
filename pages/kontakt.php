@@ -33,19 +33,34 @@ $form_data = [
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_require();
 
-    // Rate limiting: max 5 meddelanden per 15 min (session-baserat)
-    if (!isset($_SESSION['contact_timestamps'])) {
-        $_SESSION['contact_timestamps'] = [];
+    // Honeypot check — hidden field should be empty
+    if (!empty($_POST['website'] ?? '')) {
+        // Bot detected — silently accept
+        $success = true;
     }
 
-    // Rensa gamla timestamps (äldre än 15 min)
-    $cutoff = time() - (15 * 60);
-    $_SESSION['contact_timestamps'] = array_filter(
-        $_SESSION['contact_timestamps'],
-        fn($ts) => $ts > $cutoff
-    );
+    if (!$success) {
+    // Rate limiting: IP-based, max 5 meddelanden per 15 min
+    $rateLimitFile = __DIR__ . '/../data/contact_rate.json';
+    $rateLimits = [];
+    if (file_exists($rateLimitFile)) {
+        $rateLimits = json_decode(file_get_contents($rateLimitFile), true) ?? [];
+    }
 
-    if (count($_SESSION['contact_timestamps']) >= 5) {
+    $clientIp = hash('sha256', ($_SERVER['REMOTE_ADDR'] ?? '') . ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? ''));
+    $cutoff = time() - (15 * 60);
+
+    // Clean old entries
+    foreach ($rateLimits as $ip => $timestamps) {
+        $rateLimits[$ip] = array_values(array_filter($timestamps, fn($ts) => $ts > $cutoff));
+        if (empty($rateLimits[$ip])) {
+            unset($rateLimits[$ip]);
+        }
+    }
+
+    $ipTimestamps = $rateLimits[$clientIp] ?? [];
+
+    if (count($ipTimestamps) >= 5) {
         $error = 'Du har skickat för många meddelanden. Vänta en stund innan du försöker igen.';
     } else {
         // Hämta och sanitera data
@@ -107,33 +122,41 @@ HTML;
                     'reply_to' => $form_data['email'],
                 ]);
 
+                // Save as ticket FIRST (before mail, so messages never disappear)
+                try {
+                    require_once __DIR__ . '/../cms/tickets-db.php';
+                    ticket_create([
+                        'source' => 'contact',
+                        'name' => $form_data['name'],
+                        'email' => $form_data['email'],
+                        'phone' => $form_data['phone'],
+                        'subject' => $form_data['subject'],
+                        'message' => $form_data['message'],
+                    ]);
+                } catch (\Throwable $e) {
+                    error_log('Ticket creation failed: ' . $e->getMessage());
+                }
+
                 if ($sent) {
                     $success = true;
-                    $_SESSION['contact_timestamps'][] = time();
 
-                    // Save as ticket (non-blocking)
-                    try {
-                        require_once __DIR__ . '/../cms/tickets-db.php';
-                        ticket_create([
-                            'source' => 'contact',
-                            'name' => $form_data['name'],
-                            'email' => $form_data['email'],
-                            'phone' => $form_data['phone'],
-                            'subject' => $form_data['subject'],
-                            'message' => $form_data['message'],
-                        ]);
-                    } catch (\Throwable $e) {
-                        error_log('Ticket creation failed: ' . $e->getMessage());
-                    }
+                    // Update IP rate limit
+                    $ipTimestamps[] = time();
+                    $rateLimits[$clientIp] = $ipTimestamps;
+                    $tmpFile = $rateLimitFile . '.tmp.' . getmypid();
+                    file_put_contents($tmpFile, json_encode($rateLimits), LOCK_EX);
+                    rename($tmpFile, $rateLimitFile);
 
                     // Rensa formulärdata vid lyckad sändning
                     $form_data = ['name' => '', 'email' => '', 'phone' => '', 'subject' => '', 'message' => ''];
                 } else {
-                    $error = 'Meddelandet kunde inte skickas just nu. Försök igen senare.';
+                    $success = true; // Still show success — ticket was created
+                    $form_data = ['name' => '', 'email' => '', 'phone' => '', 'subject' => '', 'message' => ''];
                 }
             }
         }
     }
+    } // end if (!$success) honeypot
 }
 ?>
 <!DOCTYPE html>
@@ -189,6 +212,9 @@ HTML;
                 <?php if (!$success): ?>
                 <form method="POST" action="/kontakt" style="background: white; border: 1px solid var(--color-gray-200); border-radius: 1rem; padding: 2rem;">
                     <?php echo csrf_field(); ?>
+                    <div style="position: absolute; left: -9999px;" aria-hidden="true">
+                        <input type="text" name="website" tabindex="-1" autocomplete="off">
+                    </div>
 
                     <div style="margin-bottom: 1.25rem;">
                         <label for="name" style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.375rem;">Namn *</label>
@@ -198,7 +224,7 @@ HTML;
                                style="width: 100%; padding: 0.625rem 0.875rem; border: 1px solid var(--color-gray-300); border-radius: 0.5rem; font-size: 0.9375rem; font-family: inherit;">
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;" class="kontakt-grid">
                         <div>
                             <label for="email" style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.375rem;">E-post *</label>
                             <input type="email" id="email" name="email" required

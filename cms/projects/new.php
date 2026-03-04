@@ -73,6 +73,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $slug = generateSlug($title);
 
+        // Ensure slug uniqueness
+        $projects_file = __DIR__ . '/../../data/projects.json';
+        $existingProjects = [];
+        if (file_exists($projects_file)) {
+            $existingProjects = json_decode(file_get_contents($projects_file), true) ?? [];
+        }
+        $existingSlugs = array_column($existingProjects, 'slug');
+        $baseSlug = $slug;
+        $counter = 1;
+        while (in_array($slug, $existingSlugs)) {
+            $slug = $baseSlug . '-' . (++$counter);
+        }
+
         // Handle cover image upload
         $coverImage = '';
         if (isset($_FILES['cover_image']) && $_FILES['cover_image']['error'] === UPLOAD_ERR_OK) {
@@ -88,7 +101,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     mkdir($uploadDir, 0755, true);
                 }
 
-                $ext = pathinfo($_FILES['cover_image']['name'], PATHINFO_EXTENSION);
+                $mimeToExt = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
+                $ext = $mimeToExt[$mime] ?? 'jpg';
                 $filename = $slug . '-' . time() . '.' . $ext;
                 $destPath = $uploadDir . $filename;
 
@@ -111,16 +125,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'createdAt' => date('Y-m-d H:i:s')
         ];
 
-        $projects_file = __DIR__ . '/../../data/projects.json';
-        $projects = [];
-
-        if (file_exists($projects_file)) {
-            $json = file_get_contents($projects_file);
-            $projects = json_decode($json, true) ?? [];
-        }
-
+        $projects = $existingProjects;
         $projects[] = $project;
-        file_put_contents($projects_file, json_encode($projects, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+        $tmp = $projects_file . '.tmp.' . getmypid();
+        file_put_contents($tmp, json_encode($projects, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+        rename($tmp, $projects_file);
 
         header('Location: /cms/projects/');
         exit;

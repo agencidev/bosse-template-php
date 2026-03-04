@@ -58,7 +58,8 @@ function generateMeta($title, $description, $image = null, $type = 'website', $e
     <!-- Open Graph -->
     <meta property="og:title" content="{$title}">
     <meta property="og:description" content="{$description}">
-    <meta property="og:image" content="{$image}">{$ogImageMeta}
+    <meta property="og:image" content="{$image}">
+    <meta property="og:image:alt" content="{$title}">{$ogImageMeta}
     <meta property="og:url" content="{$canonicalUrl}">
     <meta property="og:type" content="{$type}">
     <meta property="og:site_name" content="{$siteName}">

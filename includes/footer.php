@@ -19,12 +19,12 @@
                     ?>
                     <img src="/assets/images/logo-light.png" alt="<?php echo SITE_NAME; ?>" class="footer__logo-img" width="<?php echo $footerLogoW; ?>" height="<?php echo $footerLogoH; ?>">
                 </div>
-                <?php editable_text('footer.description', 'Din partner för digitala lösningar', 'p', 'footer__text'); ?>
+                <?php editable_text('footer', 'description', 'Din partner för digitala lösningar', 'p', 'footer__text'); ?>
             </div>
             
             <div class="footer__section">
                 <h4 class="footer__title">Snabblänkar</h4>
-                <nav class="footer__nav">
+                <nav class="footer__nav" aria-label="Snabblänkar">
                     <a href="/" class="footer__link">Hem</a>
                     <a href="/om-oss" class="footer__link">Om oss</a>
                     <a href="/tjanster" class="footer__link">Tjänster</a>
@@ -35,8 +35,8 @@
             <div class="footer__section">
                 <h4 class="footer__title">Kontakt</h4>
                 <div class="footer__contact">
-                    <?php editable_text('footer.email', 'info@example.com', 'p', 'footer__text'); ?>
-                    <?php editable_text('footer.phone', '+46 70 123 45 67', 'p', 'footer__text'); ?>
+                    <?php editable_text('footer', 'email', 'info@example.com', 'p', 'footer__text'); ?>
+                    <?php editable_text('footer', 'phone', '+46 70 123 45 67', 'p', 'footer__text'); ?>
                     <?php if (defined('HOURS_WEEKDAYS') && HOURS_WEEKDAYS): ?>
                     <p class="footer__text" style="margin-top: 0.5rem;">
                         <strong>Öppettider</strong><br>

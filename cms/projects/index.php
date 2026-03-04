@@ -27,7 +27,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete_id'])) {
         $delete_id = $_POST['delete_id'];
         $projects = array_filter($projects, fn($p) => $p['id'] !== $delete_id);
-        file_put_contents($projects_file, json_encode(array_values($projects), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+        $tmp = $projects_file . '.tmp.' . getmypid();
+        file_put_contents($tmp, json_encode(array_values($projects), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+        rename($tmp, $projects_file);
         header('Location: /cms/projects/');
         exit;
     }
@@ -69,7 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
         }
 
-        file_put_contents($projects_file, json_encode(array_values($projects), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+        $tmp = $projects_file . '.tmp.' . getmypid();
+        file_put_contents($tmp, json_encode(array_values($projects), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+        rename($tmp, $projects_file);
     }
 }
 ?>

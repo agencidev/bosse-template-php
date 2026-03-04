@@ -43,7 +43,15 @@ if (empty($_ctx_map) || !is_array($_ctx_map)) {
 $_ctx = $_ctx_map[$_uri_prefix] ?? $_ctx_map['/inlagg'];
 
 // Filter by context category
-$projects = array_filter($projects, fn($p) => isset($p['category']) && strtolower($p['category']) === strtolower($_ctx['category']));
+$projects = array_values(array_filter($projects, fn($p) => isset($p['category']) && strtolower($p['category']) === strtolower($_ctx['category'])));
+
+// Pagination
+$perPage = 12;
+$currentPage = max(1, intval($_GET['sida'] ?? 1));
+$totalProjects = count($projects);
+$totalPages = max(1, ceil($totalProjects / $perPage));
+$currentPage = min($currentPage, $totalPages);
+$projects = array_slice($projects, ($currentPage - 1) * $perPage, $perPage);
 ?>
 <!DOCTYPE html>
 <html lang="sv">
@@ -133,6 +141,26 @@ $projects = array_filter($projects, fn($p) => isset($p['category']) && strtolowe
                             </a>
                         <?php endforeach; ?>
                     </div>
+
+                    <?php if ($totalPages > 1): ?>
+                    <nav class="pagination" aria-label="Sidnavigation" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 3rem;">
+                        <?php if ($currentPage > 1): ?>
+                            <a href="<?php echo $_ctx['base_url']; ?>?sida=<?php echo $currentPage - 1; ?>" class="button button--outline" style="padding: 0.5rem 1rem;">&larr; Föregående</a>
+                        <?php endif; ?>
+
+                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                            <?php if ($i === $currentPage): ?>
+                                <span class="button button--primary" style="padding: 0.5rem 0.875rem;"><?php echo $i; ?></span>
+                            <?php else: ?>
+                                <a href="<?php echo $_ctx['base_url']; ?>?sida=<?php echo $i; ?>" class="button button--outline" style="padding: 0.5rem 0.875rem;"><?php echo $i; ?></a>
+                            <?php endif; ?>
+                        <?php endfor; ?>
+
+                        <?php if ($currentPage < $totalPages): ?>
+                            <a href="<?php echo $_ctx['base_url']; ?>?sida=<?php echo $currentPage + 1; ?>" class="button button--outline" style="padding: 0.5rem 1rem;">Nästa &rarr;</a>
+                        <?php endif; ?>
+                    </nav>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </section>
