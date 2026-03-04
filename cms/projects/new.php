@@ -541,10 +541,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label class="form-label" for="category">Kategori *</label>
                     <select id="category" name="category" class="form-select" required>
                         <option value="">Välj kategori</option>
-                        <option value="Projekt" <?php echo (isset($_POST['category']) && $_POST['category'] === 'Projekt') ? 'selected' : ''; ?>>Projekt</option>
-                        <option value="Blogg" <?php echo (isset($_POST['category']) && $_POST['category'] === 'Blogg') ? 'selected' : ''; ?>>Blogg</option>
-                        <option value="Nyhet" <?php echo (isset($_POST['category']) && $_POST['category'] === 'Nyhet') ? 'selected' : ''; ?>>Nyhet</option>
-                        <option value="Event" <?php echo (isset($_POST['category']) && $_POST['category'] === 'Event') ? 'selected' : ''; ?>>Event</option>
+                        <?php
+                        $_cat_file = __DIR__ . '/../../cms/extensions/categories.php';
+                        $_cats = file_exists($_cat_file) ? (require $_cat_file) : [];
+                        $_cat_values = (is_array($_cats) && !empty($_cats))
+                            ? $_cats
+                            : ['Projekt', 'Blogg', 'Nyhet', 'Event'];
+                        foreach ($_cat_values as $_cv):
+                        ?>
+                        <option value="<?php echo htmlspecialchars($_cv, ENT_QUOTES, 'UTF-8'); ?>" <?php echo (isset($_POST['category']) && $_POST['category'] === $_cv) ? 'selected' : ''; ?>><?php echo htmlspecialchars($_cv, ENT_QUOTES, 'UTF-8'); ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
 
@@ -615,7 +621,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="button" id="preview-close">Stäng</button>
             </div>
             <article class="preview-article">
-                <a href="#" class="preview-back" id="preview-back-link">&#8592; Tillbaka till projekt</a>
+                <a href="#" class="preview-back" id="preview-back-link">&#8592; Tillbaka till inlägg</a>
                 <header class="preview-header">
                     <span class="p-category" id="preview-category"></span>
                     <h1 class="p-title" id="preview-title"></h1>

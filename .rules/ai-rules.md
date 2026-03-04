@@ -1,4 +1,4 @@
-# AI-regler - Bosse Template
+# AI-regler - Uppdragsbrev
 
 ## ⚠️ KRITISKA REGLER — LÄS FÖRST
 
@@ -42,12 +42,12 @@ Bosse-ramverket har **CORE-filer** som uppdateras automatiskt. Ändra ALDRIG des
 ### CORE-filer (ÄNDRA ALDRIG)
 | Kategori | Filer |
 |----------|-------|
-| **Ramverk** | `bootstrap.php`, `router.php`, `setup.php`, `bosse-health.php`, `.htaccess`, `.user.ini`, `.windsurfrules`, `CLAUDE.md` |
-| **CMS** | Specifika filer i `cms/` + alla i `cms/projects/` (undantag: `cms/extensions/`) |
-| **Säkerhet** | Alla filer i `security/` (inkl. `csp.php` för nonce-baserad CSP) |
+| **Ramverk** | `bootstrap.php`, `router.php`, `setup.php`, `.htaccess`, `.user.ini` |
+| **CMS** | Alla filer i `cms/` (undantag: `cms/extensions/`) |
+| **Säkerhet** | Alla filer i `security/` |
 | **Build** | Alla filer i `bin/` |
 | **System-includes** | `includes/version.php`, `includes/admin-bar.php`, `includes/cookie-consent.php`, `includes/mailer.php`, `includes/agenci-badge.php` |
-| **System-CSS/JS** | `assets/css/reset.css`, `assets/css/cms.css`, `assets/js/cms.js` |
+| **System-CSS/JS** | `assets/css/reset.css`, `assets/css/cms.css`, `assets/css/variables.css`, `assets/css/components.css`, `assets/css/main.css`, `assets/js/cms.js` |
 | **CMS-styrda sidor** | `pages/projekt.php`, `pages/projekt-single.php` |
 | **SEO** | `seo/meta.php`, `seo/schema.php`, `seo/sitemap.php`, `seo/robots.php` |
 
@@ -72,6 +72,7 @@ Bosse-ramverket har **CORE-filer** som uppdateras automatiskt. Ändra ALDRIG des
 
 1. **Brand Guide** (`.rules/brand-guide.md`) - Färger, typsnitt, tonalitet
 2. **Tekniska regler** (detta dokument) - Kodstandarder, arkitektur
+3. **Wireframes** (`relume/`) - Layout och struktur
 
 Vid konflikt gäller högre prioritet.
 
@@ -203,25 +204,27 @@ Snabbguide:
 - Filer i `uploads/` får inte exekvera PHP
 - Session-inställningar: httponly, secure, samesite=strict
 
-### CSP (Content Security Policy) — OBLIGATORISKT
-Bosse använder nonce-baserad CSP. `unsafe-inline` är borttaget för scripts.
+---
 
-- **Alla `<script>`-block** MÅSTE ha nonce: `<script <?php echo csp_nonce_attr(); ?>>`
-- **Alla `<script type="application/ld+json">`** MÅSTE ha nonce
-- **ALDRIG** använd inline event handlers (`onclick`, `onchange`, `onsubmit` etc.)
-- **ALLTID** använd `addEventListener()` eller `data-*` attribut + delegation
-- `csp_nonce_attr()` finns via `security/csp.php` (laddas automatiskt av bootstrap)
+## Innehållshantering
+
+### Redigerbara texter
+Använd `editable_text()` för innehåll som ska vara redigerbart via CMS:
 
 ```php
-// ❌ FEL — blockeras av CSP
-<button onclick="doSomething()">Klicka</button>
-
-// ✅ RÄTT — addEventListener
-<button id="my-btn">Klicka</button>
-<script <?php echo csp_nonce_attr(); ?>>
-document.getElementById('my-btn').addEventListener('click', doSomething);
-</script>
+<?php editable_text('section.key', 'Standardtext', 'h2', 'css-klass'); ?>
 ```
+
+### Innehållsdata
+- Sparas i `data/content.json`
+- Hämta med `get_content('key', 'default')`
+- Strukturera hierarkiskt: `section.element.property`
+
+### Bilder
+- Ladda upp via CMS till `uploads/`
+- Referera med `/uploads/filnamn.ext`
+- Max storlek: 5MB
+- Tillåtna format: jpg, png, webp, svg
 
 ---
 
@@ -279,12 +282,45 @@ document.getElementById('my-btn').addEventListener('click', doSomething);
 - `/projekt` — Visar alla publicerade inlägg
 - `/projekt/{slug}` — Visar enskilt inlägg
 
----
+**Exempel — Skapa 3 event:**
+```json
+[
+  {
+    "id": "event-alla-hjartans-dag",
+    "title": "Alla hjärtans dag",
+    "slug": "alla-hjartans-dag",
+    "category": "Event",
+    "summary": "Fira kärleken med en exklusiv 5-rätters middag.",
+    "status": "published",
+    "coverImage": "https://images.unsplash.com/photo-...",
+    "createdAt": "2026-02-14 18:00:00"
+  },
+  {
+    "id": "event-burgundy-kvall",
+    "title": "Burgundy Kväll",
+    "slug": "burgundy-kvall",
+    "category": "Event",
+    "summary": "Upptäck Burgundys finaste viner med vår sommelier.",
+    "status": "published",
+    "coverImage": "https://images.unsplash.com/photo-...",
+    "createdAt": "2026-02-22 19:00:00"
+  },
+  {
+    "id": "event-jazz-dine",
+    "title": "Jazz & Dine",
+    "slug": "jazz-dine",
+    "category": "Event",
+    "summary": "Live jazzmusik varje lördagskväll.",
+    "status": "published",
+    "coverImage": "https://images.unsplash.com/photo-...",
+    "createdAt": "2026-03-01 19:00:00"
+  }
+]
+```
 
-## Innehållshantering
+### Redigerbara fält
 
-### Redigerbara texter
-Använd `editable_text()` för innehåll som ska vara redigerbart via CMS:
+När du skapar nya sektioner, använd ALLTID `editable_text()` och `editable_image()`:
 
 ```php
 <?php editable_text('sektion', 'titel', 'Standardrubrik', 'h2', 'css-klass'); ?>
@@ -292,75 +328,44 @@ Använd `editable_text()` för innehåll som ska vara redigerbart via CMS:
 <?php editable_image('sektion', 'bild', '/assets/images/placeholder.jpg', 'Alt-text', 'css-klass'); ?>
 ```
 
-### Innehållsdata
-- Sparas i `data/content.json`
-- Hämta med `get_content('key', 'default')`
-- Strukturera hierarkiskt: `section.element.property`
+**Parametrar för editable_text():**
+1. `$contentKey` — Sektionsnamn (t.ex. 'hero', 'about', 'services')
+2. `$field` — Fältnamn (t.ex. 'title', 'description')
+3. `$defaultValue` — Standardvärde (visas om inget finns i content.json)
+4. `$as` — HTML-tagg (h1, h2, h3, p, span, div)
+5. `$className` — CSS-klasser
 
-### Bilder
-- Ladda upp via CMS till `uploads/`
-- Referera med `/uploads/filnamn.ext`
-- Max storlek: 5MB
-- Tillåtna format: jpg, png, webp, svg
-- Bilder optimeras automatiskt vid uppladdning (resize >2000px, JPEG-komprimering, WebP-kopia)
-- Bilddimensioner sparas i content.json (`key_width`, `key_height`) för CLS-prevention
+**Parametrar för editable_image():**
+1. `$contentKey` — Sektionsnamn
+2. `$field` — Fältnamn
+3. `$defaultValue` — Standard bildväg
+4. `$alt` — Alt-text
+5. `$className` — CSS-klasser
 
----
+**Redigerbarhet kräver:**
+- Användaren måste vara inloggad i CMS (`/admin`)
+- Admin-bar måste vara synlig (inkluderas via `includes/admin-bar.php`)
+- "Aktivera redigering" måste vara klickad i admin-bar
 
-## Skapa nya sidor — OBLIGATORISKT
-
-Alla sidfiler ligger i `pages/`-mappen. När du skapar en ny sida (t.ex. `pages/om-oss.php`, `pages/tjanster.php`) MÅSTE du följa denna mall:
-
+**Exempel på ny sektion:**
 ```php
-<?php
-/**
- * [Sidnamn] Page
- */
-
-require_once __DIR__ . '/../bootstrap.php';
-require_once __DIR__ . '/../security/session.php';
-require_once __DIR__ . '/../cms/content.php';
-require_once __DIR__ . '/../seo/meta.php';
-?>
-<!DOCTYPE html>
-<html lang="sv">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <?php
-    generateMeta(
-        get_content('sidnamn.meta_title', 'Sidtitel'),
-        get_content('sidnamn.meta_description', 'Beskrivning')
-    );
-    ?>
-
-    <?php if (file_exists(__DIR__ . '/../includes/fonts.php')) include __DIR__ . '/../includes/fonts.php'; ?>
-    <link rel="stylesheet" href="/assets/css/main.css">
-</head>
-<body>
-    <?php include __DIR__ . '/../includes/admin-bar.php'; ?>
-    <?php include __DIR__ . '/../includes/header.php'; ?>
-
-    <main id="main-content">
-        <!-- Sidinnehåll här -->
-    </main>
-
-    <?php include __DIR__ . '/../includes/footer.php'; ?>
-    <?php include __DIR__ . '/../includes/cookie-consent.php'; ?>
-</body>
-</html>
+<section class="section section--white">
+    <div class="container">
+        <?php editable_text('about', 'title', 'Om oss', 'h2', 'text-center'); ?>
+        <?php editable_text('about', 'description', 'Vi är ett företag...', 'p', 'text-lg text-center'); ?>
+        <?php editable_image('about', 'image', '/assets/images/team.jpg', 'Vårt team', 'about-image'); ?>
+    </div>
+</section>
 ```
 
-**Checklista för nya sidor:**
-- [ ] Filen skapas i `pages/`-mappen
-- [ ] `bootstrap.php` och `session.php` inkluderade (med `__DIR__ . '/../'` prefix)
-- [ ] `generateMeta()` för SEO
-- [ ] `admin-bar.php` FÖRE header
-- [ ] `header.php` inkluderad
-- [ ] `footer.php` inkluderad
-- [ ] `cookie-consent.php` sist i body
-- [ ] Lägg till rutt i `cms/extensions/routes.php`
+### Filöversikt — Publikt vs Admin
+
+| Typ | Filer | Beskrivning |
+|-----|-------|-------------|
+| **Publika sidor** | `index.php`, `pages/kontakt.php`, `pages/projekt.php`, `pages/projekt-single.php`, `pages/cookies.php`, `pages/integritetspolicy.php` | Synliga för besökare |
+| **CMS-admin** | `cms/*.php`, `cms/projects/*.php` | Kräver inloggning |
+| **Data** | `data/content.json`, `data/projects.json` | JSON-lagring |
+| **Uploads** | `uploads/` | Uppladdade bilder (max 5MB per fil) |
 
 ---
 
@@ -390,10 +395,6 @@ require_once __DIR__ . '/../seo/meta.php';
 ├── cms/                   # Admin-sidor
 │   ├── admin.php          # Inloggning
 │   ├── dashboard.php      # Översikt
-│   ├── support.php        # Supportärende (skapar ticket direkt)
-│   ├── tickets.php        # Ärendelista
-│   ├── ticket-single.php  # Enskilt ärende
-│   ├── tickets-db.php     # Ärende-databas (JSON)
 │   └── projects/          # Inlägg-hantering
 │       ├── index.php      # Lista inlägg
 │       ├── new.php        # Skapa inlägg

@@ -339,6 +339,14 @@ function handle_save_config(): void {
     foreach ($directFields as $inputKey => $constant) {
         if (!isset($input[$inputKey])) continue;
         $newValue = $input[$inputKey];
+
+        // Normalisera GITHUB_REPO till "org/name"-format
+        if ($constant === 'GITHUB_REPO' && !empty($newValue)) {
+            $newValue = preg_replace('#^https?://github\.com/#', '', $newValue);
+            $newValue = preg_replace('#\.git$#', '', $newValue);
+            $newValue = rtrim($newValue, '/');
+        }
+
         $pattern = "/define\('" . preg_quote($constant, '/') . "',\s*'[^']*'\);/";
         $replacement = "define('" . $constant . "', " . var_export($newValue, true) . ");";
         $r = safe_config_replace($pattern, $replacement, $config, $constant);
@@ -399,7 +407,10 @@ function handle_save_config(): void {
         if (!$hasGithubRepo || !$hasGithubToken) {
             $githubBlock = "\n// GitHub (för automatisk push vid uppdatering)\n";
             if (!$hasGithubRepo && !empty($input['github_repo'])) {
-                $githubBlock .= "define('GITHUB_REPO', " . var_export($input['github_repo'], true) . ");\n";
+                $repoNorm = preg_replace('#^https?://github\.com/#', '', $input['github_repo']);
+                $repoNorm = preg_replace('#\.git$#', '', $repoNorm);
+                $repoNorm = rtrim($repoNorm, '/');
+                $githubBlock .= "define('GITHUB_REPO', " . var_export($repoNorm, true) . ");\n";
             }
             if (!$hasGithubToken && !empty($input['github_token'])) {
                 $githubBlock .= "define('GITHUB_TOKEN', " . var_export($input['github_token'], true) . ");\n";

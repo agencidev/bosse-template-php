@@ -71,11 +71,14 @@ RewriteRule ^tickets/?$ cms/tickets.php [L]
 # /tickets/{id} -> /cms/ticket-single.php?id={id}
 RewriteRule ^tickets/(\d+)/?$ cms/ticket-single.php?id=$1 [QSA,L]
 
-# /projekt -> /pages/projekt.php
-RewriteRule ^projekt/?$ pages/projekt.php [L]
+# /inlagg -> /pages/inlagg.php
+RewriteRule ^inlagg/?$ pages/inlagg.php [L]
 
-# /projekt/{slug} -> /pages/projekt-single.php?slug={slug}
-RewriteRule ^projekt/([a-z0-9-]+)/?$ pages/projekt-single.php?slug=$1 [QSA,L]
+# /inlagg/{slug} -> /pages/inlagg-single.php?slug={slug}
+RewriteRule ^inlagg/([a-z0-9-]+)/?$ pages/inlagg-single.php?slug=$1 [QSA,L]
+
+# /categories -> /cms/categories.php
+RewriteRule ^categories/?$ cms/categories.php [L]
 
 # Ta bort .php — kolla pages/ först, sedan rot
 RewriteCond %{DOCUMENT_ROOT}/pages/$1.php -f

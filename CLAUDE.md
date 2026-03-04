@@ -8,28 +8,48 @@ Se `.rules/brand-guide.md` för varumärkesguide (färger, typsnitt, tonalitet).
 Dessa filer/mappar tillhör Bosse-ramverket och skrivs över vid uppdatering:
 `bootstrap.php`, `router.php`, `setup.php`, `bosse-health.php`, `cms/`, `security/`, `bin/`, `seo/`, `includes/admin-bar.php`, `includes/cookie-consent.php`, `includes/mailer.php`, `assets/css/variables.css`, `assets/css/components.css`, `assets/js/cms.js`
 
-**Du får ändra:** `index.php` (startsidan), `pages/errors/` (felsidor), `assets/css/overrides.css`, `includes/header.php`, `includes/footer.php`, sidor i `pages/`, `cms/extensions/routes.php`, `data/content.json`, `data/projects.json`, `uploads/`
+**Du får ändra:** `index.php` (startsidan), `pages/errors/` (felsidor), `assets/css/overrides.css`, `assets/css/inlagg-custom.css`, `assets/css/inlagg-single-custom.css`, `includes/header.php`, `includes/footer.php`, sidor i `pages/`, `cms/extensions/routes.php`, `data/content.json`, `data/projects.json`, `uploads/`
 
 Se `.rules/ai-rules.md` → "CORE vs SAFE" för komplett lista.
 
 ## ⚠️ KRITISKT — Läs först!
 
-**När du skapar inlägg/nyheter/event:**
-- **ALDRIG** hårdkoda i PHP-filer (index.php etc.)
-- **ALLTID** lägg till i `data/projects.json`
+### STOPP! Inlägg/nyheter/event/projekt — MÅSTE gå via `data/projects.json`
 
+**ALDRIG** skapa inlägg genom att:
+- Hårdkoda HTML/PHP i `index.php` eller andra PHP-filer
+- Skapa nya PHP-filer för enskilda inlägg
+- Lägga innehåll i `data/content.json` (det är för sidinnehåll, INTE inlägg)
+
+**ALLTID** följ dessa steg exakt:
+
+1. **Läs** `data/projects.json` med Read-verktyget
+2. **Lägg till** ett nytt objekt i arrayen med ALLA obligatoriska fält (se nedan)
+3. **Skriv tillbaka** hela arrayen till `data/projects.json`
+4. **Verifiera** att filen är giltig JSON (`php -r "json_decode(file_get_contents('data/projects.json')) ?: exit(1);"`)
+
+**Obligatoriska fält** (saknas något visas inlägget INTE korrekt):
 ```json
 {
-  "id": "event-namn-2026",
-  "title": "Event-namn",
-  "slug": "event-namn",
-  "category": "Event",
-  "summary": "Kort beskrivning",
+  "id": "unikt-id-2026",
+  "title": "Titel på inlägget",
+  "slug": "url-vänlig-slug",
+  "category": "Inlägg",
+  "summary": "Kort beskrivning (visas i listvy)",
+  "content": "Fullständig text (HTML tillåtet)",
   "status": "published",
   "coverImage": "/uploads/bild.jpg",
-  "createdAt": "2026-02-14 18:00:00"
+  "gallery": [],
+  "createdAt": "2026-03-02 12:00:00"
 }
 ```
+
+**Viktigt:**
+- `status` MÅSTE vara `"published"` för att synas publikt
+- `slug` MÅSTE vara unik — den blir URL:en (`/inlagg/min-slug`)
+- `id` MÅSTE vara unik — används av CMS:et för redigering
+- `category` styr vilken URL inlägget visas på: `"Inlägg"` → `/inlagg`. Extra kategorier konfigureras per projekt (se "Kategori- och innehållssidor" nedan)
+- Inlägget syns automatiskt i CMS-admin (`/projects`) och publikt — ingen extra konfiguration behövs
 
 ## Snabbref
 
@@ -53,6 +73,7 @@ När du skapar nya sidor (om-oss.php, tjanster.php etc.):
 ### CSS-ändringar
 - **Skriv alltid i:** `assets/css/overrides.css`
 - **Ändra ALDRIG:** `variables.css` eller `components.css`
+- **Egen design för inlägg:** Skapa `assets/css/inlagg-custom.css` (listvy) eller `assets/css/inlagg-single-custom.css` (enskild vy) — ersätter default-styles helt, överlever uppdateringar
 
 ### Innehåll
 - **Sidinnehåll:** `data/content.json`
@@ -73,7 +94,7 @@ Använd ALLTID `editable_text()` och `editable_image()` för redigerbart innehå
   "id": "unikt-id",
   "title": "Titel",
   "slug": "url-slug",
-  "category": "Projekt|Blogg|Nyhet|Event",
+  "category": "Inlägg",
   "summary": "Kort beskrivning",
   "content": "Fullständig text",
   "status": "published|draft",
@@ -82,11 +103,54 @@ Använd ALLTID `editable_text()` och `editable_image()` för redigerbart innehå
 }
 ```
 
+### Kategori- och innehållssidor
+
+Bosse har ett inbyggt system för att skapa kategorisidor (blogg, nyheter, event, portfolio etc.). Alla kategorier använder samma PHP-filer (`pages/inlagg.php` + `pages/inlagg-single.php`) men med olika URL-prefix och filter.
+
+**Default:** `/inlagg` finns alltid (hanteras av `.htaccess`). Extra kategorier konfigureras per projekt genom att redigera **2 filer**:
+
+#### Steg 1: `cms/extensions/categories.php` — Definiera kategorin
+```php
+return [
+    '/inlagg' => ['category' => 'Inlägg', 'title_sv' => 'Inlägg', 'title_en' => 'Posts', 'base_url' => '/inlagg'],
+    '/happenings' => ['category' => 'Event', 'title_sv' => 'Event', 'title_en' => 'Events', 'base_url' => '/happenings'],
+    '/blogg' => ['category' => 'Blogg', 'title_sv' => 'Blogg', 'title_en' => 'Blog', 'base_url' => '/blogg'],
+];
+```
+
+#### Steg 2: `cms/extensions/routes.php` — Lägg till routes
+```php
+return [
+    '/happenings' => '/pages/inlagg.php',
+    '/blogg' => '/pages/inlagg.php',
+    '__patterns' => [
+        ['/^\/happenings\/([a-z0-9-]+)$/', '/pages/inlagg-single.php', ['slug']],
+        ['/^\/blogg\/([a-z0-9-]+)$/', '/pages/inlagg-single.php', ['slug']],
+    ],
+];
+```
+
+#### Resultat
+- Listvy: `/happenings` visar alla inlägg med `"category": "Event"`
+- Enskild: `/happenings/mitt-event` visar detalj
+- CMS-dropdown i "Skapa inlägg" uppdateras automatiskt med nya kategorier
+
+#### Exempelprompts som triggar detta
+- "Skapa en eventsida som heter happenings" → skapar `/happenings` + `/happenings/{slug}`
+- "Lägg till kategorierna Event och Nyhet" → lägger till båda i categories.php + routes.php
+- "Jag vill ha en blogg på /blogg och portfolio på /projekt" → skapar båda
+- "Ta bort kategorin Blogg" → tar bort från categories.php + routes.php
+
+**Viktigt:** `category`-värdet i `categories.php` MÅSTE matcha `category`-fältet i `data/projects.json`. Exakt match, case-sensitive.
+
 ### Publika sidor
 - `/` — Huvudsida (`index.php` i rot)
 - `/kontakt` — Kontaktformulär (`pages/kontakt.php`)
-- `/projekt` — Projekt-lista (`pages/projekt.php`)
-- `/projekt/{slug}` — Enskilt projekt (`pages/projekt-single.php`)
+- `/inlagg` — Alla inlägg (`pages/inlagg.php`)
+- `/inlagg/{slug}` — Enskilt inlägg (`pages/inlagg-single.php`)
+- Extra kategorisidor (t.ex. `/blogg`, `/happenings`) konfigureras per projekt (se ovan)
+
+**Routing:** `/inlagg` hanteras av `.htaccess`. Extra kategorisidor routas via `cms/extensions/routes.php`. Samma PHP-filer, kontextväxling via URL-prefix.
 
 ### CMS-admin (kräver inloggning)
 - `/admin` — Logga in

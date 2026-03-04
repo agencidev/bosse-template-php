@@ -584,10 +584,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <select id="category" name="category" class="form-select" required>
                         <option value="">Välj kategori</option>
                         <?php
-                        $categories = ['Projekt', 'Blogg', 'Nyhet', 'Event'];
+                        $_cat_file = __DIR__ . '/../../cms/extensions/categories.php';
+                        $_cats = file_exists($_cat_file) ? (require $_cat_file) : [];
+                        $categories = (is_array($_cats) && !empty($_cats))
+                            ? $_cats
+                            : ['Projekt', 'Blogg', 'Nyhet', 'Event'];
                         foreach ($categories as $cat):
                         ?>
-                        <option value="<?php echo $cat; ?>" <?php echo ($project['category'] ?? '') === $cat ? 'selected' : ''; ?>><?php echo $cat; ?></option>
+                        <option value="<?php echo htmlspecialchars($cat, ENT_QUOTES, 'UTF-8'); ?>" <?php echo ($project['category'] ?? '') === $cat ? 'selected' : ''; ?>><?php echo htmlspecialchars($cat, ENT_QUOTES, 'UTF-8'); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -665,7 +669,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="button" id="preview-close">Stäng</button>
             </div>
             <article class="preview-article">
-                <a href="#" class="preview-back" id="preview-back-link">&#8592; Tillbaka till projekt</a>
+                <a href="#" class="preview-back" id="preview-back-link">&#8592; Tillbaka till inlägg</a>
                 <header class="preview-header">
                     <span class="p-category" id="preview-category"></span>
                     <h1 class="p-title" id="preview-title"></h1>

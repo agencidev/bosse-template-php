@@ -9,7 +9,9 @@ const UPDATABLE_FILES = [
     'bootstrap.php', 'router.php', 'setup.php', 'includes/version.php',
     '.htaccess', '.user.ini',
     'seo/robots.php', 'public/site.webmanifest',
-    'pages/projekt.php', 'pages/projekt-single.php', 'CLAUDE.md',
+    'assets/css/inlagg-default.css', 'assets/css/inlagg-single-default.css',
+    'cms/categories.php',
+    'CLAUDE.md',
     // CMS-logotyper (explicit för bakåtkompatibilitet med äldre updaters)
     'assets/images/cms/agenci-logo-dark.png',
     'assets/images/cms/agenci-logo-light.png',
@@ -38,8 +40,11 @@ const PROTECTED_FILES = [
     'config.php', '.env',
     'data/content.json', 'data/projects.json',
     'assets/css/variables.css', 'assets/css/overrides.css',
+    'assets/css/inlagg-custom.css', 'assets/css/inlagg-single-custom.css',
+    'cms/extensions/categories.php', 'cms/extensions/routes.php',
     'assets/css/main.css', 'assets/css/components.css',
     'includes/header.php', 'includes/footer.php', 'includes/fonts.php',
+    'pages/inlagg.php', 'pages/inlagg-single.php',
     'index.php', 'pages/kontakt.php', 'pages/cookies.php', 'pages/integritetspolicy.php',
     'pages/errors/403.php', 'pages/errors/404.php', 'pages/errors/500.php',
 ];
@@ -704,6 +709,44 @@ function should_check_for_update(): bool {
 }
 
 /**
+ * Self-heal: Kolla om kritiska core-filer saknas pa disk
+ * Returnerar lista med saknade filer, tom array om allt ok
+ * Kollar bara filer som MASTE finnas (inte valfria som .user.ini)
+ */
+function check_missing_core_files(): array {
+    $rootPath = defined('ROOT_PATH') ? ROOT_PATH : dirname(__DIR__);
+    $missing = [];
+
+    // Bara kolla filer som definitivt ska finnas i en fungerande installation
+    $criticalFiles = array_filter(UPDATABLE_FILES, function($f) {
+        // Hoppa over valfria/plattformsspecifika filer
+        $optional = ['.user.ini', '.windsurfrules', 'public/site.webmanifest', 'CLAUDE.md'];
+        if (in_array($f, $optional, true)) return false;
+        // Hoppa over bildfiler (kan saknas legitimt)
+        if (str_starts_with($f, 'assets/images/')) return false;
+        return true;
+    });
+
+    foreach ($criticalFiles as $file) {
+        $fullPath = $rootPath . '/' . $file;
+        if (!file_exists($fullPath)) {
+            $missing[] = $file;
+        }
+    }
+
+    // Ratelimit: max en self-heal per 24h
+    $stateFile = DATA_PATH . '/self-heal-last.txt';
+    if (!empty($missing) && file_exists($stateFile)) {
+        $lastHeal = (int) file_get_contents($stateFile);
+        if (time() - $lastHeal < 86400) {
+            return []; // Redan forsokt senaste 24h
+        }
+    }
+
+    return $missing;
+}
+
+/**
  * Automatisk uppdatering — kör hela flodet tyst
  * Kollar → laddar ner → backup → applicerar → loggar
  * Returnerar true om uppdatering applicerades
@@ -719,6 +762,12 @@ function auto_update(): bool {
         // Kolla cachad state — kanske redan vetat om update men inte applicerat
         $state = get_update_state();
         if (empty($state['update_available'])) {
+            // Self-heal: kolla om core-filer saknas trots att versionen ar senaste
+            $missing = check_missing_core_files();
+            if (!empty($missing)) {
+                log_update_event('self-heal', BOSSE_VERSION, count($missing) . ' saknade filer: ' . implode(', ', array_slice($missing, 0, 5)));
+                return self_heal_missing_files();
+            }
             return false;
         }
         // Finns cachad update — forsok applicera
@@ -729,10 +778,56 @@ function auto_update(): bool {
     $state = check_for_update();
 
     if (isset($state['error']) || empty($state['update_available'])) {
+        // Self-heal: aven om versionen ar senaste, kolla saknade filer
+        $missing = check_missing_core_files();
+        if (!empty($missing)) {
+            log_update_event('self-heal', BOSSE_VERSION, count($missing) . ' saknade filer: ' . implode(', ', array_slice($missing, 0, 5)));
+            return self_heal_missing_files();
+        }
         return false;
     }
 
     return auto_apply_from_state($state);
+}
+
+/**
+ * Self-heal: Ladda ner och extrahera saknade core-filer
+ * Kors nar versionen matchar men filer saknas pa disk
+ */
+function self_heal_missing_files(): bool {
+    $state = get_update_state();
+    $downloadUrl = $state['download_url'] ?? '';
+
+    // Om vi inte har en download URL, bygg den fran update URL
+    if (empty($downloadUrl) && defined('AGENCI_UPDATE_URL')) {
+        $downloadUrl = rtrim(AGENCI_UPDATE_URL, '/') . '/releases/' . BOSSE_VERSION . '.zip';
+    }
+
+    if (empty($downloadUrl)) {
+        return false;
+    }
+
+    // Ladda ner samma version (inte en uppgradering, bara re-extract)
+    $zipPath = download_update($downloadUrl, '');
+    if ($zipPath === false) {
+        log_update_event('self-heal-error', BOSSE_VERSION, 'Nedladdning misslyckades');
+        return false;
+    }
+
+    $result = apply_update($zipPath);
+
+    // Spara timestamp for ratelimit
+    @file_put_contents(DATA_PATH . '/self-heal-last.txt', (string) time());
+
+    if ($result['success']) {
+        log_update_event('self-heal-ok', BOSSE_VERSION,
+            count($result['updated_files']) . ' filer aterstallda');
+        return true;
+    }
+
+    log_update_event('self-heal-error', BOSSE_VERSION,
+        implode('; ', $result['errors'] ?? ['Okant fel']));
+    return false;
 }
 
 /**
@@ -855,6 +950,20 @@ function cleanup_old_data(): void {
 }
 
 /**
+ * Normalisera GITHUB_REPO till "org/name"-format
+ * Hanterar: full URL, .git-suffix, trailing slashes
+ */
+function normalize_github_repo(string $repo): string {
+    // Ta bort full URL-prefix
+    $repo = preg_replace('#^https?://github\.com/#', '', $repo);
+    // Ta bort .git-suffix
+    $repo = preg_replace('#\.git$#', '', $repo);
+    // Ta bort trailing slash
+    $repo = rtrim($repo, '/');
+    return $repo;
+}
+
+/**
  * HTTP-anrop till GitHub API
  */
 function github_api(string $method, string $endpoint, array $data = []): array {
@@ -927,7 +1036,7 @@ function push_to_github(array $updatedFiles, string $version): array {
         return ['success' => false, 'message' => 'GitHub ej konfigurerat — hoppar över push'];
     }
 
-    $repo = GITHUB_REPO;
+    $repo = normalize_github_repo(GITHUB_REPO);
     $rootPath = defined('ROOT_PATH') ? ROOT_PATH : dirname(__DIR__);
 
     // Filtrera bort filer som inte finns på disk

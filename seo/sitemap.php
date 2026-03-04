@@ -13,7 +13,7 @@ $pages = [
     ['url' => '/', 'priority' => '1.0', 'changefreq' => 'daily'],
     ['url' => '/om-oss', 'priority' => '0.8', 'changefreq' => 'monthly'],
     ['url' => '/kontakt', 'priority' => '0.8', 'changefreq' => 'monthly'],
-    ['url' => '/projekt', 'priority' => '0.9', 'changefreq' => 'weekly'],
+    ['url' => '/inlagg', 'priority' => '0.9', 'changefreq' => 'weekly'],
     ['url' => '/cookies', 'priority' => '0.3', 'changefreq' => 'yearly'],
     ['url' => '/integritetspolicy', 'priority' => '0.3', 'changefreq' => 'yearly'],
 ];
@@ -25,7 +25,7 @@ if (file_exists($projectsFile)) {
     foreach ($projects as $project) {
         if (($project['status'] ?? 'draft') === 'published' && !empty($project['slug'])) {
             $entry = [
-                'url' => '/projekt/' . $project['slug'],
+                'url' => '/inlagg/' . $project['slug'],
                 'priority' => '0.7',
                 'changefreq' => 'weekly',
                 'lastmod' => $project['updatedAt'] ?? $project['createdAt'] ?? null,

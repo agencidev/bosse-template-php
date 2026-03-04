@@ -162,12 +162,46 @@ HTML;
     <?php include __DIR__ . '/../includes/header.php'; ?>
 
     <main id="main-content">
-        <section class="section section--white">
+        <section class="section" style="background: var(--color-gray-100); padding: var(--spacing-16) var(--spacing-4);">
             <div class="container" style="max-width: 640px;">
-                <h1 class="text-center" style="margin-bottom: 0.5rem;">Kontakta oss</h1>
+                <h1 class="text-center" style="margin-bottom: 0.5rem;">Hur kan vi hjälpa dig?</h1>
                 <p class="text-center text-lg" style="color: var(--color-gray-500); margin-bottom: 2rem;">
-                    Har du frågor eller vill veta mer? Fyll i formuläret så återkommer vi.
+                    Vi svarar vanligtvis inom 24 timmar
                 </p>
+
+                <!-- Contact Information -->
+                <div style="background: white; border-radius: 1rem; padding: 2rem; margin-bottom: 2rem;">
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div style="width: 48px; height: 48px; background: #e0e7ff; color: var(--color-primary); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                    <polyline points="22,6 12,13 2,6"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--color-gray-500); letter-spacing: 0.05em; margin: 0 0 4px 0;">E-post</p>
+                                <p style="font-size: 16px; font-weight: 600; color: var(--color-foreground); margin: 0;">
+                                    <a href="mailto:support@uppdragsbrev.se" style="color: var(--color-foreground); text-decoration: none;">support@uppdragsbrev.se</a>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div style="width: 48px; height: 48px; background: #e0e7ff; color: var(--color-primary); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--color-gray-500); letter-spacing: 0.05em; margin: 0 0 4px 0;">Telefon</p>
+                                <p style="font-size: 16px; font-weight: 600; color: var(--color-foreground); margin: 0;">
+                                    <a href="tel:+46701234567" style="color: var(--color-foreground); text-decoration: none;">+46 70 123 45 67</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <?php if ($success): ?>
                 <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 0.75rem; padding: 1.5rem; text-align: center; margin-bottom: 2rem;">
@@ -184,51 +218,68 @@ HTML;
                 <?php endif; ?>
 
                 <?php if (!$success): ?>
-                <form method="POST" action="/kontakt" style="background: white; border: 1px solid var(--color-gray-200); border-radius: 1rem; padding: 2rem;">
+                <form method="POST" action="/kontakt" style="background: white; border: none; border-radius: 1rem; padding: 2.5rem;">
                     <?php echo csrf_field(); ?>
 
                     <div style="margin-bottom: 1.25rem;">
-                        <label for="name" style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.375rem;">Namn *</label>
+                        <label for="name" style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--color-foreground);">Namn *</label>
                         <input type="text" id="name" name="name" required minlength="2" maxlength="100"
                                value="<?php echo htmlspecialchars($form_data['name']); ?>"
                                placeholder="Ditt namn"
-                               style="width: 100%; padding: 0.625rem 0.875rem; border: 1px solid var(--color-gray-300); border-radius: 0.5rem; font-size: 0.9375rem; font-family: inherit;">
+                               style="width: 100%; padding: 0.75rem 1rem; border: none; background: var(--color-gray-50); border-radius: 0.5rem; font-size: 0.9375rem; font-family: inherit; transition: background 0.2s;">
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
                         <div>
-                            <label for="email" style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.375rem;">E-post *</label>
+                            <label for="email" style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--color-foreground);">E-post *</label>
                             <input type="email" id="email" name="email" required
                                    value="<?php echo htmlspecialchars($form_data['email']); ?>"
                                    placeholder="din@email.com"
-                                   style="width: 100%; padding: 0.625rem 0.875rem; border: 1px solid var(--color-gray-300); border-radius: 0.5rem; font-size: 0.9375rem; font-family: inherit;">
+                                   style="width: 100%; padding: 0.75rem 1rem; border: none; background: var(--color-gray-50); border-radius: 0.5rem; font-size: 0.9375rem; font-family: inherit; transition: background 0.2s;">
                         </div>
                         <div>
-                            <label for="phone" style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.375rem;">Telefon</label>
+                            <label for="phone" style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--color-foreground);">Telefon</label>
                             <input type="tel" id="phone" name="phone"
                                    value="<?php echo htmlspecialchars($form_data['phone']); ?>"
                                    placeholder="+46 70 000 00 00"
-                                   style="width: 100%; padding: 0.625rem 0.875rem; border: 1px solid var(--color-gray-300); border-radius: 0.5rem; font-size: 0.9375rem; font-family: inherit;">
+                                   style="width: 100%; padding: 0.75rem 1rem; border: none; background: var(--color-gray-50); border-radius: 0.5rem; font-size: 0.9375rem; font-family: inherit; transition: background 0.2s;">
                         </div>
                     </div>
 
-                    <div style="margin-bottom: 1.25rem;">
-                        <label for="subject" style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.375rem;">Ämne *</label>
-                        <input type="text" id="subject" name="subject" required minlength="2" maxlength="200"
-                               value="<?php echo htmlspecialchars($form_data['subject']); ?>"
-                               placeholder="Vad gäller det?"
-                               style="width: 100%; padding: 0.625rem 0.875rem; border: 1px solid var(--color-gray-300); border-radius: 0.5rem; font-size: 0.9375rem; font-family: inherit;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                        <div>
+                            <label for="subject" style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--color-foreground);">Typ av ärende *</label>
+                            <select id="subject" name="subject" required
+                                    style="width: 100%; padding: 0.75rem 1rem; border: none; background: var(--color-gray-50); border-radius: 0.5rem; font-size: 0.9375rem; font-family: inherit; transition: background 0.2s;">
+                                <option value="">Välj...</option>
+                                <option value="Teknisk support" <?php echo $form_data['subject'] === 'Teknisk support' ? 'selected' : ''; ?>>Teknisk support</option>
+                                <option value="Fråga om funktioner" <?php echo $form_data['subject'] === 'Fråga om funktioner' ? 'selected' : ''; ?>>Fråga om funktioner</option>
+                                <option value="Fakturering" <?php echo $form_data['subject'] === 'Fakturering' ? 'selected' : ''; ?>>Fakturering</option>
+                                <option value="Felanmälan" <?php echo $form_data['subject'] === 'Felanmälan' ? 'selected' : ''; ?>>Felanmälan</option>
+                                <option value="Övrigt" <?php echo $form_data['subject'] === 'Övrigt' ? 'selected' : ''; ?>>Övrigt</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="priority" style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--color-foreground);">Prioritet</label>
+                            <select id="priority" name="priority"
+                                    style="width: 100%; padding: 0.75rem 1rem; border: none; background: var(--color-gray-50); border-radius: 0.5rem; font-size: 0.9375rem; font-family: inherit; transition: background 0.2s;">
+                                <option value="low">Låg</option>
+                                <option value="normal" selected>Normal</option>
+                                <option value="high">Hög</option>
+                                <option value="urgent">Brådskande</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div style="margin-bottom: 1.5rem;">
-                        <label for="message" style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.375rem;">Meddelande *</label>
+                        <label for="message" style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--color-foreground);">Beskriv ditt ärende *</label>
                         <textarea id="message" name="message" required minlength="10" maxlength="5000" rows="6"
-                                  placeholder="Beskriv ditt ärende..."
-                                  style="width: 100%; padding: 0.625rem 0.875rem; border: 1px solid var(--color-gray-300); border-radius: 0.5rem; font-size: 0.9375rem; font-family: inherit; resize: vertical; min-height: 120px;"><?php echo htmlspecialchars($form_data['message']); ?></textarea>
+                                  placeholder="Beskriv ditt problem eller din fråga så detaljerat som möjligt..."
+                                  style="width: 100%; padding: 0.75rem 1rem; border: none; background: var(--color-gray-50); border-radius: 0.5rem; font-size: 0.9375rem; font-family: inherit; resize: vertical; min-height: 120px; transition: background 0.2s;"><?php echo htmlspecialchars($form_data['message']); ?></textarea>
                     </div>
 
                     <button type="submit" class="button button--primary" style="width: 100%; padding: 0.875rem; font-size: 1rem; cursor: pointer;">
-                        Skicka meddelande
+                        Skicka supportärende
                     </button>
                 </form>
                 <?php endif; ?>
