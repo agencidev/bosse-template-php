@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.83
+- Feat: Ja/nej-toggle för Google Analytics i setup-wizarden
+- Feat: Fullskärms mobilmeny med staggered hamburger-ikon och smooth animationer
+- Fix: Cookie-banner använder nu projektets CSS-variabler istället för hårdkodade färger
+- Fix: Cookie policy-titlar är nu vita för bättre läsbarhet
+- Change: `data/content.json` och `data/projects.json` borttagna från `.gitignore`
+
 ## 1.5.75
 - Fix: router.php — stöd för `__patterns` (blogg/nyheter/event-sluggar fungerar nu i PHP dev-server)
 - Fix: router.php + index.php — robust path-resolution, hanterar absoluta sökvägar i custom routes utan att dubbla `__DIR__`
