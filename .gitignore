@@ -16,6 +16,8 @@ data/backups/
 
 # Setup state (generated per server)
 data/.setup-complete
+data/content.json
+data/projects.json
 
 # Lokal AI-config
 .claude
