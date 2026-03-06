@@ -56,14 +56,23 @@ RewriteRule ^cookies/?$ pages/cookies.php [L]
 # /integritetspolicy -> /pages/integritetspolicy.php
 RewriteRule ^integritetspolicy/?$ pages/integritetspolicy.php [L]
 
-# /projects -> /cms/projects/index.php
+# /projects -> /cms/projects/index.php (legacy)
 RewriteRule ^projects/?$ cms/projects/index.php [L]
 
-# /projects/new -> /cms/projects/new.php
+# /projects/new -> /cms/projects/new.php (legacy)
 RewriteRule ^projects/new/?$ cms/projects/new.php [QSA,L]
 
-# /projects/edit -> /cms/projects/edit.php
+# /projects/edit -> /cms/projects/edit.php (legacy)
 RewriteRule ^projects/edit/?$ cms/projects/edit.php [QSA,L]
+
+# /inlagg-admin -> /cms/projects/index.php
+RewriteRule ^inlagg-admin/?$ cms/projects/index.php [L]
+
+# /inlagg-admin/ny -> /cms/projects/new.php
+RewriteRule ^inlagg-admin/ny/?$ cms/projects/new.php [QSA,L]
+
+# /inlagg-admin/redigera -> /cms/projects/edit.php
+RewriteRule ^inlagg-admin/redigera/?$ cms/projects/edit.php [QSA,L]
 
 # /tickets -> /cms/tickets.php
 RewriteRule ^tickets/?$ cms/tickets.php [L]
