@@ -486,6 +486,19 @@ function apply_update(string $zipPath): array {
     if (empty($result['errors'])) {
         $result['success'] = true;
 
+        // Regenerate custom routes in .htaccess (categories, custom pages etc.)
+        if (function_exists('regenerate_htaccess_routes')) {
+            regenerate_htaccess_routes();
+        } else {
+            $helpersPath = $rootPath . '/cms/helpers.php';
+            if (file_exists($helpersPath)) {
+                require_once $helpersPath;
+                if (function_exists('regenerate_htaccess_routes')) {
+                    regenerate_htaccess_routes();
+                }
+            }
+        }
+
         // Skapa .installed om den saknas (för sites byggda före v1.5.23)
         if (!file_exists($rootPath . '/.installed')) {
             @file_put_contents($rootPath . '/.installed', 'installed');

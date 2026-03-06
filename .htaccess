@@ -89,6 +89,11 @@ RewriteRule ^inlagg/([a-z0-9-]+)/?$ pages/inlagg-single.php?slug=$1 [QSA,L]
 # /categories -> /cms/categories.php
 RewriteRule ^categories/?$ cms/categories.php [L]
 
+# BEGIN BOSSE CUSTOM ROUTES
+# Auto-generated from cms/extensions/routes.php and categories.php
+# Regenerated on update and when categories change — do not edit manually
+# END BOSSE CUSTOM ROUTES
+
 # Ta bort .php — kolla pages/ först, sedan rot
 RewriteCond %{DOCUMENT_ROOT}/pages/$1.php -f
 RewriteRule ^(.+?)/?$ pages/$1.php [L,QSA]
@@ -97,10 +102,10 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}.php -f
 RewriteRule ^(.+?)/?$ $1.php [L,QSA]
 
-# Front controller — allt annat till index.php (landing pages, dynamiska routes)
+# Front controller — dynamiska routes via router.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /index.php [L]
+RewriteRule . /router.php [L]
 
 
 ############################################

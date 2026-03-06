@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../security/session.php';
 require_once __DIR__ . '/../security/csrf.php';
+require_once __DIR__ . '/helpers.php';
 
 if (!is_logged_in()) {
     header('Location: /admin');
@@ -178,7 +179,13 @@ function saveCategories(array $cats, string $catFile, string $routeFile): bool
     $routeContent .= "    ],\n";
     $routeContent .= "];\n";
 
-    return file_put_contents($routeFile, $routeContent, LOCK_EX) !== false;
+    $saved = file_put_contents($routeFile, $routeContent, LOCK_EX) !== false;
+
+    if ($saved && function_exists('regenerate_htaccess_routes')) {
+        regenerate_htaccess_routes();
+    }
+
+    return $saved;
 }
 ?>
 <!DOCTYPE html>
