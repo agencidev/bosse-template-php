@@ -133,23 +133,23 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
                 <div class="cookie-info-content" id="cookie-policy-content" style="display: none;">
                     <p><strong><?php echo htmlspecialchars($company_name); ?></strong> använder cookies på denna webbplats. Nedan beskrivs vilka cookies vi använder och varför.</p>
 
-                    <p style="margin-top: 0.75rem;"><strong style="color: var(--color-primary, #8b5cf6);">Nödvändiga cookies</strong><br>
+                    <p style="margin-top: 0.75rem;"><strong style="color: white;">Nödvändiga cookies</strong><br>
                     Dessa krävs för att webbplatsen ska fungera korrekt, t.ex. sessionshantering och CSRF-skydd. De kan inte stängas av. Lagringstid: sessionens längd.</p>
 
-                    <p style="margin-top: 0.75rem;"><strong style="color: var(--color-primary, #8b5cf6);">Analytiska cookies</strong><br>
+                    <p style="margin-top: 0.75rem;"><strong style="color: white;">Analytiska cookies</strong><br>
                     Hjälper oss förstå hur besökare använder webbplatsen genom anonymiserad statistik (t.ex. Google Analytics). Lagringstid: upp till 365 dagar.</p>
 
-                    <p style="margin-top: 0.75rem;"><strong style="color: var(--color-primary, #8b5cf6);">Funktionella cookies</strong><br>
+                    <p style="margin-top: 0.75rem;"><strong style="color: white;">Funktionella cookies</strong><br>
                     Gör det möjligt att komma ihåg dina val, t.ex. språk och visningsinställningar. Lagringstid: upp till 365 dagar.</p>
 
-                    <p style="margin-top: 0.75rem;"><strong style="color: var(--color-primary, #8b5cf6);">Marknadsföringscookies</strong><br>
+                    <p style="margin-top: 0.75rem;"><strong style="color: white;">Marknadsföringscookies</strong><br>
                     Används för att visa relevanta annonser baserat på dina intressen. Lagringstid: upp till 365 dagar.</p>
 
                     <p style="margin-top: 0.75rem;"><strong>Ditt samtycke</strong><br>
                     Ditt samtycke sparas i 365 dagar. Du kan när som helst ändra dina inställningar via cookie-inställningarna.</p>
 
                     <p style="margin-top: 0.75rem;"><strong>Kontakt</strong><br>
-                    Har du frågor om vår cookie policy? Kontakta oss på <a href="mailto:<?php echo htmlspecialchars($contact_email); ?>" style="color: var(--color-primary, #8b5cf6);"><?php echo htmlspecialchars($contact_email); ?></a><?php if (!empty($contact_phone)): ?> eller ring <strong><?php echo htmlspecialchars($contact_phone); ?></strong><?php endif; ?>.</p>
+                    Har du frågor om vår cookie policy? Kontakta oss på <a href="mailto:<?php echo htmlspecialchars($contact_email); ?>" style="color: white;"><?php echo htmlspecialchars($contact_email); ?></a><?php if (!empty($contact_phone)): ?> eller ring <strong><?php echo htmlspecialchars($contact_phone); ?></strong><?php endif; ?>.</p>
                 </div>
             </div>
         </div>
@@ -163,12 +163,12 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 </div>
 
 <style>
-/* Cookie Consent Banner - Mörk design som bilderna */
+/* Cookie Consent Banner - Använder projektets färger */
 .cookie-consent-banner {
     position: fixed;
     bottom: 1.5rem;
     left: 1.5rem;
-    background: #054547;
+    background: var(--color-gray-900, #18181b);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     z-index: 9999;
     border-radius: 0.75rem;
@@ -229,21 +229,21 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 }
 
 .cookie-banner-btn-primary {
-    background: white;
-    color: #033234;
+    background: var(--color-primary, #8b5cf6);
+    color: white;
 }
 
 .cookie-banner-btn-primary:hover {
-    background: #f0f0f0;
+    background: var(--color-primary-dark, #764ed1);
 }
 
 .cookie-banner-btn-secondary {
     background: white;
-    color: #033234;
+    color: var(--color-gray-900, #18181b);
 }
 
 .cookie-banner-btn-secondary:hover {
-    background: #f0f0f0;
+    background: var(--color-gray-100, #f4f4f5);
 }
 
 .cookie-banner-btn-tertiary {
@@ -283,7 +283,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 }
 
 .cookie-modal-content {
-    background: #033234;
+    background: var(--color-gray-900, #18181b);
     border-radius: 0.75rem;
     max-width: 680px;
     width: 100%;
@@ -347,7 +347,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 }
 
 .cookie-category {
-    background: #054547;
+    background: var(--color-gray-800, #27272a);
     border-radius: 0.5rem;
     margin-bottom: 0.75rem;
     overflow: hidden;
@@ -448,7 +448,7 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 }
 
 .cookie-info-section {
-    background: #054547;
+    background: var(--color-gray-800, #27272a);
     border-radius: 0.5rem;
     margin-top: 0.75rem;
     overflow: hidden;
@@ -500,21 +500,21 @@ $contact_phone = defined('CONTACT_PHONE') ? CONTACT_PHONE : '';
 }
 
 .cookie-modal-btn-primary {
-    background: white;
-    color: #033234;
+    background: var(--color-primary, #8b5cf6);
+    color: white;
 }
 
 .cookie-modal-btn-primary:hover {
-    background: #f0f0f0;
+    background: var(--color-primary-dark, #764ed1);
 }
 
 .cookie-modal-btn-secondary {
     background: white;
-    color: #033234;
+    color: var(--color-gray-900, #18181b);
 }
 
 .cookie-modal-btn-secondary:hover {
-    background: #f0f0f0;
+    background: var(--color-gray-100, #f4f4f5);
 }
 
 .cookie-modal-btn-tertiary {

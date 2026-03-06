@@ -13,23 +13,29 @@
                     <img src="/assets/images/logo-dark.png" alt="<?php echo SITE_NAME; ?>" class="header__logo-img">
                 </a>
             </div>
-            
-            <nav class="header__nav">
+
+            <nav id="main-nav" class="header__nav">
                 <a href="/inlagg" class="header__nav-link">Resurser</a>
                 <a href="/kontakt" class="header__nav-link">Support</a>
             </nav>
-            
+
             <a href="/boka-demo" class="header__cta">
                 Kom igång gratis
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M5 12h14M12 5l7 7-7 7"/>
                 </svg>
             </a>
-            
-            <button class="header__mobile-toggle" aria-label="Toggle menu">
-                <span></span>
-                <span></span>
-                <span></span>
+
+            <button class="header__mobile-toggle" aria-label="Öppna meny" aria-expanded="false" aria-controls="main-nav">
+                <svg class="header__menu-icon" width="28" height="20" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect y="0" width="28" height="2.5" rx="1.25" fill="currentColor"/>
+                    <rect x="6" y="8.5" width="22" height="2.5" rx="1.25" fill="currentColor"/>
+                    <rect y="17" width="28" height="2.5" rx="1.25" fill="currentColor"/>
+                </svg>
+                <svg class="header__close-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="20" y1="4" x2="4" y2="20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
             </button>
         </div>
     </div>
@@ -133,32 +139,120 @@
 
 .header__mobile-toggle {
     display: none;
-    flex-direction: column;
-    gap: 4px;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
     cursor: pointer;
     padding: 0.5rem;
+    color: var(--color-gray-700);
+    z-index: 102;
+    position: relative;
 }
 
-.header__mobile-toggle span {
-    width: 24px;
-    height: 2px;
-    background-color: var(--color-gray-700);
-    transition: all var(--transition-fast);
+.header__close-icon {
+    display: none;
+}
+
+.header__mobile-toggle[aria-expanded="true"] .header__menu-icon {
+    display: none;
+}
+
+.header__mobile-toggle[aria-expanded="true"] .header__close-icon {
+    display: block;
 }
 
 @media (max-width: 768px) {
     .header__nav {
-        display: none;
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100dvh;
+        background-color: white;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 0;
+        z-index: 101;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
     }
-    
+
+    .header__nav.is-open {
+        display: flex;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .header__nav-link {
+        font-size: 1.5rem;
+        font-weight: 600;
+        padding: 1rem 0;
+        color: var(--color-gray-800, #1f2937);
+        text-decoration: none;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.3s ease, transform 0.3s ease, color 0.2s ease;
+    }
+
+    .header__nav.is-open .header__nav-link {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .header__nav.is-open .header__nav-link:nth-child(1) { transition-delay: 0.1s; }
+    .header__nav.is-open .header__nav-link:nth-child(2) { transition-delay: 0.15s; }
+    .header__nav.is-open .header__nav-link:nth-child(3) { transition-delay: 0.2s; }
+    .header__nav.is-open .header__nav-link:nth-child(4) { transition-delay: 0.25s; }
+    .header__nav.is-open .header__nav-link:nth-child(5) { transition-delay: 0.3s; }
+
+    .header__nav-link:hover {
+        color: var(--color-primary);
+    }
+
     .header__cta {
         display: none;
     }
-    
+
     .header__mobile-toggle {
         display: flex;
     }
+
+    .header__mobile-toggle[aria-expanded="true"] {
+        color: var(--color-gray-800, #1f2937);
+    }
 }
 </style>
+
+<script>
+(function() {
+    var toggle = document.querySelector('.header__mobile-toggle');
+    var nav = document.getElementById('main-nav');
+    if (!toggle || !nav) return;
+
+    function closeMenu() {
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', 'Öppna meny');
+        nav.classList.remove('is-open');
+        document.body.style.overflow = '';
+    }
+
+    function openMenu() {
+        toggle.setAttribute('aria-expanded', 'true');
+        toggle.setAttribute('aria-label', 'Stäng meny');
+        nav.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    toggle.addEventListener('click', function() {
+        var expanded = toggle.getAttribute('aria-expanded') === 'true';
+        expanded ? closeMenu() : openMenu();
+    });
+
+    nav.querySelectorAll('.header__nav-link').forEach(function(link) {
+        link.addEventListener('click', closeMenu);
+    });
+})();
+</script>
