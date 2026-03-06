@@ -70,7 +70,7 @@ foreach ($projects as $i => $p) {
 }
 
 if ($project === null) {
-    header('Location: /cms/projects/');
+    header('Location: /inlagg-admin');
     exit;
 }
 
@@ -138,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         file_put_contents($projects_file, json_encode($projects, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
 
-        header('Location: /cms/projects/');
+        header('Location: /inlagg-admin');
         exit;
     }
 }
@@ -548,7 +548,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include __DIR__ . '/../../includes/admin-bar.php'; ?>
     <div class="page-content">
     <div class="container">
-        <a href="/cms/projects/" class="back-link">&larr; Tillbaka till inlägg</a>
+        <a href="/inlagg-admin" class="back-link">&larr; Tillbaka till inlägg</a>
 
         <h1 class="title">Redigera inlägg</h1>
 
@@ -586,9 +586,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php
                         $_cat_file = __DIR__ . '/../../cms/extensions/categories.php';
                         $_cats = file_exists($_cat_file) ? (require $_cat_file) : [];
-                        $categories = (is_array($_cats) && !empty($_cats))
-                            ? $_cats
-                            : ['Projekt', 'Blogg', 'Nyhet', 'Event'];
+                        if (is_array($_cats) && !empty($_cats)) {
+                            $first = reset($_cats);
+                            if (is_array($first)) {
+                                $categories = array_unique(array_column($_cats, 'category'));
+                            } else {
+                                $categories = $_cats;
+                            }
+                        } else {
+                            $categories = ['Projekt', 'Blogg', 'Nyhet', 'Event'];
+                        }
                         foreach ($categories as $cat):
                         ?>
                         <option value="<?php echo htmlspecialchars($cat, ENT_QUOTES, 'UTF-8'); ?>" <?php echo ($project['category'] ?? '') === $cat ? 'selected' : ''; ?>><?php echo htmlspecialchars($cat, ENT_QUOTES, 'UTF-8'); ?></option>
@@ -655,7 +662,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="form-actions">
                     <button type="submit" class="button button-primary">Spara ändringar</button>
                     <button type="button" class="btn-preview" id="btn-preview">Förhandsgranska</button>
-                    <a href="/cms/projects/" class="button button-secondary">Avbryt</a>
+                    <a href="/inlagg-admin" class="button button-secondary">Avbryt</a>
                 </div>
             </form>
         </div>

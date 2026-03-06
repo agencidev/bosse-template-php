@@ -122,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $projects[] = $project;
         file_put_contents($projects_file, json_encode($projects, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
 
-        header('Location: /cms/projects/');
+        header('Location: /inlagg-admin');
         exit;
     }
 }
@@ -513,7 +513,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include __DIR__ . '/../../includes/admin-bar.php'; ?>
     <div class="page-content">
     <div class="container">
-        <a href="/cms/projects/" class="back-link">&larr; Tillbaka till inlägg</a>
+        <a href="/inlagg-admin" class="back-link">&larr; Tillbaka till inlägg</a>
 
         <h1 class="title">Nytt inlägg</h1>
 
@@ -544,12 +544,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php
                         $_cat_file = __DIR__ . '/../../cms/extensions/categories.php';
                         $_cats = file_exists($_cat_file) ? (require $_cat_file) : [];
-                        $_cat_values = (is_array($_cats) && !empty($_cats))
-                            ? $_cats
-                            : ['Projekt', 'Blogg', 'Nyhet', 'Event'];
+                        if (is_array($_cats) && !empty($_cats)) {
+                            $first = reset($_cats);
+                            if (is_array($first)) {
+                                $_cat_values = array_unique(array_column($_cats, 'category'));
+                            } else {
+                                $_cat_values = $_cats;
+                            }
+                        } else {
+                            $_cat_values = ['Projekt', 'Blogg', 'Nyhet', 'Event'];
+                        }
                         foreach ($_cat_values as $_cv):
                         ?>
-                        <option value="<?php echo htmlspecialchars($_cv, ENT_QUOTES, 'UTF-8'); ?>" <?php echo (isset($_POST['category']) && $_POST['category'] === $_cv) ? 'selected' : ''; ?>><?php echo htmlspecialchars($_cv, ENT_QUOTES, 'UTF-8'); ?></option>
+                        <?php
+                        $_preselect = $_POST['category'] ?? $_GET['category'] ?? '';
+                        ?>
+                        <option value="<?php echo htmlspecialchars($_cv, ENT_QUOTES, 'UTF-8'); ?>" <?php echo ($_preselect === $_cv) ? 'selected' : ''; ?>><?php echo htmlspecialchars($_cv, ENT_QUOTES, 'UTF-8'); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -607,7 +617,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="form-actions">
                     <button type="submit" class="button button-primary">Skapa inlägg</button>
                     <button type="button" class="btn-preview" id="btn-preview">Förhandsgranska</button>
-                    <a href="/cms/projects/" class="button button-secondary">Avbryt</a>
+                    <a href="/inlagg-admin" class="button button-secondary">Avbryt</a>
                 </div>
             </form>
         </div>

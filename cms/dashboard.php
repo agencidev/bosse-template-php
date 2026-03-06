@@ -435,16 +435,7 @@ if (file_exists($updateLogFile)) {
         </div>
 
         <div class="grid">
-            <a href="/cms/projects/new" class="card">
-                <div class="icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                </div>
-                <span class="label">Skapa inlägg</span>
-            </a>
-
-            <a href="/cms/projects/" class="card">
+            <a href="/inlagg-admin" class="card">
                 <?php if ($projectCount > 0): ?>
                 <span class="badge"><?php echo $projectCount; ?></span>
                 <?php endif; ?>
